@@ -43,39 +43,41 @@ const Calendar = () => {
           </div>
         </CardHeader>
         <CardContent>
-          <TabsContent value="schedule" className="mt-0">
-            <div className="flex justify-center border rounded-lg p-4 bg-white">
-              <CalendarComponent
-                mode="single"
-                selected={date}
-                onSelect={setDate}
-                className="rounded-md"
-              />
-            </div>
-            <div className="mt-6 border-t pt-4">
-              <h3 className="text-lg font-medium mb-3">일정 목록</h3>
-              <div className="text-center text-muted-foreground py-12">
-                아직 등록된 일정이 없습니다.
+          <Tabs value={viewType}>
+            <TabsContent value="schedule" className="mt-0">
+              <div className="flex justify-center border rounded-lg p-4 bg-white">
+                <CalendarComponent
+                  mode="single"
+                  selected={date}
+                  onSelect={setDate}
+                  className="rounded-md"
+                />
               </div>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="trainer" className="mt-0">
-            <div className="flex justify-center border rounded-lg p-4 bg-white">
-              <CalendarComponent
-                mode="single"
-                selected={date}
-                onSelect={setDate}
-                className="rounded-md"
-              />
-            </div>
-            <div className="mt-6 border-t pt-4">
-              <h3 className="text-lg font-medium mb-3">트레이너 스케줄</h3>
-              <div className="text-center text-muted-foreground py-12">
-                아직 등록된 트레이너 스케줄이 없습니다.
+              <div className="mt-6 border-t pt-4">
+                <h3 className="text-lg font-medium mb-3">일정 목록</h3>
+                <div className="text-center text-muted-foreground py-12">
+                  아직 등록된 일정이 없습니다.
+                </div>
               </div>
-            </div>
-          </TabsContent>
+            </TabsContent>
+            
+            <TabsContent value="trainer" className="mt-0">
+              <div className="flex justify-center border rounded-lg p-4 bg-white">
+                <CalendarComponent
+                  mode="single"
+                  selected={date}
+                  onSelect={setDate}
+                  className="rounded-md"
+                />
+              </div>
+              <div className="mt-6 border-t pt-4">
+                <h3 className="text-lg font-medium mb-3">트레이너 스케줄</h3>
+                <div className="text-center text-muted-foreground py-12">
+                  아직 등록된 트레이너 스케줄이 없습니다.
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
     </div>

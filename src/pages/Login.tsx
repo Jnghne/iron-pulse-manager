@@ -6,12 +6,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Mail, MessageSquare } from "lucide-react"; // replaced incorrect Google and Kakao icons
-import { toast } from "sonner";
+import { toast } from "@/components/ui/use-toast";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { InfoIcon } from "lucide-react";
 
 const Login = () => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("test@test.com");
+  const [password, setPassword] = useState("1234");
   const [isOwner, setIsOwner] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -28,13 +30,24 @@ const Login = () => {
           localStorage.setItem("isAuthenticated", "true");
           localStorage.setItem("userRole", isOwner ? "owner" : "trainer");
           
-          toast.success(`로그인 성공! ${isOwner ? '관장님' : '트레이너'}으로 로그인했습니다.`);
+          toast({
+            title: "로그인 성공!",
+            description: `${isOwner ? '관장님' : '트레이너'}으로 로그인했습니다.`,
+          });
           navigate("/");
         } else {
-          toast.error("이메일과 비밀번호를 입력해주세요.");
+          toast({
+            title: "로그인 실패",
+            description: "이메일과 비밀번호를 입력해주세요.",
+            variant: "destructive"
+          });
         }
       } catch (error) {
-        toast.error("로그인 중 오류가 발생했습니다. 다시 시도해주세요.");
+        toast({
+          title: "오류 발생",
+          description: "로그인 중 오류가 발생했습니다. 다시 시도해주세요.",
+          variant: "destructive"
+        });
         console.error("Login error:", error);
       } finally {
         setIsLoading(false);
@@ -47,8 +60,10 @@ const Login = () => {
     
     // Mock social login - replace with actual implementation
     setTimeout(() => {
-      toast.success(`${provider} 로그인이 시작되었습니다.`);
-      toast.info("현재 소셜 로그인은 데모 버전에서 제공되지 않습니다.");
+      toast({
+        title: `${provider} 로그인`,
+        description: "현재 소셜 로그인은 데모 버전에서 제공되지 않습니다."
+      });
       setIsLoading(false);
     }, 1000);
   };
@@ -62,6 +77,13 @@ const Login = () => {
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">헬스장 관리 시스템에 로그인하세요</p>
         </div>
+        
+        <Alert className="bg-blue-50 border-blue-200">
+          <InfoIcon className="h-4 w-4 text-blue-500" />
+          <AlertDescription className="text-sm">
+            프로토타입 버전입니다. 테스트 계정 정보가 이미 입력되어 있으니 로그인 버튼을 클릭하세요.
+          </AlertDescription>
+        </Alert>
         
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
@@ -126,7 +148,7 @@ const Login = () => {
             disabled={isLoading}
             className="flex items-center justify-center space-x-2"
           >
-            <MessageSquare className="w-5 h-5" /> {/* Changed from Kakao to MessageSquare icon */}
+            <MessageSquare className="w-5 h-5" />
             <span>카카오 로그인</span>
           </Button>
           
@@ -137,7 +159,7 @@ const Login = () => {
             disabled={isLoading}
             className="flex items-center justify-center space-x-2"
           >
-            <Mail className="w-5 h-5" /> {/* Changed from Google to Mail icon */}
+            <Mail className="w-5 h-5" />
             <span>구글 로그인</span>
           </Button>
         </div>

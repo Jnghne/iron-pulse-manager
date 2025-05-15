@@ -247,9 +247,6 @@ const AttendanceTab = ({ memberId }: { memberId: string }) => {
               className="rounded-md border"
               modifiers={modifiers}
               modifiersStyles={modifiersStyles}
-              styles={{
-                day_today: { fontWeight: "bold" }
-              }}
               onDayClick={(day) => {
                 // Find attendance record for this date if needed
                 const dateStr = day.toISOString().split("T")[0];

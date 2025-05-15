@@ -9,26 +9,66 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DatePicker } from "@/components/DatePicker";
-import { Search, UserPlus, Calendar as CalendarIcon } from "lucide-react";
-import { mockDailyTickets, DailyTicket } from "@/data/mockData";
-import { formatDate, formatCurrency, formatPhoneNumber } from "@/lib/utils";
+import { Search, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 
-// DatePicker component for selecting dates
-const DatePicker = ({ selected, onSelect }: { selected: Date, onSelect: (date: Date) => void }) => {
-  return (
-    <div className="relative">
-      <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-        <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-      </div>
-      <input
-        type="date"
-        value={selected.toISOString().split('T')[0]}
-        onChange={(e) => onSelect(new Date(e.target.value))}
-        className="pl-10 pr-3 py-2 w-full border rounded-md focus:outline-none focus:ring-2 focus:ring-ring text-sm"
-      />
-    </div>
-  );
+// Mock data for daily tickets
+interface DailyTicket {
+  id: string;
+  name: string;
+  phoneNumber: string;
+  date: string;
+  paymentAmount: number;
+  paymentMethod: "카드" | "현금";
+}
+
+const mockDailyTickets: DailyTicket[] = [
+  {
+    id: "D100001",
+    name: "김방문",
+    phoneNumber: "010-1234-5678",
+    date: new Date().toISOString().split("T")[0],
+    paymentAmount: 10000,
+    paymentMethod: "카드"
+  },
+  {
+    id: "D100002",
+    name: "박일일",
+    phoneNumber: "010-2345-6789",
+    date: new Date().toISOString().split("T")[0],
+    paymentAmount: 10000,
+    paymentMethod: "현금"
+  },
+  {
+    id: "D100003",
+    name: "이헬스",
+    phoneNumber: "010-3456-7890",
+    date: new Date(Date.now() - 86400000).toISOString().split("T")[0],
+    paymentAmount: 10000,
+    paymentMethod: "카드"
+  },
+  {
+    id: "D100004",
+    name: "최운동",
+    phoneNumber: "010-4567-8901",
+    date: new Date(Date.now() - 86400000).toISOString().split("T")[0],
+    paymentAmount: 10000,
+    paymentMethod: "카드"
+  }
+];
+
+// Helper functions
+const formatDate = (dateStr: string): string => {
+  const date = new Date(dateStr);
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+};
+
+const formatCurrency = (amount: number): string => {
+  return amount.toLocaleString() + "원";
+};
+
+const formatPhoneNumber = (phoneNumber: string): string => {
+  return phoneNumber; // Already formatted in mock data
 };
 
 const DailyTickets = () => {
@@ -90,7 +130,7 @@ const DailyTickets = () => {
       phoneNumber: newTicket.phoneNumber,
       date: today,
       paymentAmount: newTicket.paymentAmount,
-      paymentMethod: newTicket.paymentMethod
+      paymentMethod: newTicket.paymentMethod as "카드" | "현금"
     };
     
     // In a real app, this would update the server

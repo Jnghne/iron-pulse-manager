@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Google, Kakao } from "lucide-react";
+import { Mail, MessageSquare } from "lucide-react"; // replaced incorrect Google and Kakao icons
 import { toast } from "sonner";
 
 const Login = () => {
@@ -126,7 +126,7 @@ const Login = () => {
             disabled={isLoading}
             className="flex items-center justify-center space-x-2"
           >
-            <Kakao className="w-5 h-5" />
+            <MessageSquare className="w-5 h-5" /> {/* Changed from Kakao to MessageSquare icon */}
             <span>카카오 로그인</span>
           </Button>
           
@@ -137,7 +137,7 @@ const Login = () => {
             disabled={isLoading}
             className="flex items-center justify-center space-x-2"
           >
-            <Google className="w-5 h-5" />
+            <Mail className="w-5 h-5" /> {/* Changed from Google to Mail icon */}
             <span>구글 로그인</span>
           </Button>
         </div>

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { 
@@ -26,15 +25,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Calendar,
-  CalendarCell,
-  CalendarGrid,
-  CalendarHeader,
-  CalendarHeadCell,
-  CalendarMonthHeader,
-  CalendarViewHeader,
-} from "@/components/ui/calendar";
+import { Calendar } from "@/components/ui/calendar";
 import { Separator } from "@/components/ui/separator";
 import { mockMembers, Member, getMockAttendance, AttendanceRecord } from "@/data/mockData";
 import { formatDate, formatPhoneNumber, getAttendanceStatus } from "@/lib/utils";
@@ -215,32 +206,27 @@ const AttendanceTab = ({ memberId }: { memberId: string }) => {
   
   const attendanceRate = calculateAttendanceRate();
   const status = getAttendanceStatus(attendanceRate);
-  
-  // Custom calendar cell renderer
-  const renderCell = (date: Date) => {
-    // Find attendance record for this date
-    const dateStr = date.toISOString().split("T")[0];
-    const record = attendance.find(r => r.date === dateStr);
-    
-    return (
-      <CalendarCell
-        date={date}
-        className={`relative p-0 ${
-          record?.attended 
-            ? "bg-green-100 hover:bg-green-200" 
-            : record ? "bg-red-50 hover:bg-red-100" : ""
-        }`}
-      >
-        <div className="flex flex-col h-full justify-between p-2">
-          <span>{date.getDate()}</span>
-          {record?.attended && (
-            <div className="w-full text-[8px] text-right mt-1 text-green-700">
-              {record.timeIn && `${record.timeIn}`}
-            </div>
-          )}
-        </div>
-      </CalendarCell>
-    );
+
+  // Customize calendar appearance by modifying CSS
+  const modifiers = {
+    attended: attendance
+      .filter(record => record.attended)
+      .map(record => new Date(record.date)),
+    absent: attendance
+      .filter(record => !record.attended && record.date)
+      .map(record => new Date(record.date)),
+  };
+
+  const modifiersStyles = {
+    attended: { 
+      backgroundColor: "#f0fdf4", // Light green background
+      color: "#15803d",
+      fontWeight: "bold"
+    },
+    absent: { 
+      backgroundColor: "#fef2f2", // Light red background
+      color: "#dc2626"
+    }
   };
   
   return (
@@ -259,8 +245,19 @@ const AttendanceTab = ({ memberId }: { memberId: string }) => {
               selected={date}
               onSelect={setDate}
               className="rounded-md border"
-              components={{
-                Cell: renderCell,
+              modifiers={modifiers}
+              modifiersStyles={modifiersStyles}
+              styles={{
+                day_today: { fontWeight: "bold" }
+              }}
+              onDayClick={(day) => {
+                // Find attendance record for this date if needed
+                const dateStr = day.toISOString().split("T")[0];
+                const record = attendance.find(r => r.date === dateStr);
+                if (record) {
+                  // Could show a tooltip or detail about this day
+                  console.log(record);
+                }
               }}
             />
             <div className="flex items-center justify-center space-x-4 mt-4 text-sm">

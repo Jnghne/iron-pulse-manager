@@ -1,0 +1,298 @@
+
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DatePicker } from "@/components/DatePicker";
+import { Search, UserPlus, Calendar as CalendarIcon } from "lucide-react";
+import { mockDailyTickets, DailyTicket } from "@/data/mockData";
+import { formatDate, formatCurrency, formatPhoneNumber } from "@/lib/utils";
+import { toast } from "sonner";
+
+// DatePicker component for selecting dates
+const DatePicker = ({ selected, onSelect }: { selected: Date, onSelect: (date: Date) => void }) => {
+  return (
+    <div className="relative">
+      <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+        <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+      </div>
+      <input
+        type="date"
+        value={selected.toISOString().split('T')[0]}
+        onChange={(e) => onSelect(new Date(e.target.value))}
+        className="pl-10 pr-3 py-2 w-full border rounded-md focus:outline-none focus:ring-2 focus:ring-ring text-sm"
+      />
+    </div>
+  );
+};
+
+const DailyTickets = () => {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [filteredTickets, setFilteredTickets] = useState<DailyTicket[]>([]);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("all");
+  
+  // New ticket form state
+  const [newTicket, setNewTicket] = useState({
+    name: "",
+    phoneNumber: "",
+    paymentAmount: 10000,
+    paymentMethod: "카드"
+  });
+  
+  // Filter tickets based on search query and date
+  useEffect(() => {
+    let filtered = [...mockDailyTickets];
+    
+    // Filter by date if "today" or "date" tab is active
+    if (activeTab === "today") {
+      const todayStr = new Date().toISOString().split("T")[0];
+      filtered = filtered.filter(ticket => ticket.date === todayStr);
+    } else if (activeTab === "date") {
+      const dateStr = selectedDate.toISOString().split("T")[0];
+      filtered = filtered.filter(ticket => ticket.date === dateStr);
+    }
+    
+    // Filter by search query
+    if (searchQuery) {
+      const lowercaseQuery = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        ticket =>
+          ticket.name.toLowerCase().includes(lowercaseQuery) ||
+          ticket.phoneNumber.replace(/-/g, "").includes(lowercaseQuery.replace(/-/g, ""))
+      );
+    }
+    
+    setFilteredTickets(filtered);
+  }, [searchQuery, selectedDate, activeTab]);
+  
+  const handleCreateTicket = () => {
+    // Basic validation
+    if (!newTicket.name || !newTicket.phoneNumber) {
+      toast.error("이름과 연락처를 모두 입력해주세요.");
+      return;
+    }
+    
+    // In a real app, this would be an API call
+    const today = new Date().toISOString().split("T")[0];
+    const ticketId = `D${Date.now().toString().slice(-6)}`;
+    
+    // Add new ticket
+    const ticket: DailyTicket = {
+      id: ticketId,
+      name: newTicket.name,
+      phoneNumber: newTicket.phoneNumber,
+      date: today,
+      paymentAmount: newTicket.paymentAmount,
+      paymentMethod: newTicket.paymentMethod
+    };
+    
+    // In a real app, this would update the server
+    // For demo, we just show a success message
+    toast.success(`${newTicket.name}님이 일일권으로 등록되었습니다.`);
+    
+    // Reset form and close dialog
+    setNewTicket({
+      name: "",
+      phoneNumber: "",
+      paymentAmount: 10000,
+      paymentMethod: "카드"
+    });
+    setIsCreateDialogOpen(false);
+    
+    // We'd normally refresh the data here in a real app
+  };
+  
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center space-y-2 sm:space-y-0">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">일일권 이력</h1>
+          <p className="text-muted-foreground">일자별 일일권 이용 회원을 조회합니다.</p>
+        </div>
+        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+          <DialogTrigger asChild>
+            <Button className="w-full sm:w-auto bg-gym-primary hover:bg-gym-secondary">
+              <UserPlus className="mr-2 h-4 w-4" />
+              일일권 등록
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>일일권 등록</DialogTitle>
+              <DialogDescription>
+                일일권 사용자 정보를 입력하세요.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="visitor-name" className="text-right">
+                  이름
+                </Label>
+                <Input
+                  id="visitor-name"
+                  value={newTicket.name}
+                  onChange={(e) => setNewTicket({ ...newTicket, name: e.target.value })}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="visitor-phone" className="text-right">
+                  연락처
+                </Label>
+                <Input
+                  id="visitor-phone"
+                  value={newTicket.phoneNumber}
+                  onChange={(e) => setNewTicket({ ...newTicket, phoneNumber: e.target.value })}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="payment-amount" className="text-right">
+                  결제 금액
+                </Label>
+                <Input
+                  id="payment-amount"
+                  type="number"
+                  value={newTicket.paymentAmount}
+                  onChange={(e) => setNewTicket({ ...newTicket, paymentAmount: Number(e.target.value) })}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label className="text-right">결제 수단</Label>
+                <div className="col-span-3 flex gap-4">
+                  <div className="flex items-center">
+                    <input
+                      type="radio"
+                      id="payment-card"
+                      name="payment-method"
+                      checked={newTicket.paymentMethod === "카드"}
+                      onChange={() => setNewTicket({ ...newTicket, paymentMethod: "카드" })}
+                      className="mr-2"
+                    />
+                    <label htmlFor="payment-card">카드</label>
+                  </div>
+                  <div className="flex items-center">
+                    <input
+                      type="radio"
+                      id="payment-cash"
+                      name="payment-method"
+                      checked={newTicket.paymentMethod === "현금"}
+                      onChange={() => setNewTicket({ ...newTicket, paymentMethod: "현금" })}
+                      className="mr-2"
+                    />
+                    <label htmlFor="payment-cash">현금</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+                취소
+              </Button>
+              <Button onClick={handleCreateTicket}>등록하기</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+      
+      <Card>
+        <CardHeader>
+          <CardTitle>일일권 이용 현황</CardTitle>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Tabs
+              defaultValue="all"
+              value={activeTab}
+              onValueChange={setActiveTab}
+              className="w-full sm:w-auto"
+            >
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="all">전체</TabsTrigger>
+                <TabsTrigger value="today">오늘</TabsTrigger>
+                <TabsTrigger value="date">날짜 선택</TabsTrigger>
+              </TabsList>
+            </Tabs>
+            
+            {activeTab === "date" && (
+              <div className="w-full sm:w-48">
+                <DatePicker
+                  selected={selectedDate}
+                  onSelect={setSelectedDate}
+                />
+              </div>
+            )}
+            
+            <div className="relative flex-1">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="이름 또는 연락처로 검색..."
+                className="pl-8"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="rounded-md border overflow-hidden">
+            <div className="relative w-full overflow-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>No.</TableHead>
+                    <TableHead>이름</TableHead>
+                    <TableHead>연락처</TableHead>
+                    <TableHead>방문일자</TableHead>
+                    <TableHead>결제금액</TableHead>
+                    <TableHead>결제방식</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredTickets.length > 0 ? (
+                    filteredTickets.map((ticket, index) => (
+                      <TableRow key={ticket.id}>
+                        <TableCell className="font-medium">{index + 1}</TableCell>
+                        <TableCell>{ticket.name}</TableCell>
+                        <TableCell>{formatPhoneNumber(ticket.phoneNumber)}</TableCell>
+                        <TableCell>{formatDate(ticket.date)}</TableCell>
+                        <TableCell>{formatCurrency(ticket.paymentAmount)}</TableCell>
+                        <TableCell>
+                          <Badge 
+                            variant={ticket.paymentMethod === "카드" ? "default" : "outline"}
+                            className={ticket.paymentMethod === "카드" ? "bg-gym-primary" : ""}
+                          >
+                            {ticket.paymentMethod}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-10">
+                        <div className="flex flex-col items-center justify-center text-muted-foreground">
+                          <Search className="h-10 w-10 mb-2" />
+                          <p>검색 결과가 없습니다.</p>
+                          <p className="text-sm">다른 검색어를 입력하거나 필터를 변경해 보세요.</p>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default DailyTickets;

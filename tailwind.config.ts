@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,7 +62,19 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+				gym: {
+					// Custom gym management color palette
+					primary: '#2563eb', // Blue
+					secondary: '#3b82f6', // Light blue
+					accent: '#0ea5e9', // Sky blue
+					dark: '#1e293b', // Slate dark
+					light: '#f8fafc', // Slate light
+					success: '#22c55e', // Green
+					warning: '#f59e0b', // Amber
+					danger: '#ef4444', // Red
+					muted: '#64748b', // Slate muted
+				},
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -84,11 +97,31 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'fade-in': {
+					'0%': {
+						opacity: '0',
+						transform: 'translateY(10px)'
+					},
+					'100%': {
+						opacity: '1',
+						transform: 'translateY(0)'
+					}
+				},
+				'pulse-light': {
+					'0%, 100%': {
+						opacity: '1'
+					},
+					'50%': {
+						opacity: '0.7'
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'fade-in': 'fade-in 0.3s ease-out',
+				'pulse-light': 'pulse-light 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
 			}
 		}
 	},

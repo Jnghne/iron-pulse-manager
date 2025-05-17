@@ -1,4 +1,3 @@
-
 // This file contains mock data for the application
 // In a real application, this would be replaced with API calls to the backend
 
@@ -16,9 +15,14 @@ export interface Member {
   hasPT: boolean;
   ptRemaining?: number;
   ptExpireDate?: string;
-  attendanceRate: number;
-  lockerId?: string;
   trainerAssigned?: string;
+  lockerId?: string;
+  birthDate?: string;
+  address?: string;
+  memo?: string;
+  attendanceRate: number;
+  postalCode?: string;
+  photoUrl?: string;
 }
 
 export const mockMembers: Member[] = [
@@ -36,6 +40,7 @@ export const mockMembers: Member[] = [
     attendanceRate: 85,
     lockerId: "A15",
     trainerAssigned: "박지훈",
+    photoUrl: "/images/members/member-1001.jpg"
   },
   {
     id: "1002",
@@ -47,6 +52,7 @@ export const mockMembers: Member[] = [
     membershipEndDate: "2023-09-19",
     hasPT: false,
     attendanceRate: 65,
+    photoUrl: "/images/members/member-1002.jpg"
   },
   {
     id: "1003",
@@ -62,6 +68,7 @@ export const mockMembers: Member[] = [
     attendanceRate: 92,
     lockerId: "B22",
     trainerAssigned: "최수진",
+    photoUrl: "/images/members/member-1003.jpg"
   },
   {
     id: "1004",
@@ -74,6 +81,7 @@ export const mockMembers: Member[] = [
     hasPT: false,
     attendanceRate: 45,
     lockerId: "C10",
+    photoUrl: "/images/members/member-1004.jpg"
   },
   {
     id: "1005",
@@ -85,6 +93,7 @@ export const mockMembers: Member[] = [
     membershipEndDate: "2023-08-14",
     hasPT: false,
     attendanceRate: 30,
+    photoUrl: "/images/members/member-1005.jpg"
   },
   {
     id: "1006",
@@ -99,6 +108,7 @@ export const mockMembers: Member[] = [
     ptExpireDate: "2024-06-30",
     attendanceRate: 75,
     trainerAssigned: "박지훈",
+    photoUrl: "/images/members/member-1006.jpg"
   },
   {
     id: "1007",
@@ -114,6 +124,7 @@ export const mockMembers: Member[] = [
     attendanceRate: 80,
     lockerId: "A05",
     trainerAssigned: "최수진",
+    photoUrl: "/images/members/member-1007.jpg"
   },
   {
     id: "1008",
@@ -125,6 +136,7 @@ export const mockMembers: Member[] = [
     membershipEndDate: "2024-02-14",
     hasPT: false,
     attendanceRate: 50,
+    photoUrl: "/images/members/member-1008.jpg"
   },
   {
     id: "1009",
@@ -140,6 +152,7 @@ export const mockMembers: Member[] = [
     attendanceRate: 88,
     lockerId: "B15",
     trainerAssigned: "김태양",
+    photoUrl: "/images/members/member-1009.jpg"
   },
   {
     id: "1010",
@@ -151,6 +164,7 @@ export const mockMembers: Member[] = [
     membershipEndDate: "2023-07-19",
     hasPT: false,
     attendanceRate: 40,
+    photoUrl: "/images/members/member-1010.jpg"
   },
 ];
 

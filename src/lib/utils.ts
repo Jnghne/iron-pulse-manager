@@ -135,3 +135,21 @@ export function truncateString(str: string, maxLength: number): string {
   if (str.length <= maxLength) return str;
   return str.slice(0, maxLength) + '...';
 }
+
+export function calculateAge(birthDate: string): number {
+  const today = new Date();
+  const birth = new Date(
+    parseInt(birthDate.substring(0, 4)),
+    parseInt(birthDate.substring(4, 6)) - 1,
+    parseInt(birthDate.substring(6, 8))
+  );
+  
+  let age = today.getFullYear() - birth.getFullYear();
+  const monthDiff = today.getMonth() - birth.getMonth();
+  
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+    age--;
+  }
+  
+  return age;
+}

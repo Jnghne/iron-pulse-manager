@@ -46,7 +46,8 @@ import {
   getAttendanceStatus, 
   formatDateYYYYMMDD, 
   addDays, 
-  toDateString 
+  toDateString,
+  calculateAge 
 } from "@/lib/utils";
 import { 
   Edit, 
@@ -62,6 +63,9 @@ import {
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 // Components for member details tabs
 const MembershipForm = ({ member, onClose }: { member: Member, onClose: () => void }) => {
@@ -290,7 +294,7 @@ const LockerForm = ({ member, onClose }: { member: Member, onClose: () => void }
                 {locker.id === member.lockerId
                   ? "현재 사용 중"
                   : locker.status === "available"
-                  ? "사�� 가능"
+                  ? "사용 가능"
                   : "사용 중"}
               </div>
             </div>
@@ -312,39 +316,384 @@ const LockerForm = ({ member, onClose }: { member: Member, onClose: () => void }
   );
 };
 
-const MemberInfo = ({ member }: { member: Member }) => {
+const MemberInfo = ({ member: initialMember }: { member: Member }) => {
+  const [member, setMember] = useState<Member>(initialMember);
   const [membershipDialogOpen, setMembershipDialogOpen] = useState(false);
   const [lockerDialogOpen, setLockerDialogOpen] = useState(false);
+  const [attendance, setAttendance] = useState<AttendanceRecord[]>([]);
+  const [date, setDate] = useState<Date>(new Date());
+  
+  useEffect(() => {
+    // Get mock attendance data
+    const attendanceData = getMockAttendance(member.id, 90);
+    setAttendance(attendanceData);
+  }, [member.id]);
+
+  // Calculate attendance rate
+  const calculateAttendanceRate = () => {
+    const totalDays = attendance.length;
+    if (totalDays === 0) return 0;
+    
+    const attendedDays = attendance.filter(record => record.attended).length;
+    return Math.round((attendedDays / totalDays) * 100);
+  };
+  
+  const attendanceRate = calculateAttendanceRate();
+  const status = getAttendanceStatus(attendanceRate);
+
+  // Customize calendar appearance
+  const modifiers = {
+    attended: attendance
+      .filter(record => record.attended)
+      .map(record => new Date(record.date)),
+    absent: attendance
+      .filter(record => !record.attended && record.date)
+      .map(record => new Date(record.date)),
+  };
+
+  const modifiersStyles = {
+    attended: { 
+      backgroundColor: "#f0fdf4",
+      color: "#15803d",
+      fontWeight: "bold"
+    },
+    absent: { 
+      backgroundColor: "#fef2f2",
+      color: "#dc2626"
+    }
+  };
   
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>회원 정보</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-2">
-            <div className="text-sm font-medium">회원 번호</div>
-            <div className="text-sm">{member.id}</div>
-            
-            <div className="text-sm font-medium">이름</div>
-            <div className="text-sm">{member.name}</div>
-            
-            <div className="text-sm font-medium">연락처</div>
-            <div className="text-sm">{formatPhoneNumber(member.phoneNumber)}</div>
-            
-            <div className="text-sm font-medium">등록일</div>
-            <div className="text-sm">{formatDate(member.registrationDate)}</div>
-          </div>
-        </CardContent>
-        <CardFooter className="border-t bg-muted/50 px-6">
-          <Button variant="outline" size="sm" className="ml-auto">
-            <Edit className="h-4 w-4 mr-2" />
-            <span>정보 수정</span>
-          </Button>
-        </CardFooter>
-      </Card>
-      
+    <div className="grid grid-cols-1 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-[340px_1fr] gap-4">
+        {/* 출석 캘린더 및 통계 */}
+        <Card className="h-fit border-0 shadow-md w-[340px]">
+          <CardContent className="pt-8 space-y-6">
+            <div className="space-y-4">
+              <div className="flex justify-center mb-6">
+                <div className="relative w-32 h-32">
+                  {member.photoUrl ? (
+                    <img
+                      src={member.photoUrl}
+                      alt={member.name}
+                      className="w-full h-full rounded-full object-cover border-4 border-white shadow-lg"
+                    />
+                  ) : (
+                    <div className="w-full h-full rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white shadow-lg">
+                      <User className="h-16 w-16" />
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="space-y-3">
+                <p className="text-sm font-medium text-gray-600">출석률</p>
+                <div className="flex items-center justify-between">
+                  <div className="flex-1 mr-4">
+                    <div className="h-2.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                      <div
+                        className={`h-2.5 rounded-full transition-all ${
+                          attendanceRate >= 80
+                            ? "bg-green-500"
+                            : attendanceRate >= 50
+                            ? "bg-yellow-500"
+                            : "bg-red-500"
+                        }`}
+                        style={{ width: `${attendanceRate}%` }}
+                      />
+                    </div>
+                  </div>
+                  <span className="text-2xl font-semibold text-gray-900">{attendanceRate}%</span>
+                </div>
+                <div className={`text-sm font-medium text-center ${
+                  attendanceRate >= 80
+                    ? "text-green-600"
+                    : attendanceRate >= 50
+                    ? "text-yellow-600"
+                    : "text-red-600"
+                }`}>
+                  {status.label}
+                </div>
+              </div>
+              
+              <div className="space-y-8">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <p className="text-sm font-medium text-gray-600 mb-1 text-left">최근 30일</p>
+                    <p className="text-xl font-semibold text-gray-900">
+                      {attendance.slice(0, 30).filter(r => r.attended).length}
+                      <span className="text-base font-medium text-gray-600 ml-1">회 방문</span>
+                    </p>
+                  </div>
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <p className="text-sm font-medium text-gray-600 mb-1 text-left">최근 90일</p>
+                    <p className="text-xl font-semibold text-gray-900">
+                      {attendance.filter(r => r.attended).length}
+                      <span className="text-base font-medium text-gray-600 ml-1">회 방문</span>
+                    </p>
+                  </div>
+                </div>
+                
+                {/* 출석 캘린더 */}
+                <div>
+                  <p className="text-sm font-medium text-gray-600 mb-2">이번 달 출석 기록</p>
+                  <div className="w-full">
+                    <Calendar
+                      mode="single"
+                      selected={date}
+                      onSelect={setDate}
+                      className="rounded-md border w-full"
+                      modifiers={modifiers}
+                      modifiersStyles={modifiersStyles}
+                      onDayClick={(day) => {
+                        const dateStr = day.toISOString().split("T")[0];
+                        const record = attendance.find(r => r.date === dateStr);
+                        if (record) {
+                          console.log(record);
+                        }
+                      }}
+                    />
+                  </div>
+                  <div className="flex items-center justify-center space-x-4 mt-4 text-sm">
+                    <div className="flex items-center">
+                      <div className="w-4 h-4 bg-green-100 rounded mr-2"></div>
+                      <span>출석</span>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-4 h-4 bg-red-50 rounded mr-2"></div>
+                      <span>미출석</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 회원 기본 정보 */}
+        <Card className="border-0 shadow-md">
+          <CardHeader className="pb-4">
+            <div className="flex justify-end">
+              <div className="flex gap-3">
+                <Dialog open={membershipDialogOpen} onOpenChange={setMembershipDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      className="bg-white border-gray-200 hover:bg-gray-50 text-gray-700 font-medium px-3 py-2 text-sm"
+                    >
+                      <CreditCard className="h-4 w-4 mr-2 text-blue-600" />
+                      <span>이용권 등록/수정</span>
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>이용권 등록/수정</DialogTitle>
+                      <DialogDescription>
+                        {member.name} 회원의 이용권 정보를 등록하거나 수정합니다.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <MembershipForm 
+                      member={member} 
+                      onClose={() => setMembershipDialogOpen(false)} 
+                    />
+                  </DialogContent>
+                </Dialog>
+                
+                <Dialog open={lockerDialogOpen} onOpenChange={setLockerDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      className="bg-white border-gray-200 hover:bg-gray-50 text-gray-700 font-medium px-3 py-2 text-sm"
+                    >
+                      <Key className="h-4 w-4 mr-2 text-green-600" />
+                      <span>락커 등록</span>
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>락커 등록</DialogTitle>
+                      <DialogDescription>
+                        {member.name} 회원에게 락커를 등록합니다.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <LockerForm 
+                      member={member} 
+                      onClose={() => setLockerDialogOpen(false)} 
+                    />
+                  </DialogContent>
+                </Dialog>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-gray-700">회원그룹</Label>
+                  <Select defaultValue="헬스">
+                    <SelectTrigger className="bg-white border-gray-200 hover:bg-gray-50 font-medium">
+                      <SelectValue placeholder="회원그룹 선택" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="헬스">헬스</SelectItem>
+                      <SelectItem value="PT">PT</SelectItem>
+                      <SelectItem value="필라테스">필라테스</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>담당</Label>
+                  <Select defaultValue={member.trainerAssigned || ""}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="담당 선택" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="박지훈">박지훈</SelectItem>
+                      <SelectItem value="김태양">김태양</SelectItem>
+                      <SelectItem value="최수진">최수진</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>회원명</Label>
+                  <Input value={member.name} />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>생년월일</Label>
+                  <div className="flex items-center gap-2">
+                    <Input value={member.birthDate || ""} placeholder="YYYYMMDD" />
+                    {member.birthDate && (
+                      <span className="text-sm text-muted-foreground whitespace-nowrap">
+                        만 {calculateAge(member.birthDate)}세
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>성별</Label>
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                      <input type="radio" id="male" name="gender" defaultChecked />
+                      <label htmlFor="male">남</label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <input type="radio" id="female" name="gender" />
+                      <label htmlFor="female">여</label>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>수신동의</Label>
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2">
+                      <input type="checkbox" id="sms" defaultChecked />
+                      <label htmlFor="sms">문자수신</label>
+                    </div>
+                    <Button variant="secondary" size="sm">문자전송</Button>
+                    <Button variant="secondary" size="sm">자동문자설정</Button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>회원그룹2</Label>
+                  <Select defaultValue="선택">
+                    <SelectTrigger>
+                      <SelectValue placeholder="회원그룹2 선택" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="선택">선택</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>담당2</Label>
+                  <Select defaultValue="선택">
+                    <SelectTrigger>
+                      <SelectValue placeholder="담당2 선택" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="선택">선택</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>휴대폰</Label>
+                  <Input value={formatPhoneNumber(member.phoneNumber)} />
+                </div>
+              </div>
+              
+              <div className="col-span-2 space-y-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-gray-700">우편번호</Label>
+                  <div className="flex gap-2">
+                    <Input 
+                      value={member.postalCode || ""} 
+                      className="w-32 bg-white border-gray-200" 
+                      readOnly 
+                    />
+                    <Button 
+                      variant="secondary" 
+                      size="sm"
+                      className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium"
+                      onClick={() => {
+                        // @ts-ignore
+                        new daum.Postcode({
+                          oncomplete: function(data: any) {
+                            // Update member postal code and address
+                            const updatedMember = { ...member };
+                            updatedMember.postalCode = data.zonecode;
+                            updatedMember.address = data.address;
+                            setMember(updatedMember);
+                          }
+                        }).open();
+                      }}
+                    >
+                      우편번호 찾기
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Input 
+                    value={member.address || ""} 
+                    placeholder="상세주소를 입력하세요"
+                    className="bg-white border-gray-200"
+                    onChange={(e) => {
+                      const updatedMember = { ...member };
+                      updatedMember.address = e.target.value;
+                      setMember(updatedMember);
+                    }}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-gray-700">메모</Label>
+                  <Textarea 
+                    value={member.memo || ""} 
+                    placeholder="메모를 입력하세요"
+                    className="h-24 bg-white border-gray-200 resize-none"
+                    onChange={(e) => {
+                      const updatedMember = { ...member };
+                      updatedMember.memo = e.target.value;
+                      setMember(updatedMember);
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* 두 번째 행: 헬스장/PT 이용 정보 */}
       <Card>
         <CardHeader>
           <CardTitle>헬스장 / PT 이용 정보</CardTitle>
@@ -403,49 +752,40 @@ const MemberInfo = ({ member }: { member: Member }) => {
             )}
           </div>
         </CardContent>
-        <CardFooter className="border-t bg-muted/50 px-6 flex justify-between">
-          <Dialog open={membershipDialogOpen} onOpenChange={setMembershipDialogOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline" size="sm">
-                <CreditCard className="h-4 w-4 mr-2" />
-                <span>이용권 등록/수정</span>
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-md">
-              <DialogHeader>
-                <DialogTitle>이용권 등록/수정</DialogTitle>
-                <DialogDescription>
-                  {member.name} 회원의 이용권 정보를 등록하거나 수정합니다.
-                </DialogDescription>
-              </DialogHeader>
-              <MembershipForm 
-                member={member} 
-                onClose={() => setMembershipDialogOpen(false)} 
-              />
-            </DialogContent>
-          </Dialog>
-          
-          <Dialog open={lockerDialogOpen} onOpenChange={setLockerDialogOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline" size="sm">
-                <Key className="h-4 w-4 mr-2" />
-                <span>락커 등록</span>
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-md">
-              <DialogHeader>
-                <DialogTitle>락커 등록</DialogTitle>
-                <DialogDescription>
-                  {member.name} 회원에게 락커를 등록합니다.
-                </DialogDescription>
-              </DialogHeader>
-              <LockerForm 
-                member={member} 
-                onClose={() => setLockerDialogOpen(false)} 
-              />
-            </DialogContent>
-          </Dialog>
-        </CardFooter>
+      </Card>
+
+      {/* 세 번째 행: 결제 내역 */}
+      <Card>
+        <CardHeader>
+          <CardTitle>결제 내역</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableCell className="font-medium">결제일</TableCell>
+                <TableCell className="font-medium">구분</TableCell>
+                <TableCell className="font-medium">상품명</TableCell>
+                <TableCell className="font-medium">결제 금액</TableCell>
+                <TableCell className="font-medium">결제 수단</TableCell>
+                <TableCell className="font-medium">상태</TableCell>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {/* 결제 내역 데이터 매핑 필요 */}
+              <TableRow>
+                <TableCell>2024-03-15</TableCell>
+                <TableCell>PT</TableCell>
+                <TableCell>PT 20회</TableCell>
+                <TableCell>1,000,000원</TableCell>
+                <TableCell>카드</TableCell>
+                <TableCell>
+                  <Badge variant="outline" className="bg-emerald-50 text-emerald-700">완료</Badge>
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </CardContent>
       </Card>
     </div>
   );
@@ -453,7 +793,6 @@ const MemberInfo = ({ member }: { member: Member }) => {
 
 const AttendanceTab = ({ memberId }: { memberId: string }) => {
   const [attendance, setAttendance] = useState<AttendanceRecord[]>([]);
-  const [date, setDate] = useState<Date>(new Date());
   
   useEffect(() => {
     // Get mock attendance data
@@ -461,140 +800,14 @@ const AttendanceTab = ({ memberId }: { memberId: string }) => {
     setAttendance(attendanceData);
   }, [memberId]);
   
-  // Calculate attendance rate
-  const calculateAttendanceRate = () => {
-    const totalDays = attendance.length;
-    if (totalDays === 0) return 0;
-    
-    const attendedDays = attendance.filter(record => record.attended).length;
-    return Math.round((attendedDays / totalDays) * 100);
-  };
-  
-  const attendanceRate = calculateAttendanceRate();
-  const status = getAttendanceStatus(attendanceRate);
-
-  // Customize calendar appearance by modifying CSS
-  const modifiers = {
-    attended: attendance
-      .filter(record => record.attended)
-      .map(record => new Date(record.date)),
-    absent: attendance
-      .filter(record => !record.attended && record.date)
-      .map(record => new Date(record.date)),
-  };
-
-  const modifiersStyles = {
-    attended: { 
-      backgroundColor: "#f0fdf4", // Light green background
-      color: "#15803d",
-      fontWeight: "bold"
-    },
-    absent: { 
-      backgroundColor: "#fef2f2", // Light red background
-      color: "#dc2626"
-    }
-  };
-  
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="md:col-span-2">
-          <CardHeader>
-            <CardTitle>출석 캘린더</CardTitle>
-            <CardDescription>
-              회원의 헬스장 방문 기록을 캘린더로 확인하세요.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Calendar
-              mode="single"
-              selected={date}
-              onSelect={setDate}
-              className="rounded-md border"
-              modifiers={modifiers}
-              modifiersStyles={modifiersStyles}
-              onDayClick={(day) => {
-                // Find attendance record for this date if needed
-                const dateStr = day.toISOString().split("T")[0];
-                const record = attendance.find(r => r.date === dateStr);
-                if (record) {
-                  // Could show a tooltip or detail about this day
-                  console.log(record);
-                }
-              }}
-            />
-            <div className="flex items-center justify-center space-x-4 mt-4 text-sm">
-              <div className="flex items-center">
-                <div className="w-4 h-4 bg-green-100 rounded mr-2"></div>
-                <span>출석</span>
-              </div>
-              <div className="flex items-center">
-                <div className="w-4 h-4 bg-red-50 rounded mr-2"></div>
-                <span>미출석</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle>출석 통계</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="space-y-2">
-              <p className="text-xs text-muted-foreground">출석률</p>
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <div className="h-2 w-full bg-muted rounded-full">
-                    <div
-                      className={`h-2 rounded-full ${
-                        attendanceRate >= 80
-                          ? "bg-gym-success"
-                          : attendanceRate >= 50
-                          ? "bg-gym-warning"
-                          : "bg-gym-danger"
-                      }`}
-                      style={{ width: `${attendanceRate}%` }}
-                    />
-                  </div>
-                </div>
-                <span className="ml-4 text-2xl font-bold">{attendanceRate}%</span>
-              </div>
-              <div className={`text-sm ${status.color}`}>
-                {status.label}
-              </div>
-            </div>
-            
-            <Separator />
-            
-            <div className="space-y-4">
-              <div>
-                <p className="text-xs text-muted-foreground">최근 30일</p>
-                <p className="text-xl font-bold">
-                  {attendance.slice(0, 30).filter(r => r.attended).length}회 방문
-                </p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">최근 90일</p>
-                <p className="text-xl font-bold">
-                  {attendance.filter(r => r.attended).length}회 방문
-                </p>
-              </div>
-            </div>
-            
-            <Separator />
-            
-            <Button className="w-full" variant="outline">
-              <Mail className="mr-2 h-4 w-4" />
-              <span>참여 독려 메시지 보내기</span>
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-      
       <Card>
         <CardHeader>
-          <CardTitle>최근 출석 기록</CardTitle>
+          <CardTitle>출석 기록</CardTitle>
+          <CardDescription>
+            전체 출석 기록을 확인할 수 있습니다.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="rounded-md border">
@@ -606,10 +819,11 @@ const AttendanceTab = ({ memberId }: { memberId: string }) => {
                     <th className="h-12 px-4 text-left align-middle font-medium">출석 여부</th>
                     <th className="h-12 px-4 text-left align-middle font-medium">입장 시간</th>
                     <th className="h-12 px-4 text-left align-middle font-medium">퇴장 시간</th>
+                    <th className="h-12 px-4 text-left align-middle font-medium">체류 시간</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {attendance.slice(0, 10).map((record, index) => (
+                  {attendance.map((record, index) => (
                     <tr key={index} className="border-b">
                       <td className="p-4 align-middle">{formatDate(record.date)}</td>
                       <td className="p-4 align-middle">
@@ -626,6 +840,9 @@ const AttendanceTab = ({ memberId }: { memberId: string }) => {
                       </td>
                       <td className="p-4 align-middle">
                         {record.timeOut || "-"}
+                      </td>
+                      <td className="p-4 align-middle">
+                        {record.timeIn && record.timeOut ? "2시간 30분" : "-"}
                       </td>
                     </tr>
                   ))}
@@ -644,6 +861,17 @@ const MemberDetail = () => {
   const navigate = useNavigate();
   const [member, setMember] = useState<Member | null>(null);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Daum 우편번호 서비스 스크립트 로드
+    const script = document.createElement('script');
+    script.src = '//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
+    script.async = true;
+    document.body.appendChild(script);
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
   
   useEffect(() => {
     // In a real app, this would be an API call
@@ -700,22 +928,26 @@ const MemberDetail = () => {
   
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between sm:items-center space-y-2 sm:space-y-0">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center space-y-2 sm:space-y-0 mb-8">
         <div className="flex items-center">
-          <div className="w-12 h-12 rounded-full bg-gym-primary flex items-center justify-center text-primary-foreground">
-            <User className="h-6 w-6" />
+          <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white shadow-lg">
+            <User className="h-7 w-7" />
           </div>
-          <div className="ml-4">
-            <h1 className="text-2xl font-bold tracking-tight">{member.name}</h1>
-            <p className="text-muted-foreground">{member.id}</p>
+          <div className="ml-5">
+            <h1 className="text-2xl font-semibold tracking-tight text-gray-900">{member.name}</h1>
+            <p className="text-sm text-gray-500 mt-0.5 font-medium">회원번호: {member.id}</p>
           </div>
         </div>
         
-        <div className="flex space-x-2">
-          <Button variant="outline" onClick={() => navigate("/members")}>
+        <div className="flex space-x-3">
+          <Button 
+            variant="outline" 
+            onClick={() => navigate("/members")}
+            className="font-medium text-gray-600 hover:text-gray-900"
+          >
             목록으로
           </Button>
-          <Button className="bg-gym-primary hover:bg-gym-secondary">
+          <Button className="bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-md">
             <Edit className="mr-2 h-4 w-4" />
             회원 정보 수정
           </Button>
@@ -723,16 +955,26 @@ const MemberDetail = () => {
       </div>
       
       <Tabs defaultValue="info">
-        <TabsList>
-          <TabsTrigger value="info">회원 정보</TabsTrigger>
-          <TabsTrigger value="attendance">출석 관리</TabsTrigger>
+        <TabsList className="bg-gray-100 p-1 rounded-lg">
+          <TabsTrigger 
+            value="info" 
+            className="px-4 py-2 rounded-md data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm font-medium"
+          >
+            회원 정보
+          </TabsTrigger>
+          <TabsTrigger 
+            value="attendance"
+            className="px-4 py-2 rounded-md data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm font-medium"
+          >
+            출석 관리
+          </TabsTrigger>
         </TabsList>
         
-        <TabsContent value="info" className="space-y-6 mt-6">
+        <TabsContent value="info" className="space-y-2 mt-2">
           <MemberInfo member={member} />
         </TabsContent>
         
-        <TabsContent value="attendance" className="space-y-6 mt-6">
+        <TabsContent value="attendance" className="space-y-2 mt-2">
           <AttendanceTab memberId={member.id} />
         </TabsContent>
       </Tabs>

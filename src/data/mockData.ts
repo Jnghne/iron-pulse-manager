@@ -23,7 +23,7 @@ export interface Member {
 
 export const mockMembers: Member[] = [
   {
-    id: "M123456",
+    id: "1001",
     name: "김민준",
     phoneNumber: "010-1234-5678",
     registrationDate: "2023-01-15",
@@ -38,7 +38,7 @@ export const mockMembers: Member[] = [
     trainerAssigned: "박지훈",
   },
   {
-    id: "M234567",
+    id: "1002",
     name: "이서연",
     phoneNumber: "010-2345-6789",
     registrationDate: "2023-03-20",
@@ -49,7 +49,7 @@ export const mockMembers: Member[] = [
     attendanceRate: 65,
   },
   {
-    id: "M345678",
+    id: "1003",
     name: "박준호",
     phoneNumber: "010-3456-7890",
     registrationDate: "2023-02-10",
@@ -64,7 +64,7 @@ export const mockMembers: Member[] = [
     trainerAssigned: "최수진",
   },
   {
-    id: "M456789",
+    id: "1004",
     name: "최지우",
     phoneNumber: "010-4567-8901",
     registrationDate: "2023-04-05",
@@ -76,7 +76,7 @@ export const mockMembers: Member[] = [
     lockerId: "C10",
   },
   {
-    id: "M567890",
+    id: "1005",
     name: "정도윤",
     phoneNumber: "010-5678-9012",
     registrationDate: "2023-05-15",
@@ -87,7 +87,7 @@ export const mockMembers: Member[] = [
     attendanceRate: 30,
   },
   {
-    id: "M678901",
+    id: "1006",
     name: "한소희",
     phoneNumber: "010-6789-0123",
     registrationDate: "2023-06-20",
@@ -101,7 +101,7 @@ export const mockMembers: Member[] = [
     trainerAssigned: "박지훈",
   },
   {
-    id: "M789012",
+    id: "1007",
     name: "송민석",
     phoneNumber: "010-7890-1234",
     registrationDate: "2023-07-10",
@@ -116,7 +116,7 @@ export const mockMembers: Member[] = [
     trainerAssigned: "최수진",
   },
   {
-    id: "M890123",
+    id: "1008",
     name: "임하은",
     phoneNumber: "010-8901-2345",
     registrationDate: "2023-08-15",
@@ -127,7 +127,7 @@ export const mockMembers: Member[] = [
     attendanceRate: 50,
   },
   {
-    id: "M901234",
+    id: "1009",
     name: "윤재현",
     phoneNumber: "010-9012-3456",
     registrationDate: "2023-09-01",
@@ -142,7 +142,7 @@ export const mockMembers: Member[] = [
     trainerAssigned: "김태양",
   },
   {
-    id: "M012345",
+    id: "1010",
     name: "장미나",
     phoneNumber: "010-0123-4567",
     registrationDate: "2023-01-20",

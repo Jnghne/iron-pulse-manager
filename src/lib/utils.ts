@@ -1,4 +1,3 @@
-
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -52,7 +51,9 @@ export function getRandomInt(min: number, max: number): number {
  * Generate a random member ID
  */
 export function generateMemberId(): string {
-  return `M${Date.now().toString().slice(-6)}${Math.floor(Math.random() * 10)}`;
+  // Generate a numeric ID starting from 1001
+  const randomNum = Math.floor(1000 + Math.random() * 8999);
+  return randomNum.toString();
 }
 
 /**

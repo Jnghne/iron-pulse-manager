@@ -32,7 +32,7 @@ const MemberList = () => {
     const filtered = mockMembers.filter(
       (member) =>
         member.name.toLowerCase().includes(lowercaseQuery) ||
-        member.id.toLowerCase().includes(lowercaseQuery) ||
+        member.id.includes(lowercaseQuery) ||
         member.phoneNumber.replace(/-/g, "").includes(lowercaseQuery.replace(/-/g, ""))
     );
     
@@ -61,7 +61,7 @@ const MemberList = () => {
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
-              placeholder="회원 이름, 회원 번호, 연락처로 검색..."
+              placeholder="회원 번호, 이름, 연락처로 검색..."
               className="pl-8"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -88,7 +88,7 @@ const MemberList = () => {
                   {filteredMembers.length > 0 ? (
                     filteredMembers.map((member) => (
                       <TableRow key={member.id}>
-                        <TableCell className="font-medium">
+                        <TableCell className="font-mono font-medium">
                           <Link
                             to={`/members/${member.id}`}
                             className="hover:text-gym-primary hover:underline"

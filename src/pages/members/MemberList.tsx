@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { 
   Table, 
   TableBody, 
@@ -13,13 +13,14 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Search, Plus, UserPlus } from "lucide-react";
+import { Search, UserPlus } from "lucide-react";
 import { mockMembers, Member } from "@/data/mockData";
 import { formatDate, formatPhoneNumber } from "@/lib/utils";
 
 const MemberList = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredMembers, setFilteredMembers] = useState<Member[]>(mockMembers);
+  const navigate = useNavigate();
   
   // Filter members based on search query
   useEffect(() => {
@@ -38,6 +39,10 @@ const MemberList = () => {
     
     setFilteredMembers(filtered);
   }, [searchQuery]);
+
+  const handleRowClick = (memberId: string) => {
+    navigate(`/members/${memberId}`);
+  };
   
   return (
     <div className="space-y-6">
@@ -46,12 +51,13 @@ const MemberList = () => {
           <h1 className="text-3xl font-bold tracking-tight">회원 관리</h1>
           <p className="text-muted-foreground">헬스장 회원 목록을 조회하고 관리하세요.</p>
         </div>
-        <Link to="/members/new">
-          <Button className="w-full sm:w-auto bg-gym-primary hover:bg-gym-secondary">
-            <UserPlus className="mr-2 h-4 w-4" />
-            신규 회원 등록
-          </Button>
-        </Link>
+        <Button 
+          className="w-full sm:w-auto bg-gym-primary hover:bg-gym-secondary"
+          onClick={() => navigate("/members/new")}
+        >
+          <UserPlus className="mr-2 h-4 w-4" />
+          신규 회원 등록
+        </Button>
       </div>
       
       <Card>
@@ -79,82 +85,36 @@ const MemberList = () => {
                     <TableHead>연락처</TableHead>
                     <TableHead>등록일</TableHead>
                     <TableHead>회원권 상태</TableHead>
-                    <TableHead>PT 이용권</TableHead>
-                    <TableHead>출석률</TableHead>
-                    <TableHead>락커</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredMembers.length > 0 ? (
                     filteredMembers.map((member) => (
-                      <TableRow key={member.id}>
+                      <TableRow 
+                        key={member.id}
+                        onClick={() => handleRowClick(member.id)}
+                        className="cursor-pointer"
+                      >
                         <TableCell className="font-mono font-medium">
-                          <Link
-                            to={`/members/${member.id}`}
-                            className="hover:text-gym-primary hover:underline"
-                          >
-                            {member.id}
-                          </Link>
+                          {member.id}
                         </TableCell>
-                        <TableCell>
-                          <Link
-                            to={`/members/${member.id}`}
-                            className="hover:text-gym-primary hover:underline"
-                          >
-                            {member.name}
-                          </Link>
-                        </TableCell>
+                        <TableCell>{member.name}</TableCell>
                         <TableCell>{formatPhoneNumber(member.phoneNumber)}</TableCell>
                         <TableCell>{formatDate(member.registrationDate)}</TableCell>
                         <TableCell>
                           {member.membershipActive ? (
-                            <Badge className="bg-gym-success">활성</Badge>
+                            <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100">활성</Badge>
                           ) : (
                             <Badge variant="secondary" className="text-muted-foreground">
                               만료
                             </Badge>
                           )}
                         </TableCell>
-                        <TableCell>
-                          {member.hasPT ? (
-                            <Badge className="bg-gym-accent">
-                              {member.ptRemaining}회 남음
-                            </Badge>
-                          ) : (
-                            <Badge variant="outline">미등록</Badge>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center">
-                            <div className="w-full bg-muted rounded-full h-2 mr-2">
-                              <div
-                                className={`h-2 rounded-full ${
-                                  member.attendanceRate >= 80
-                                    ? "bg-gym-success"
-                                    : member.attendanceRate >= 50
-                                    ? "bg-gym-warning"
-                                    : "bg-gym-danger"
-                                }`}
-                                style={{ width: `${member.attendanceRate}%` }}
-                              />
-                            </div>
-                            <span className="text-xs">{member.attendanceRate}%</span>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          {member.lockerId ? (
-                            <Badge variant="outline" className="bg-blue-50">
-                              {member.lockerId}
-                            </Badge>
-                          ) : (
-                            <span className="text-muted-foreground">-</span>
-                          )}
-                        </TableCell>
                       </TableRow>
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={8} className="text-center py-10">
+                      <TableCell colSpan={5} className="text-center py-10">
                         <div className="flex flex-col items-center justify-center text-muted-foreground">
                           <Search className="h-10 w-10 mb-2" />
                           <p>검색 결과가 없습니다.</p>

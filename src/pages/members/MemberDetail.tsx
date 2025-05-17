@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { 
@@ -25,10 +26,22 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
 import { Separator } from "@/components/ui/separator";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { mockMembers, Member, getMockAttendance, AttendanceRecord } from "@/data/mockData";
-import { formatDate, formatPhoneNumber, getAttendanceStatus } from "@/lib/utils";
+import { formatDate, formatPhoneNumber, getAttendanceStatus, formatDateYYYYMMDD, addDays } from "@/lib/utils";
 import { 
   Edit, 
   User, 
@@ -36,12 +49,267 @@ import {
   Clock,
   CreditCard,
   Key,
-  Mail
+  Mail,
+  Plus,
+  Trash2
 } from "lucide-react";
 import { toast } from "sonner";
+import { useForm } from "react-hook-form";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 // Components for member details tabs
+const MembershipForm = ({ member, onClose }: { member: Member, onClose: () => void }) => {
+  const [membershipType, setMembershipType] = useState(member.membershipActive ? "extend" : "new");
+  const [membershipMonths, setMembershipMonths] = useState("1");
+  const [ptSessions, setPtSessions] = useState(member.hasPT ? member.ptRemaining.toString() : "0");
+  const [startDate, setStartDate] = useState<Date>(
+    member.membershipStartDate ? new Date(member.membershipStartDate) : new Date()
+  );
+  const [endDate, setEndDate] = useState<Date>(
+    member.membershipEndDate ? new Date(member.membershipEndDate) : addDays(new Date(), 30)
+  );
+
+  // Calculate end date based on start date and months
+  useEffect(() => {
+    if (membershipType === "extend" && member.membershipEndDate) {
+      const months = parseInt(membershipMonths);
+      const baseDate = new Date(member.membershipEndDate);
+      setEndDate(new Date(baseDate.setMonth(baseDate.getMonth() + months)));
+    } else if (membershipType === "new") {
+      const months = parseInt(membershipMonths);
+      const baseDate = new Date(startDate);
+      setEndDate(new Date(baseDate.setMonth(baseDate.getMonth() + months)));
+    }
+  }, [startDate, membershipMonths, membershipType, member.membershipEndDate]);
+
+  const handleSubmit = () => {
+    const updatedMember = { ...member };
+    
+    // Update membership info
+    updatedMember.membershipActive = true;
+    updatedMember.membershipStartDate = startDate;
+    updatedMember.membershipEndDate = endDate;
+    
+    // Update PT info
+    const ptSessionsInt = parseInt(ptSessions);
+    if (ptSessionsInt > 0) {
+      updatedMember.hasPT = true;
+      updatedMember.ptRemaining = ptSessionsInt;
+      // Add PT expiration date (6 months from now)
+      const ptExpireDate = new Date();
+      ptExpireDate.setMonth(ptExpireDate.getMonth() + 6);
+      updatedMember.ptExpireDate = ptExpireDate;
+    }
+    
+    // In a real app, this would be an API call
+    toast.success("회원권 정보가 업데이트되었습니다.");
+    onClose();
+  };
+
+  return (
+    <div className="space-y-4">
+      <RadioGroup 
+        value={membershipType} 
+        onValueChange={setMembershipType}
+        className="flex flex-col space-y-2"
+      >
+        <div className="flex items-center space-x-2">
+          <RadioGroupItem value="new" id="new" />
+          <label htmlFor="new" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            신규 등록
+          </label>
+        </div>
+        
+        <div className="flex items-center space-x-2">
+          <RadioGroupItem value="extend" id="extend" />
+          <label htmlFor="extend" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            기존 이용권 연장
+          </label>
+        </div>
+      </RadioGroup>
+
+      <div className="space-y-4 pt-2">
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium" htmlFor="start-date">시작일</label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start text-left font-normal"
+                  disabled={membershipType === "extend"}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {startDate ? formatDate(startDate) : "날짜 선택"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <Calendar
+                  mode="single"
+                  selected={startDate}
+                  onSelect={(date) => date && setStartDate(date)}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+          
+          <div className="space-y-2">
+            <label className="text-sm font-medium" htmlFor="membership-months">개월 수</label>
+            <Select value={membershipMonths} onValueChange={setMembershipMonths}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="개월 선택" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="1">1개월</SelectItem>
+                <SelectItem value="3">3개월</SelectItem>
+                <SelectItem value="6">6개월</SelectItem>
+                <SelectItem value="12">12개월</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        
+        <div className="space-y-2">
+          <label className="text-sm font-medium" htmlFor="end-date">종료일</label>
+          <Input 
+            id="end-date" 
+            value={formatDate(endDate)} 
+            disabled 
+            className="bg-muted"
+          />
+        </div>
+      </div>
+      
+      <Separator className="my-4" />
+      
+      <div className="space-y-4">
+        <h3 className="text-sm font-medium">PT 이용권</h3>
+        
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium" htmlFor="pt-sessions">PT 횟수</label>
+            <Input 
+              id="pt-sessions" 
+              type="number" 
+              min="0" 
+              value={ptSessions} 
+              onChange={(e) => setPtSessions(e.target.value)}
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <label className="text-sm font-medium" htmlFor="trainer">담당 트레이너</label>
+            <Select defaultValue={member.trainerAssigned || ""}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="트레이너 선택" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="박지훈">박지훈</SelectItem>
+                <SelectItem value="김태양">김태양</SelectItem>
+                <SelectItem value="최수진">최수진</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </div>
+      
+      <DialogFooter className="mt-6">
+        <Button variant="outline" onClick={onClose}>취소</Button>
+        <Button onClick={handleSubmit}>저장하기</Button>
+      </DialogFooter>
+    </div>
+  );
+};
+
+const LockerForm = ({ member, onClose }: { member: Member, onClose: () => void }) => {
+  // In a real app, these would come from an API
+  const [availableLockers, setAvailableLockers] = useState([
+    { id: "A01", status: "available" },
+    { id: "A02", status: "occupied" },
+    { id: "A03", status: "available" },
+    { id: "B01", status: "available" },
+    { id: "B02", status: "available" },
+    { id: "B03", status: "occupied" },
+    { id: "B04", status: "occupied" },
+    { id: "C01", status: "available" },
+    { id: "C02", status: "available" },
+  ]);
+  
+  const [selectedLocker, setSelectedLocker] = useState<string | null>(
+    member.lockerId || null
+  );
+
+  const handleLockerSelect = (lockerId: string) => {
+    setSelectedLocker(lockerId === selectedLocker ? null : lockerId);
+  };
+
+  const handleSubmit = () => {
+    if (!selectedLocker) {
+      toast.error("락커를 선택해주세요.");
+      return;
+    }
+    
+    // In a real app, this would be an API call
+    toast.success(`${selectedLocker} 락커가 ${member.name} 회원에게 등록되었습니다.`);
+    onClose();
+  };
+
+  return (
+    <div className="space-y-4">
+      <p className="text-sm text-muted-foreground">
+        {member.lockerId 
+          ? `${member.name} 회원은 현재 ${member.lockerId} 락커를 사용 중입니다.`
+          : `${member.name} 회원은 현재 등록된 락커가 없습니다.`}
+      </p>
+      
+      <div className="grid grid-cols-3 gap-2 mt-4">
+        {availableLockers.map((locker) => (
+          <Button
+            key={locker.id}
+            variant={selectedLocker === locker.id ? "default" : "outline"}
+            className={`h-16 ${
+              locker.status === "occupied" && locker.id !== member.lockerId
+                ? "bg-muted text-muted-foreground cursor-not-allowed"
+                : locker.status === "available"
+                ? "hover:bg-primary/20"
+                : ""
+            }`}
+            onClick={() => locker.status === "available" && handleLockerSelect(locker.id)}
+            disabled={locker.status === "occupied" && locker.id !== member.lockerId}
+          >
+            <div className="text-center">
+              <div className="text-lg font-bold">{locker.id}</div>
+              <div className="text-xs">
+                {locker.id === member.lockerId
+                  ? "현재 사용 중"
+                  : locker.status === "available"
+                  ? "사용 가능"
+                  : "사용 중"}
+              </div>
+            </div>
+          </Button>
+        ))}
+      </div>
+      
+      <DialogFooter className="mt-6">
+        {member.lockerId && member.lockerId !== selectedLocker && (
+          <Button variant="destructive" className="mr-auto" onClick={() => onClose()}>
+            <Trash2 className="h-4 w-4 mr-2" />
+            락커 해지
+          </Button>
+        )}
+        <Button variant="outline" onClick={onClose}>취소</Button>
+        <Button onClick={handleSubmit}>저장하기</Button>
+      </DialogFooter>
+    </div>
+  );
+};
+
 const MemberInfo = ({ member }: { member: Member }) => {
+  const [membershipDialogOpen, setMembershipDialogOpen] = useState(false);
+  const [lockerDialogOpen, setLockerDialogOpen] = useState(false);
+  
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <Card>
@@ -80,7 +348,7 @@ const MemberInfo = ({ member }: { member: Member }) => {
             <p className="text-sm font-medium mb-1">헬스장 이용권</p>
             {member.membershipActive ? (
               <div className="flex items-center">
-                <Badge className="bg-gym-success mr-2">활성</Badge>
+                <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 mr-2">활성</Badge>
                 <span className="text-sm">
                   {member.membershipStartDate && member.membershipEndDate
                     ? `${formatDate(member.membershipStartDate)} ~ ${formatDate(member.membershipEndDate)}`
@@ -99,7 +367,7 @@ const MemberInfo = ({ member }: { member: Member }) => {
             {member.hasPT ? (
               <div className="space-y-2">
                 <div className="flex items-center">
-                  <Badge className="bg-gym-accent mr-2">활성</Badge>
+                  <Badge className="bg-blue-50 text-blue-700 hover:bg-blue-100 mr-2">활성</Badge>
                   <span className="text-sm">{member.ptRemaining}회 남음</span>
                 </div>
                 {member.ptExpireDate && (
@@ -130,53 +398,45 @@ const MemberInfo = ({ member }: { member: Member }) => {
           </div>
         </CardContent>
         <CardFooter className="border-t bg-muted/50 px-6 flex justify-between">
-          <Dialog>
+          <Dialog open={membershipDialogOpen} onOpenChange={setMembershipDialogOpen}>
             <DialogTrigger asChild>
               <Button variant="outline" size="sm">
                 <CreditCard className="h-4 w-4 mr-2" />
                 <span>이용권 등록/수정</span>
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="max-w-md">
               <DialogHeader>
                 <DialogTitle>이용권 등록/수정</DialogTitle>
                 <DialogDescription>
                   {member.name} 회원의 이용권 정보를 등록하거나 수정합니다.
                 </DialogDescription>
               </DialogHeader>
-              {/* Membership form would go here */}
-              <p className="text-sm text-muted-foreground">이 기능은 데모 버전에서는 제공되지 않습니다.</p>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => {}}>취소</Button>
-                <Button onClick={() => toast.success("이용권이 등록되었습니다.")}>
-                  저장하기
-                </Button>
-              </DialogFooter>
+              <MembershipForm 
+                member={member} 
+                onClose={() => setMembershipDialogOpen(false)} 
+              />
             </DialogContent>
           </Dialog>
           
-          <Dialog>
+          <Dialog open={lockerDialogOpen} onOpenChange={setLockerDialogOpen}>
             <DialogTrigger asChild>
               <Button variant="outline" size="sm">
                 <Key className="h-4 w-4 mr-2" />
                 <span>락커 등록</span>
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="max-w-md">
               <DialogHeader>
                 <DialogTitle>락커 등록</DialogTitle>
                 <DialogDescription>
                   {member.name} 회원에게 락커를 등록합니다.
                 </DialogDescription>
               </DialogHeader>
-              {/* Locker form would go here */}
-              <p className="text-sm text-muted-foreground">이 기능은 데모 버전에서는 제공되지 않습니다.</p>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => {}}>취소</Button>
-                <Button onClick={() => toast.success("락커가 등록되었습니다.")}>
-                  저장하기
-                </Button>
-              </DialogFooter>
+              <LockerForm 
+                member={member} 
+                onClose={() => setLockerDialogOpen(false)} 
+              />
             </DialogContent>
           </Dialog>
         </CardFooter>

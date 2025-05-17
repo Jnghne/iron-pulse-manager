@@ -103,9 +103,9 @@ const MemberList = () => {
                         <TableCell>{formatDate(member.registrationDate)}</TableCell>
                         <TableCell>
                           {member.membershipActive ? (
-                            <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100">활성</Badge>
+                            <Badge className="bg-green-600 text-white hover:bg-green-700">활성</Badge>
                           ) : (
-                            <Badge variant="secondary" className="text-muted-foreground">
+                            <Badge variant="secondary" className="bg-gray-300 text-gray-700 hover:bg-gray-400">
                               만료
                             </Badge>
                           )}

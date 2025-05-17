@@ -22,6 +22,8 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { generateMemberId, formatPhoneNumber, isValidPhoneNumber } from "@/lib/utils";
+import { DatePicker } from "@/components/DatePicker";
+import { Textarea } from "@/components/ui/textarea";
 
 const MemberCreate = () => {
   const navigate = useNavigate();
@@ -30,6 +32,10 @@ const MemberCreate = () => {
   // Form state
   const [name, setName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [postalCode, setPostalCode] = useState("");
+  const [address, setAddress] = useState("");
+  const [birthDate, setBirthDate] = useState<Date>(new Date());
+  const [memo, setMemo] = useState("");
   const [hasMembership, setHasMembership] = useState(false);
   const [membershipMonths, setMembershipMonths] = useState("1");
   const [hasPT, setHasPT] = useState(false);
@@ -140,6 +146,48 @@ const MemberCreate = () => {
                   placeholder="010-0000-0000"
                   value={phoneNumber}
                   onChange={handlePhoneChange}
+                  disabled={isSubmitting}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="postal-code">우편번호</Label>
+                <Input
+                  id="postal-code"
+                  placeholder="00000"
+                  value={postalCode}
+                  onChange={(e) => setPostalCode(e.target.value)}
+                  disabled={isSubmitting}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="birth-date">생년월일</Label>
+                <DatePicker
+                  selected={birthDate}
+                  onSelect={setBirthDate}
+                  className="w-full"
+                />
+              </div>
+
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="address">상세 주소</Label>
+                <Input
+                  id="address"
+                  placeholder="주소를 입력하세요"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  disabled={isSubmitting}
+                />
+              </div>
+
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="memo">메모</Label>
+                <Textarea
+                  id="memo"
+                  placeholder="특이사항이나 메모를 입력하세요"
+                  value={memo}
+                  onChange={(e) => setMemo(e.target.value)}
                   disabled={isSubmitting}
                 />
               </div>

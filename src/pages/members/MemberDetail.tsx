@@ -41,7 +41,14 @@ import { Separator } from "@/components/ui/separator";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { mockMembers, Member, getMockAttendance, AttendanceRecord } from "@/data/mockData";
-import { formatDate, formatPhoneNumber, getAttendanceStatus, formatDateYYYYMMDD, addDays } from "@/lib/utils";
+import { 
+  formatDate, 
+  formatPhoneNumber, 
+  getAttendanceStatus, 
+  formatDateYYYYMMDD, 
+  addDays, 
+  toDateString 
+} from "@/lib/utils";
 import { 
   Edit, 
   User, 

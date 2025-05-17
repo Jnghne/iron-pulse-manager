@@ -1,4 +1,3 @@
-
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -37,6 +36,16 @@ export function formatDate(date: Date | string): string {
 export function formatDateYYYYMMDD(date: Date | string): string {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
   return dateObj.toISOString().split('T')[0];
+}
+
+/**
+ * Convert a Date to ISO string or return the string as is
+ */
+export function toDateString(date: Date | string): string {
+  if (date instanceof Date) {
+    return date.toISOString();
+  }
+  return date;
 }
 
 /**

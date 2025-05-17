@@ -128,7 +128,8 @@ const MemberCreate = () => {
           <CardContent className="space-y-6">
             {/* Basic Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
+              {/* Name - top row, full width */}
+              <div className="space-y-2 md:col-span-2">
                 <Label htmlFor="name">회원 이름</Label>
                 <Input
                   id="name"
@@ -139,6 +140,7 @@ const MemberCreate = () => {
                 />
               </div>
               
+              {/* Phone and Birth Date - second row, side by side */}
               <div className="space-y-2">
                 <Label htmlFor="phone">핸드폰 번호</Label>
                 <Input
@@ -151,6 +153,16 @@ const MemberCreate = () => {
               </div>
 
               <div className="space-y-2">
+                <Label htmlFor="birth-date">생년월일</Label>
+                <DatePicker
+                  selected={birthDate}
+                  onSelect={setBirthDate}
+                  className="w-full"
+                />
+              </div>
+              
+              {/* Postal Code and Address - third row, side by side */}
+              <div className="space-y-2">
                 <Label htmlFor="postal-code">우편번호</Label>
                 <Input
                   id="postal-code"
@@ -162,15 +174,6 @@ const MemberCreate = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="birth-date">생년월일</Label>
-                <DatePicker
-                  selected={birthDate}
-                  onSelect={setBirthDate}
-                  className="w-full"
-                />
-              </div>
-
-              <div className="space-y-2 md:col-span-2">
                 <Label htmlFor="address">상세 주소</Label>
                 <Input
                   id="address"
@@ -181,6 +184,7 @@ const MemberCreate = () => {
                 />
               </div>
 
+              {/* Memo - bottom row, full width */}
               <div className="space-y-2 md:col-span-2">
                 <Label htmlFor="memo">메모</Label>
                 <Textarea

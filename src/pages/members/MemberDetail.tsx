@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { 
@@ -94,8 +93,8 @@ const MembershipForm = ({ member, onClose }: { member: Member, onClose: () => vo
     
     // Update membership info
     updatedMember.membershipActive = true;
-    updatedMember.membershipStartDate = startDate;
-    updatedMember.membershipEndDate = endDate;
+    updatedMember.membershipStartDate = toDateString(startDate);
+    updatedMember.membershipEndDate = toDateString(endDate);
     
     // Update PT info
     const ptSessionsInt = parseInt(ptSessions);
@@ -105,7 +104,7 @@ const MembershipForm = ({ member, onClose }: { member: Member, onClose: () => vo
       // Add PT expiration date (6 months from now)
       const ptExpireDate = new Date();
       ptExpireDate.setMonth(ptExpireDate.getMonth() + 6);
-      updatedMember.ptExpireDate = ptExpireDate;
+      updatedMember.ptExpireDate = toDateString(ptExpireDate);
     }
     
     // In a real app, this would be an API call
@@ -291,7 +290,7 @@ const LockerForm = ({ member, onClose }: { member: Member, onClose: () => void }
                 {locker.id === member.lockerId
                   ? "현재 사용 중"
                   : locker.status === "available"
-                  ? "사용 가능"
+                  ? "사�� 가능"
                   : "사용 중"}
               </div>
             </div>

@@ -367,55 +367,57 @@ const MemberInfo = ({ member: initialMember }: { member: Member }) => {
     <div className="grid grid-cols-1 gap-4">
       <div className="grid grid-cols-1 md:grid-cols-[340px_1fr] gap-4">
         {/* 출석 캘린더 및 통계 */}
-        <Card className="h-fit border-0 shadow-md w-[340px]">
-          <CardContent className="pt-8 space-y-6">
-            <div className="space-y-4">
-              <div className="flex justify-center mb-6">
-                <div className="relative w-32 h-32">
-                  {member.photoUrl ? (
-                    <img
-                      src={member.photoUrl}
-                      alt={member.name}
-                      className="w-full h-full rounded-full object-cover border-4 border-white shadow-lg"
-                    />
-                  ) : (
-                    <div className="w-full h-full rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white shadow-lg">
-                      <User className="h-16 w-16" />
-                    </div>
-                  )}
-                </div>
-              </div>
-              <div className="space-y-3">
-                <p className="text-sm font-medium text-gray-600">출석률</p>
-                <div className="flex items-center justify-between">
-                  <div className="flex-1 mr-4">
-                    <div className="h-2.5 w-full bg-gray-100 rounded-full overflow-hidden">
-                      <div
-                        className={`h-2.5 rounded-full transition-all ${
-                          attendanceRate >= 80
-                            ? "bg-green-500"
-                            : attendanceRate >= 50
-                            ? "bg-yellow-500"
-                            : "bg-red-500"
-                        }`}
-                        style={{ width: `${attendanceRate}%` }}
-                      />
+        <Card className="border-0 shadow-md w-[340px] h-full">
+          <CardContent className="h-full flex flex-col justify-between pt-8 pb-6">
+            <div className="space-y-12">
+              <div className="space-y-8">
+                <div className="space-y-6">
+                  <div className="flex justify-center">
+                    <div className="relative w-32 h-32">
+                      {member.photoUrl ? (
+                        <img
+                          src={member.photoUrl}
+                          alt={member.name}
+                          className="w-full h-full rounded-full object-cover border-4 border-white shadow-lg"
+                        />
+                      ) : (
+                        <div className="w-full h-full rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white shadow-lg">
+                          <User className="h-16 w-16" />
+                        </div>
+                      )}
                     </div>
                   </div>
-                  <span className="text-2xl font-semibold text-gray-900">{attendanceRate}%</span>
+                  <div className="space-y-3">
+                    <p className="text-sm font-medium text-gray-600">출석률</p>
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1 mr-4">
+                        <div className="h-2.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                          <div
+                            className={`h-2.5 rounded-full transition-all ${
+                              attendanceRate >= 80
+                                ? "bg-green-500"
+                                : attendanceRate >= 50
+                                ? "bg-yellow-500"
+                                : "bg-red-500"
+                            }`}
+                            style={{ width: `${attendanceRate}%` }}
+                          />
+                        </div>
+                      </div>
+                      <span className="text-2xl font-semibold text-gray-900">{attendanceRate}%</span>
+                    </div>
+                    <div className={`text-sm font-medium text-center ${
+                      attendanceRate >= 80
+                        ? "text-green-600"
+                        : attendanceRate >= 50
+                        ? "text-yellow-600"
+                        : "text-red-600"
+                    }`}>
+                      {status.label}
+                    </div>
+                  </div>
                 </div>
-                <div className={`text-sm font-medium text-center ${
-                  attendanceRate >= 80
-                    ? "text-green-600"
-                    : attendanceRate >= 50
-                    ? "text-yellow-600"
-                    : "text-red-600"
-                }`}>
-                  {status.label}
-                </div>
-              </div>
-              
-              <div className="space-y-8">
+                
                 <div className="grid grid-cols-2 gap-4">
                   <div className="bg-gray-50 rounded-lg p-4">
                     <p className="text-sm font-medium text-gray-600 mb-1 text-left">최근 30일</p>
@@ -432,36 +434,33 @@ const MemberInfo = ({ member: initialMember }: { member: Member }) => {
                     </p>
                   </div>
                 </div>
-                
-                {/* 출석 캘린더 */}
-                <div>
-                  <p className="text-sm font-medium text-gray-600 mb-2">이번 달 출석 기록</p>
-                  <div className="w-full">
-                    <Calendar
-                      mode="single"
-                      selected={date}
-                      onSelect={setDate}
-                      className="rounded-md border w-full"
-                      modifiers={modifiers}
-                      modifiersStyles={modifiersStyles}
-                      onDayClick={(day) => {
-                        const dateStr = day.toISOString().split("T")[0];
-                        const record = attendance.find(r => r.date === dateStr);
-                        if (record) {
-                          console.log(record);
-                        }
-                      }}
-                    />
+              </div>
+
+              <div className="space-y-3">
+                <p className="text-sm font-medium text-gray-600">이번 달 출석 기록</p>
+                <Calendar
+                  mode="single"
+                  selected={date}
+                  onSelect={setDate}
+                  className="rounded-md border w-full"
+                  modifiers={modifiers}
+                  modifiersStyles={modifiersStyles}
+                  onDayClick={(day) => {
+                    const dateStr = day.toISOString().split("T")[0];
+                    const record = attendance.find(r => r.date === dateStr);
+                    if (record) {
+                      console.log(record);
+                    }
+                  }}
+                />
+                <div className="flex items-center justify-center space-x-4 text-sm">
+                  <div className="flex items-center">
+                    <div className="w-4 h-4 bg-green-100 rounded mr-2"></div>
+                    <span>출석</span>
                   </div>
-                  <div className="flex items-center justify-center space-x-4 mt-4 text-sm">
-                    <div className="flex items-center">
-                      <div className="w-4 h-4 bg-green-100 rounded mr-2"></div>
-                      <span>출석</span>
-                    </div>
-                    <div className="flex items-center">
-                      <div className="w-4 h-4 bg-red-50 rounded mr-2"></div>
-                      <span>미출석</span>
-                    </div>
+                  <div className="flex items-center">
+                    <div className="w-4 h-4 bg-red-50 rounded mr-2"></div>
+                    <span>미출석</span>
                   </div>
                 </div>
               </div>
@@ -700,44 +699,62 @@ const MemberInfo = ({ member: initialMember }: { member: Member }) => {
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <p className="text-sm font-medium mb-1">헬스장 이용권</p>
-            {member.membershipActive ? (
-              <div className="flex items-center">
-                <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 mr-2">활성</Badge>
-                <span className="text-sm">
-                  {member.membershipStartDate && member.membershipEndDate
-                    ? `${formatDate(member.membershipStartDate)} ~ ${formatDate(member.membershipEndDate)}`
-                    : "기간 정보 없음"}
-                </span>
+            <div className="flex items-center gap-2 mb-2">
+              <p className="text-sm font-medium">헬스장 이용권</p>
+              {member.membershipActive ? (
+                <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100">활성</Badge>
+              ) : (
+                <Badge variant="secondary" className="text-muted-foreground">만료</Badge>
+              )}
+            </div>
+            {member.membershipActive && member.membershipStartDate && member.membershipEndDate && (
+              <div className="text-sm text-gray-600 ml-1">
+                <div className="grid grid-cols-[60px_auto] items-center">
+                  <span className="text-gray-500 font-normal">이용기간</span>
+                  <span className="text-gray-700 font-medium ml-2">
+                    {formatDateYYYYMMDD(member.membershipStartDate)} ~ {formatDateYYYYMMDD(member.membershipEndDate)}
+                  </span>
+                </div>
               </div>
-            ) : (
-              <Badge variant="secondary" className="text-muted-foreground">만료</Badge>
             )}
           </div>
           
           <Separator />
           
           <div>
-            <p className="text-sm font-medium mb-1">PT 이용권</p>
-            {member.hasPT ? (
-              <div className="space-y-2">
-                <div className="flex items-center">
-                  <Badge className="bg-blue-50 text-blue-700 hover:bg-blue-100 mr-2">활성</Badge>
-                  <span className="text-sm">{member.ptRemaining}회 남음</span>
+            <div className="flex items-center gap-2 mb-2">
+              <p className="text-sm font-medium">PT 이용권</p>
+              {member.hasPT ? (
+                <Badge className="bg-blue-50 text-blue-700 hover:bg-blue-100">활성</Badge>
+              ) : (
+                <Badge variant="outline">미등록</Badge>
+              )}
+            </div>
+            {member.hasPT && (
+              <div className="space-y-1 ml-1">
+                <div className="grid grid-cols-[60px_auto] items-center text-sm text-gray-600">
+                  <span className="text-gray-500 font-normal">잔여횟수</span>
+                  <span className="text-gray-700 font-medium ml-2">
+                    {member.ptRemaining}회
+                  </span>
                 </div>
                 {member.ptExpireDate && (
-                  <div className="text-sm">
-                    만료일: {formatDate(member.ptExpireDate)}
+                  <div className="grid grid-cols-[60px_auto] items-center text-sm text-gray-600">
+                    <span className="text-gray-500 font-normal">만료일</span>
+                    <span className="text-gray-700 font-medium ml-2">
+                      {formatDateYYYYMMDD(member.ptExpireDate)}
+                    </span>
                   </div>
                 )}
                 {member.trainerAssigned && (
-                  <div className="text-sm">
-                    담당 트레이너: {member.trainerAssigned}
+                  <div className="grid grid-cols-[60px_auto] items-center text-sm text-gray-600">
+                    <span className="text-gray-500 font-normal">담당</span>
+                    <span className="text-gray-700 font-medium ml-2">
+                      {member.trainerAssigned}
+                    </span>
                   </div>
                 )}
               </div>
-            ) : (
-              <Badge variant="outline">미등록</Badge>
             )}
           </div>
           

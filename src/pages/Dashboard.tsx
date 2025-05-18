@@ -2,10 +2,10 @@
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, LineChart, Line } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, LineChart, Line, Area, AreaChart } from "recharts";
 import { formatCurrency } from "@/lib/utils";
 import { mockRevenueData, mockMonthlyRevenueData, mockVisitorsData } from "@/data/mockData";
-import { TrendingUp, TrendingDown, Users, CreditCard } from "lucide-react";
+import { TrendingUp, TrendingDown, Users, CreditCard, Activity } from "lucide-react";
 
 // Get today's visitor count
 const getTodayVisitors = () => {
@@ -61,8 +61,9 @@ const revenueBreakdownData = [
   { name: '기타', value: mockMonthlyRevenueData[0].other },
 ];
 
-// Colors for the pie chart
-const COLORS = ['#2563eb', '#3b82f6', '#0ea5e9', '#64748b'];
+// Colors for the charts
+const COLORS = ['#4EA8DE', '#8FB4FF', '#A78BFA', '#FB7185'];
+const AREA_COLORS = ['#4EA8DE', '#8FB4FF'];
 
 // Prepare daily revenue data for the last 7 days
 const dailyRevenueData = mockRevenueData.slice(0, 7).map(item => ({
@@ -91,32 +92,32 @@ const Dashboard = () => {
   
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">대시보드</h1>
-        <p className="text-muted-foreground">헬스장 운영 현황을 한눈에 확인하세요.</p>
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8">
+        <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-gym-primary to-gym-accent bg-clip-text text-transparent">대시보드</h1>
+        <p className="text-muted-foreground text-sm">최종 업데이트: {new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
       </div>
       
-      <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
         {/* Today's Revenue */}
-        <Card className="dashboard-card">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <div className="space-y-1">
-              <CardTitle className="text-sm font-medium">오늘 매출</CardTitle>
-              <CardDescription>
-                {getRevenueChange('daily') >= 0 ? (
-                  <div className="flex items-center text-gym-success">
-                    <TrendingUp className="h-4 w-4 mr-1" />
-                    <span>+{getRevenueChange('daily').toFixed(1)}%</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center text-gym-danger">
-                    <TrendingDown className="h-4 w-4 mr-1" />
-                    <span>{getRevenueChange('daily').toFixed(1)}%</span>
-                  </div>
-                )}
-              </CardDescription>
-            </div>
-            <CreditCard className="h-6 w-6 text-muted-foreground" />
+        <Card className="overflow-hidden relative bg-gradient-to-br from-white to-blue-50 dark:from-gray-900 dark:to-gray-800 border-none shadow-md hover:shadow-lg transition-all duration-300">
+          <div className="absolute top-0 right-0 w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-bl-3xl flex items-center justify-center">
+            <CreditCard className="h-6 w-6 text-gym-primary" />
+          </div>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">오늘 매출</CardTitle>
+            <CardDescription>
+              {getRevenueChange('daily') >= 0 ? (
+                <div className="flex items-center text-gym-success gap-1">
+                  <TrendingUp className="h-4 w-4" />
+                  <span className="font-medium">+{getRevenueChange('daily').toFixed(1)}%</span>
+                </div>
+              ) : (
+                <div className="flex items-center text-gym-danger gap-1">
+                  <TrendingDown className="h-4 w-4" />
+                  <span className="font-medium">{getRevenueChange('daily').toFixed(1)}%</span>
+                </div>
+              )}
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -126,25 +127,25 @@ const Dashboard = () => {
         </Card>
         
         {/* Monthly Revenue */}
-        <Card className="dashboard-card">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <div className="space-y-1">
-              <CardTitle className="text-sm font-medium">이번달 매출</CardTitle>
-              <CardDescription>
-                {getRevenueChange('monthly') >= 0 ? (
-                  <div className="flex items-center text-gym-success">
-                    <TrendingUp className="h-4 w-4 mr-1" />
-                    <span>+{getRevenueChange('monthly').toFixed(1)}%</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center text-gym-danger">
-                    <TrendingDown className="h-4 w-4 mr-1" />
-                    <span>{getRevenueChange('monthly').toFixed(1)}%</span>
-                  </div>
-                )}
-              </CardDescription>
-            </div>
-            <CreditCard className="h-6 w-6 text-muted-foreground" />
+        <Card className="overflow-hidden relative bg-gradient-to-br from-white to-indigo-50 dark:from-gray-900 dark:to-gray-800 border-none shadow-md hover:shadow-lg transition-all duration-300">
+          <div className="absolute top-0 right-0 w-16 h-16 bg-indigo-100 dark:bg-indigo-900/30 rounded-bl-3xl flex items-center justify-center">
+            <Activity className="h-6 w-6 text-indigo-500" />
+          </div>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">이번달 매출</CardTitle>
+            <CardDescription>
+              {getRevenueChange('monthly') >= 0 ? (
+                <div className="flex items-center text-gym-success gap-1">
+                  <TrendingUp className="h-4 w-4" />
+                  <span className="font-medium">+{getRevenueChange('monthly').toFixed(1)}%</span>
+                </div>
+              ) : (
+                <div className="flex items-center text-gym-danger gap-1">
+                  <TrendingDown className="h-4 w-4" />
+                  <span className="font-medium">{getRevenueChange('monthly').toFixed(1)}%</span>
+                </div>
+              )}
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -154,25 +155,25 @@ const Dashboard = () => {
         </Card>
         
         {/* Today's Visitors */}
-        <Card className="dashboard-card">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <div className="space-y-1">
-              <CardTitle className="text-sm font-medium">오늘 방문자</CardTitle>
-              <CardDescription>
-                {getVisitorChange('daily') >= 0 ? (
-                  <div className="flex items-center text-gym-success">
-                    <TrendingUp className="h-4 w-4 mr-1" />
-                    <span>+{getVisitorChange('daily').toFixed(1)}%</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center text-gym-danger">
-                    <TrendingDown className="h-4 w-4 mr-1" />
-                    <span>{getVisitorChange('daily').toFixed(1)}%</span>
-                  </div>
-                )}
-              </CardDescription>
-            </div>
-            <Users className="h-6 w-6 text-muted-foreground" />
+        <Card className="overflow-hidden relative bg-gradient-to-br from-white to-purple-50 dark:from-gray-900 dark:to-gray-800 border-none shadow-md hover:shadow-lg transition-all duration-300">
+          <div className="absolute top-0 right-0 w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-bl-3xl flex items-center justify-center">
+            <Users className="h-6 w-6 text-purple-500" />
+          </div>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">오늘 방문자</CardTitle>
+            <CardDescription>
+              {getVisitorChange('daily') >= 0 ? (
+                <div className="flex items-center text-gym-success gap-1">
+                  <TrendingUp className="h-4 w-4" />
+                  <span className="font-medium">+{getVisitorChange('daily').toFixed(1)}%</span>
+                </div>
+              ) : (
+                <div className="flex items-center text-gym-danger gap-1">
+                  <TrendingDown className="h-4 w-4" />
+                  <span className="font-medium">{getVisitorChange('daily').toFixed(1)}%</span>
+                </div>
+              )}
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -182,25 +183,25 @@ const Dashboard = () => {
         </Card>
         
         {/* Weekly Visitors */}
-        <Card className="dashboard-card">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <div className="space-y-1">
-              <CardTitle className="text-sm font-medium">이번주 방문자</CardTitle>
-              <CardDescription>
-                {getVisitorChange('weekly') >= 0 ? (
-                  <div className="flex items-center text-gym-success">
-                    <TrendingUp className="h-4 w-4 mr-1" />
-                    <span>+{getVisitorChange('weekly').toFixed(1)}%</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center text-gym-danger">
-                    <TrendingDown className="h-4 w-4 mr-1" />
-                    <span>{getVisitorChange('weekly').toFixed(1)}%</span>
-                  </div>
-                )}
-              </CardDescription>
-            </div>
-            <Users className="h-6 w-6 text-muted-foreground" />
+        <Card className="overflow-hidden relative bg-gradient-to-br from-white to-pink-50 dark:from-gray-900 dark:to-gray-800 border-none shadow-md hover:shadow-lg transition-all duration-300">
+          <div className="absolute top-0 right-0 w-16 h-16 bg-pink-100 dark:bg-pink-900/30 rounded-bl-3xl flex items-center justify-center">
+            <Users className="h-6 w-6 text-pink-500" />
+          </div>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">이번주 방문자</CardTitle>
+            <CardDescription>
+              {getVisitorChange('weekly') >= 0 ? (
+                <div className="flex items-center text-gym-success gap-1">
+                  <TrendingUp className="h-4 w-4" />
+                  <span className="font-medium">+{getVisitorChange('weekly').toFixed(1)}%</span>
+                </div>
+              ) : (
+                <div className="flex items-center text-gym-danger gap-1">
+                  <TrendingDown className="h-4 w-4" />
+                  <span className="font-medium">{getVisitorChange('weekly').toFixed(1)}%</span>
+                </div>
+              )}
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -210,56 +211,85 @@ const Dashboard = () => {
         </Card>
       </div>
       
-      <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
+      <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
         {/* Revenue Chart */}
-        <Card className="col-span-1">
-          <CardHeader>
-            <CardTitle>매출 요약</CardTitle>
-            <Tabs defaultValue="daily" value={revenueTab} onValueChange={setRevenueTab}>
-              <TabsList>
-                <TabsTrigger value="daily">일일</TabsTrigger>
-                <TabsTrigger value="monthly">매월</TabsTrigger>
+        <Card className="col-span-1 border-none shadow-md hover:shadow-lg transition-all duration-300 bg-white dark:bg-gray-900 overflow-hidden">
+          <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-2 border-b">
+            <CardTitle className="text-lg font-semibold">매출 요약</CardTitle>
+            <Tabs defaultValue="daily" value={revenueTab} onValueChange={setRevenueTab} className="mt-2 sm:mt-0">
+              <TabsList className="h-8">
+                <TabsTrigger value="daily" className="text-xs px-3 py-1">일일</TabsTrigger>
+                <TabsTrigger value="monthly" className="text-xs px-3 py-1">매월</TabsTrigger>
               </TabsList>
             </Tabs>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
                 {revenueTab === "daily" ? (
-                  <BarChart
+                  <AreaChart
                     data={dailyRevenueData}
-                    margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                    margin={{ top: 10, right: 10, left: 0, bottom: 20 }}
                   >
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="date" />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                    <XAxis dataKey="date" tick={{ fontSize: 12 }} dy={10} />
                     <YAxis
                       tickFormatter={(value) => `${value / 10000}만원`}
+                      tick={{ fontSize: 12 }}
+                      width={70}
                     />
                     <Tooltip
                       formatter={(value) => formatCurrency(Number(value))}
+                      contentStyle={{ 
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+                        borderRadius: '8px', 
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)', 
+                        border: '1px solid #f0f0f0' 
+                      }}
                     />
-                    <Bar dataKey="매출" fill="#2563eb" radius={[4, 4, 0, 0]} />
-                  </BarChart>
+                    <defs>
+                      <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#4EA8DE" stopOpacity={0.8}/>
+                        <stop offset="95%" stopColor="#4EA8DE" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <Area 
+                      type="monotone" 
+                      dataKey="매출" 
+                      stroke="#4EA8DE" 
+                      strokeWidth={2}
+                      fill="url(#colorRevenue)" 
+                      activeDot={{ r: 6, strokeWidth: 0 }} 
+                    />
+                  </AreaChart>
                 ) : (
                   <LineChart
                     data={monthlyRevenueData}
-                    margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                    margin={{ top: 10, right: 10, left: 0, bottom: 20 }}
                   >
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="date" />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                    <XAxis dataKey="date" tick={{ fontSize: 12 }} dy={10} />
                     <YAxis
                       tickFormatter={(value) => `${value / 1000000}백만원`}
+                      tick={{ fontSize: 12 }}
+                      width={70}
                     />
                     <Tooltip
                       formatter={(value) => formatCurrency(Number(value))}
+                      contentStyle={{ 
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+                        borderRadius: '8px', 
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)', 
+                        border: '1px solid #f0f0f0' 
+                      }}
                     />
                     <Line
                       type="monotone"
                       dataKey="매출"
-                      stroke="#2563eb"
-                      strokeWidth={2}
-                      dot={{ r: 4 }}
-                      activeDot={{ r: 6 }}
+                      stroke="#8FB4FF"
+                      strokeWidth={3}
+                      dot={{ r: 4, strokeWidth: 2, fill: "#fff" }}
+                      activeDot={{ r: 6, strokeWidth: 0 }}
                     />
                   </LineChart>
                 )}
@@ -269,12 +299,12 @@ const Dashboard = () => {
         </Card>
         
         {/* Revenue Breakdown */}
-        <Card className="col-span-1">
-          <CardHeader>
-            <CardTitle>매출 구성</CardTitle>
+        <Card className="col-span-1 border-none shadow-md hover:shadow-lg transition-all duration-300 bg-white dark:bg-gray-900 overflow-hidden">
+          <CardHeader className="border-b pb-2">
+            <CardTitle className="text-lg font-semibold">매출 구성</CardTitle>
             <CardDescription>이번달 매출 카테고리별 비율</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -284,16 +314,35 @@ const Dashboard = () => {
                     cy="50%"
                     labelLine={false}
                     outerRadius={100}
+                    innerRadius={60}
                     fill="#8884d8"
                     dataKey="value"
                     label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    paddingAngle={2}
                   >
                     {revenueBreakdownData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      <Cell 
+                        key={`cell-${index}`} 
+                        fill={COLORS[index % COLORS.length]} 
+                        stroke="none"
+                      />
                     ))}
                   </Pie>
-                  <Legend />
-                  <Tooltip formatter={(value) => formatCurrency(Number(value))} />
+                  <Legend 
+                    verticalAlign="bottom" 
+                    height={36} 
+                    iconType="circle"
+                    formatter={(value) => <span className="text-sm">{value}</span>}
+                  />
+                  <Tooltip
+                    formatter={(value) => formatCurrency(Number(value))}
+                    contentStyle={{ 
+                      backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+                      borderRadius: '8px', 
+                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)', 
+                      border: '1px solid #f0f0f0' 
+                    }}
+                  />
                 </PieChart>
               </ResponsiveContainer>
             </div>
@@ -302,25 +351,54 @@ const Dashboard = () => {
       </div>
       
       {/* Visitor Trends */}
-      <Card>
-        <CardHeader>
-          <CardTitle>방문자 추이</CardTitle>
-          <CardDescription>최근 7일간 방문자 현황</CardDescription>
+      <Card className="border-none shadow-md hover:shadow-lg transition-all duration-300 bg-white dark:bg-gray-900 overflow-hidden">
+        <CardHeader className="border-b pb-2">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+            <div>
+              <CardTitle className="text-lg font-semibold">방문자 추이</CardTitle>
+              <CardDescription>최근 7일간 방문자 현황</CardDescription>
+            </div>
+          </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={visitorData}
-                margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                margin={{ top: 10, right: 10, left: 0, bottom: 20 }}
+                barGap={4}
               >
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="회원" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="일일권" fill="#0ea5e9" radius={[4, 4, 0, 0]} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                <XAxis dataKey="date" tick={{ fontSize: 12 }} dy={10} />
+                <YAxis tick={{ fontSize: 12 }} />
+                <Tooltip
+                  contentStyle={{ 
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+                    borderRadius: '8px', 
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)', 
+                    border: '1px solid #f0f0f0' 
+                  }}
+                />
+                <Legend 
+                  verticalAlign="top" 
+                  height={36} 
+                  iconType="circle"
+                  formatter={(value) => <span className="text-sm">{value}</span>}
+                />
+                <Bar 
+                  dataKey="회원" 
+                  fill="#8FB4FF" 
+                  radius={[4, 4, 0, 0]}
+                  maxBarSize={40}
+                  name="회원"
+                />
+                <Bar 
+                  dataKey="일일권" 
+                  fill="#A78BFA" 
+                  radius={[4, 4, 0, 0]} 
+                  maxBarSize={40}
+                  name="일일권"
+                />
               </BarChart>
             </ResponsiveContainer>
           </div>

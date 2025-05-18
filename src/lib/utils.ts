@@ -15,6 +15,7 @@ export function formatCurrency(amount: number): string {
   return new Intl.NumberFormat('ko-KR', {
     style: 'currency',
     currency: 'KRW',
+    maximumFractionDigits: 0
   }).format(amount);
 }
 
@@ -152,4 +153,31 @@ export function calculateAge(birthDate: string): number {
   }
   
   return age;
+}
+
+/**
+ * Format a number with a specific unit
+ */
+export function formatNumberWithUnit(value: number, unit: string): string {
+  return `${value.toLocaleString()}${unit}`;
+}
+
+/**
+ * Calculate the difference in days between two dates
+ */
+export function daysBetween(date1: Date, date2: Date): number {
+  const oneDay = 24 * 60 * 60 * 1000; // hours*minutes*seconds*milliseconds
+  const diffDays = Math.round(Math.abs((date1.getTime() - date2.getTime()) / oneDay));
+  return diffDays;
+}
+
+/**
+ * Calculate the difference in months between two dates
+ */
+export function monthsBetween(date1: Date, date2: Date): number {
+  const d1 = new Date(date1);
+  const d2 = new Date(date2);
+  const yearDiff = d2.getFullYear() - d1.getFullYear();
+  const monthDiff = d2.getMonth() - d1.getMonth();
+  return yearDiff * 12 + monthDiff;
 }

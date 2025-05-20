@@ -18,15 +18,21 @@ const trainerData = {
   totalRemainingPT: trainerMembers.reduce((sum, member) => sum + (member.ptRemaining || 0), 0),
   todayScheduledPT: 8, // 실제 구현시 API로 대체
   todayScheduledConsultations: 3, // 실제 구현시 API로 대체
-  members: trainerMembers.map(member => ({
-    id: member.id,
-    memberNumber: member.id,
-    name: member.name,
-    attendanceRate: member.attendanceRate,
-    remainingPT: member.ptRemaining || 0,
-    remainingGymDays: member.membershipEndDate ? 
-      Math.ceil((new Date(member.membershipEndDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)) : 0
-  }))
+  members: trainerMembers.map(member => {
+    let remainingGymDays = 0;
+    if (member.membershipEndDate) {
+      const diff = Math.ceil((new Date(member.membershipEndDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+      remainingGymDays = diff > 0 ? diff : 0;
+    }
+    return {
+      id: member.id,
+      memberNumber: member.id,
+      name: member.name,
+      attendanceRate: member.attendanceRate,
+      remainingPT: member.ptRemaining || 0,
+      remainingGymDays,
+    };
+  })
 };
 
 const TrainerDashboard = () => {

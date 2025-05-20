@@ -873,50 +873,37 @@ const AttendanceTab = ({ memberId }: { memberId: string }) => {
   );
 };
 
-const MemberDetail = () => {
-  const { id } = useParams<{ id: string }>();
+interface MemberDetailProps {
+  id?: string;
+}
+
+const MemberDetail = (props: MemberDetailProps) => {
+  const params = useParams();
   const navigate = useNavigate();
+  const id = props.id ?? params.id;
   const [member, setMember] = useState<Member | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Daum 우편번호 서비스 스크립트 로드
-    const script = document.createElement('script');
-    script.src = '//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
-    script.async = true;
-    document.body.appendChild(script);
-    return () => {
-      document.body.removeChild(script);
-    };
-  }, []);
+    if (!id) {
+      setError("회원을 찾을 수 없습니다.");
+      setIsLoading(false);
+      return;
+    }
+    // Find member in mock data
+    const foundMember = mockMembers.find(m => m.id === id);
+    if (foundMember) {
+      setMember(foundMember);
+      setError(null);
+    } else {
+      setError("회원을 찾을 수 없습니다.");
+      toast.error("회원을 찾을 수 없습니다.");
+    }
+    setIsLoading(false);
+  }, [id]);
   
-  useEffect(() => {
-    // In a real app, this would be an API call
-    const fetchMember = () => {
-      setLoading(true);
-      
-      try {
-        // Find member by ID
-        const foundMember = mockMembers.find(m => m.id === id);
-        
-        if (foundMember) {
-          setMember(foundMember);
-        } else {
-          toast.error("회원 정보를 찾을 수 없습니다.");
-          navigate("/members");
-        }
-      } catch (error) {
-        console.error("Error fetching member:", error);
-        toast.error("회원 정보를 불러오는 중 오류가 발생했습니다.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchMember();
-  }, [id, navigate]);
-  
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="text-center">

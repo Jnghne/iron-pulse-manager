@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,6 +10,7 @@ import DashboardLayout from "./layouts/DashboardLayout";
 // Pages
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
+import TrainerDashboard from "./pages/TrainerDashboard";
 import MemberList from "./pages/members/MemberList";
 import MemberDetail from "./pages/members/MemberDetail";
 import MemberCreate from "./pages/members/MemberCreate";
@@ -38,7 +38,9 @@ const App = () => (
           
           {/* Protected Routes */}
           <Route path="/" element={<DashboardLayout />}>
-            <Route index element={<Dashboard />} />
+            <Route index element={
+              localStorage.getItem("userRole") === "owner" ? <Dashboard /> : <TrainerDashboard />
+            } />
             <Route path="members" element={<MemberList />} />
             <Route path="members/:id" element={<MemberDetail />} />
             <Route path="members/new" element={<MemberCreate />} />

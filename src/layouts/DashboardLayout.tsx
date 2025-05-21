@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Outlet, Link, useLocation, Navigate } from "react-router-dom";
 import { 
@@ -128,24 +127,16 @@ const DashboardLayout = () => {
               />
             ))}
             
-            {ownerOnlyNavItems.length > 0 && (
-              <>
-                <div className="my-4 border-t border-border"></div>
-                <p className="px-3 text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
-                  관리자 전용
-                </p>
-                
-                {ownerOnlyNavItems.map((item) => (
-                  <NavItem 
-                    key={item.to}
-                    to={item.to}
-                    icon={item.icon}
-                    label={item.label}
-                    active={currentPath === item.to}
-                    disabled={!isOwner}
-                  />
-                ))}
-              </>
+            {isOwner && ownerOnlyNavItems.length > 0 && (
+              ownerOnlyNavItems.map((item) => (
+                <NavItem 
+                  key={item.to}
+                  to={item.to}
+                  icon={item.icon}
+                  label={item.label}
+                  active={currentPath === item.to}
+                />
+              ))
             )}
           </nav>
           

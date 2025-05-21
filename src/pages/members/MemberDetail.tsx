@@ -58,7 +58,9 @@ import {
   Key,
   Mail,
   Plus,
-  Trash2
+  Trash2,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
@@ -810,40 +812,142 @@ const MemberInfo = ({ member: initialMember }: { member: Member }) => {
 
 const AttendanceTab = ({ memberId }: { memberId: string }) => {
   const [attendance, setAttendance] = useState<AttendanceRecord[]>([]);
-  
+  const [filteredAttendance, setFilteredAttendance] = useState<AttendanceRecord[]>([]);
+  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
+
   useEffect(() => {
     // Get mock attendance data
     const attendanceData = getMockAttendance(memberId, 90);
     setAttendance(attendanceData);
+    setFilteredAttendance(attendanceData);
+    setCurrentPage(1);
   }, [memberId]);
-  
+
+  // 날짜 검색 시 페이지를 1로 초기화
+  const handleSearch = () => {
+    if (!startDate || !endDate) return;
+    const filtered = attendance.filter(record => {
+      const recordDate = new Date(record.date);
+      return recordDate >= startDate && recordDate <= endDate;
+    });
+    setFilteredAttendance(filtered);
+    setCurrentPage(1);
+  };
+
+  // 초기화 시 페이지도 1로
+  const handleReset = () => {
+    setStartDate(undefined);
+    setEndDate(undefined);
+    setFilteredAttendance(attendance);
+    setCurrentPage(1);
+  };
+
+  // 페이징 관련 계산
+  const totalPages = Math.ceil(filteredAttendance.length / ITEMS_PER_PAGE);
+  const pagedAttendance = filteredAttendance.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  // 페이지 번호 배열 생성 (최대 5개씩, 그룹 이동)
+  const getPageNumbers = () => {
+    const pages = [];
+    const total = totalPages;
+    let start = Math.floor((currentPage - 1) / 5) * 5 + 1;
+    let end = Math.min(start + 4, total);
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+    return pages;
+  };
+
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>출석 기록</CardTitle>
-          <CardDescription>
-            전체 출석 기록을 확인할 수 있습니다.
-          </CardDescription>
+          <div className="flex items-center justify-center gap-3">
+            <div className="flex items-center gap-4">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="w-[280px] font-normal relative"
+                  >
+                    <CalendarIcon className="absolute left-3 h-4 w-4" />
+                    <span className="text-center w-full">
+                      {startDate ? formatDate(startDate) : "시작일 선택"}
+                    </span>
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={startDate}
+                    onSelect={setStartDate}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+              <span className="text-gray-500">~</span>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="w-[280px] font-normal relative"
+                  >
+                    <CalendarIcon className="absolute left-3 h-4 w-4" />
+                    <span className="text-center w-full">
+                      {endDate ? formatDate(endDate) : "종료일 선택"}
+                    </span>
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={endDate}
+                    onSelect={setEndDate}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="outline"
+                className="bg-gray-100 hover:bg-gray-200 text-gray-600 border-gray-200"
+                onClick={handleReset}
+              >
+                초기화
+              </Button>
+              <Button 
+                variant="outline"
+                className="bg-white border-gray-200 hover:bg-gray-50"
+                onClick={handleSearch}
+              >
+                검색
+              </Button>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
-          <div className="rounded-md border">
+          <div className="rounded-md border max-w-4xl mx-auto">
             <div className="relative w-full overflow-auto">
               <table className="w-full caption-bottom text-sm">
                 <thead>
                   <tr className="border-b bg-muted/50">
-                    <th className="h-12 px-4 text-left align-middle font-medium">날짜</th>
-                    <th className="h-12 px-4 text-left align-middle font-medium">출석 여부</th>
-                    <th className="h-12 px-4 text-left align-middle font-medium">입장 시간</th>
-                    <th className="h-12 px-4 text-left align-middle font-medium">퇴장 시간</th>
-                    <th className="h-12 px-4 text-left align-middle font-medium">체류 시간</th>
+                    <th className="h-12 px-4 text-center align-middle font-medium w-[200px]">날짜</th>
+                    <th className="h-12 px-4 text-center align-middle font-medium w-[120px]">출석 여부</th>
+                    <th className="h-12 px-4 text-center align-middle font-medium w-[120px]">입장 시간</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {attendance.map((record, index) => (
-                    <tr key={index} className="border-b">
-                      <td className="p-4 align-middle">{formatDate(record.date)}</td>
-                      <td className="p-4 align-middle">
+                  {pagedAttendance.map((record, index) => (
+                    <tr key={index} className="border-b hover:bg-gray-50">
+                      <td className="p-4 align-middle text-center font-medium">{formatDate(record.date)}</td>
+                      <td className="p-4 align-middle text-center">
                         {record.attended ? (
                           <Badge className="bg-gym-success">출석</Badge>
                         ) : (
@@ -852,21 +956,53 @@ const AttendanceTab = ({ memberId }: { memberId: string }) => {
                           </Badge>
                         )}
                       </td>
-                      <td className="p-4 align-middle">
+                      <td className="p-4 align-middle text-center text-gray-600">
                         {record.timeIn || "-"}
-                      </td>
-                      <td className="p-4 align-middle">
-                        {record.timeOut || "-"}
-                      </td>
-                      <td className="p-4 align-middle">
-                        {record.timeIn && record.timeOut ? "2시간 30분" : "-"}
                       </td>
                     </tr>
                   ))}
+                  {pagedAttendance.length === 0 && (
+                    <tr>
+                      <td colSpan={3} className="text-center text-gray-400 py-8">출석 기록이 없습니다.</td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
           </div>
+          {totalPages > 1 && (
+            <div className="flex justify-center items-center gap-1 py-4">
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </Button>
+              {getPageNumbers().map((page) => (
+                <Button
+                  key={page}
+                  variant={page === currentPage ? "default" : "outline"}
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => setCurrentPage(page)}
+                >
+                  {page}
+                </Button>
+              ))}
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+              >
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

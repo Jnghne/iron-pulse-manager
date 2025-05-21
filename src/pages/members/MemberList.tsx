@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -13,13 +12,16 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Search, UserPlus } from "lucide-react";
+import { Search, UserPlus, ChevronLeft, ChevronRight } from "lucide-react";
 import { mockMembers, Member } from "@/data/mockData";
 import { formatDate, formatPhoneNumber } from "@/lib/utils";
+
+const ITEMS_PER_PAGE = 10;
 
 const MemberList = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredMembers, setFilteredMembers] = useState<Member[]>(mockMembers);
+  const [currentPage, setCurrentPage] = useState(1);
   const navigate = useNavigate();
   
   // Filter members based on search query
@@ -38,19 +40,55 @@ const MemberList = () => {
     );
     
     setFilteredMembers(filtered);
+    setCurrentPage(1); // 검색 시 첫 페이지로 이동
   }, [searchQuery]);
 
   const handleRowClick = (memberId: string) => {
     navigate(`/members/${memberId}`);
   };
+
+  // 페이지네이션 계산
+  const totalPages = Math.ceil(filteredMembers.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const currentMembers = filteredMembers.slice(startIndex, endIndex);
+
+  // 페이지 변경 핸들러
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  // 페이지 번호 배열 생성
+  const getPageNumbers = () => {
+    const pageNumbers = [];
+    const maxVisiblePages = 5;
+    
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        pageNumbers.push(i);
+      }
+    } else {
+      if (currentPage <= 3) {
+        for (let i = 1; i <= 5; i++) {
+          pageNumbers.push(i);
+        }
+      } else if (currentPage >= totalPages - 2) {
+        for (let i = totalPages - 4; i <= totalPages; i++) {
+          pageNumbers.push(i);
+        }
+      } else {
+        for (let i = currentPage - 2; i <= currentPage + 2; i++) {
+          pageNumbers.push(i);
+        }
+      }
+    }
+    
+    return pageNumbers;
+  };
   
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between sm:items-center space-y-2 sm:space-y-0">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">회원 관리</h1>
-          <p className="text-muted-foreground">헬스장 회원 목록을 조회하고 관리하세요.</p>
-        </div>
+    <div className="space-y-4">
+      <div className="flex justify-end">
         <Button 
           className="w-full sm:w-auto bg-gym-primary hover:bg-gym-secondary"
           onClick={() => navigate("/members/new")}
@@ -62,7 +100,7 @@ const MemberList = () => {
       
       <Card>
         <CardHeader>
-          <CardTitle>회원 목록</CardTitle>
+          {/* <CardTitle>회원 목록</CardTitle> */}
           <div className="relative">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
@@ -80,41 +118,59 @@ const MemberList = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>회원 번호</TableHead>
-                    <TableHead>이름</TableHead>
-                    <TableHead>연락처</TableHead>
-                    <TableHead>등록일</TableHead>
-                    <TableHead>회원권 상태</TableHead>
+                    <TableHead className="text-center">회원 번호</TableHead>
+                    <TableHead className="text-center">이름</TableHead>
+                    <TableHead className="text-center">연락처</TableHead>
+                    <TableHead className="text-center">등록일</TableHead>
+                    <TableHead className="text-center">출석률</TableHead>
+                    <TableHead className="text-center">회원권 상태</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredMembers.length > 0 ? (
-                    filteredMembers.map((member) => (
+                  {currentMembers.length > 0 ? (
+                    currentMembers.map((member) => (
                       <TableRow 
                         key={member.id}
                         onClick={() => handleRowClick(member.id)}
                         className="cursor-pointer"
                       >
-                        <TableCell className="font-mono font-medium">
+                        <TableCell className="text-center font-mono font-medium">
                           {member.id}
                         </TableCell>
-                        <TableCell>{member.name}</TableCell>
-                        <TableCell>{formatPhoneNumber(member.phoneNumber)}</TableCell>
-                        <TableCell>{formatDate(member.registrationDate)}</TableCell>
-                        <TableCell>
-                          {member.membershipActive ? (
-                            <Badge className="bg-green-600 text-white hover:bg-green-700">활성</Badge>
-                          ) : (
-                            <Badge variant="secondary" className="bg-gray-300 text-gray-700 hover:bg-gray-400">
-                              만료
-                            </Badge>
-                          )}
+                        <TableCell className="text-center">{member.name}</TableCell>
+                        <TableCell className="text-center">{formatPhoneNumber(member.phoneNumber)}</TableCell>
+                        <TableCell className="text-center">{formatDate(member.registrationDate)}</TableCell>
+                        <TableCell className="text-center">
+                          <Badge
+                            variant="outline"
+                            className={`${
+                              member.attendanceRate >= 70
+                                ? "bg-blue-100 text-blue-800 border-blue-200"
+                                : member.attendanceRate >= 50
+                                ? "bg-yellow-100 text-yellow-800 border-yellow-200"
+                                : "bg-red-100 text-red-800 border-red-200"
+                            }`}
+                          >
+                            {member.attendanceRate}%
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Badge
+                            variant="outline"
+                            className={`${
+                              member.membershipActive
+                                ? "bg-green-100 text-green-800 border-green-200"
+                                : "bg-gray-100 text-gray-600 border-gray-200"
+                            }`}
+                          >
+                            {member.membershipActive ? "활성" : "만료"}
+                          </Badge>
                         </TableCell>
                       </TableRow>
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={5} className="text-center py-10">
+                      <TableCell colSpan={6} className="text-center py-10">
                         <div className="flex flex-col items-center justify-center text-muted-foreground">
                           <Search className="h-10 w-10 mb-2" />
                           <p>검색 결과가 없습니다.</p>
@@ -127,6 +183,41 @@ const MemberList = () => {
               </Table>
             </div>
           </div>
+
+          {/* 페이지네이션 */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center space-x-2 mt-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              
+              {getPageNumbers().map((pageNum) => (
+                <Button
+                  key={pageNum}
+                  variant={currentPage === pageNum ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => handlePageChange(pageNum)}
+                  className={currentPage === pageNum ? "bg-gym-primary hover:bg-gym-secondary" : ""}
+                >
+                  {pageNum}
+                </Button>
+              ))}
+              
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

@@ -70,10 +70,6 @@ const TrainerDashboard = () => {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8">
-        <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-gym-primary to-gym-accent bg-clip-text text-transparent">트레이너 대시보드</h1>
-        <p className="text-muted-foreground text-sm">최종 업데이트: {new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-      </div>
 
       {/* 통계 카드 */}
       <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">

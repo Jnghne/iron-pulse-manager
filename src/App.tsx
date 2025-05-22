@@ -2,7 +2,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
+import RoleBasedRedirect from "./pages/RoleBasedRedirect";
 
 // Layouts
 import DashboardLayout from "./layouts/DashboardLayout";
@@ -38,9 +39,9 @@ const App = () => (
           
           {/* Protected Routes */}
           <Route path="/" element={<DashboardLayout />}>
-            <Route index element={
-              localStorage.getItem("userRole") === "owner" ? <Dashboard /> : <TrainerDashboard />
-            } />
+            <Route index element={<RoleBasedRedirect />} />
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="trainer-dashboard" element={<TrainerDashboard />} />
             <Route path="members" element={<MemberList />} />
             <Route path="members/:id" element={<MemberDetail />} />
             <Route path="members/new" element={<MemberCreate />} />

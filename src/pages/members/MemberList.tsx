@@ -12,9 +12,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Search, UserPlus, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, UserPlus, ChevronLeft, ChevronRight, CheckCircle, AlertTriangle, XCircle } from "lucide-react";
 import { mockMembers, Member } from "@/data/mockData";
 import { formatDate, formatPhoneNumber } from "@/lib/utils";
+import { differenceInDays, parseISO, isValid } from "date-fns";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -86,6 +87,19 @@ const MemberList = () => {
     return pageNumbers;
   };
   
+  // 회원권 상태 판별 함수
+  const getMembershipStatus = (member: Member) => {
+    if (!member.membershipActive) return "expired";
+    if (member.membershipEndDate) {
+      const endDate = parseISO(member.membershipEndDate);
+      if (isValid(endDate)) {
+        const daysLeft = differenceInDays(endDate, new Date());
+        if (daysLeft <= 7 && daysLeft >= 0) return "expiring";
+      }
+    }
+    return "active";
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
@@ -141,30 +155,52 @@ const MemberList = () => {
                         <TableCell className="text-center">{formatPhoneNumber(member.phoneNumber)}</TableCell>
                         <TableCell className="text-center">{formatDate(member.registrationDate)}</TableCell>
                         <TableCell className="text-center">
-                          <Badge
-                            variant="outline"
-                            className={`${
-                              member.attendanceRate >= 70
-                                ? "bg-blue-100 text-blue-800 border-blue-200"
-                                : member.attendanceRate >= 50
-                                ? "bg-yellow-100 text-yellow-800 border-yellow-200"
-                                : "bg-red-100 text-red-800 border-red-200"
-                            }`}
-                          >
-                            {member.attendanceRate}%
-                          </Badge>
+                          <div className="flex flex-col items-center gap-1">
+                            <div className="w-20">
+                              <div className="w-full bg-muted rounded-full h-2.5">
+                                <div
+                                  className={`
+                                    h-2.5 rounded-full transition-all
+                                    ${member.attendanceRate >= 70
+                                      ? 'bg-primary/30'
+                                      : member.attendanceRate >= 50
+                                        ? 'bg-yellow-200'
+                                        : 'bg-red-200'
+                                    }
+                                  `}
+                                  style={{ width: `${member.attendanceRate}%` }}
+                                />
+                              </div>
+                            </div>
+                            <span className="text-xs font-semibold text-muted-foreground">{member.attendanceRate}%</span>
+                          </div>
                         </TableCell>
                         <TableCell className="text-center">
-                          <Badge
-                            variant="outline"
-                            className={`${
-                              member.membershipActive
-                                ? "bg-green-100 text-green-800 border-green-200"
-                                : "bg-gray-100 text-gray-600 border-gray-200"
-                            }`}
-                          >
-                            {member.membershipActive ? "활성" : "만료"}
-                          </Badge>
+                          {(() => {
+                            const status = getMembershipStatus(member);
+                            if (status === "active") {
+                              return (
+                                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary shadow-sm">
+                                  <CheckCircle className="w-4 h-4 text-primary" />
+                                  활성
+                                </span>
+                              );
+                            }
+                            if (status === "expiring") {
+                              return (
+                                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-700 shadow-sm">
+                                  <AlertTriangle className="w-4 h-4 text-yellow-500" />
+                                  만료임박
+                                </span>
+                              );
+                            }
+                            return (
+                              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-muted text-muted-foreground shadow-sm">
+                                <XCircle className="w-4 h-4 text-muted-foreground" />
+                                만료
+                              </span>
+                            );
+                          })()}
                         </TableCell>
                       </TableRow>
                     ))

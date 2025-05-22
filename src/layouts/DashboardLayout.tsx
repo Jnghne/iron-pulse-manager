@@ -16,6 +16,8 @@ import {
   Home
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import Dashboard from "@/pages/Dashboard";
+import TrainerDashboard from "@/pages/TrainerDashboard";
 
 // Mock authentication - replace with actual auth implementation
 const useAuth = () => {
@@ -69,7 +71,7 @@ const DashboardLayout = () => {
   if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
-  
+
   const isOwner = userRole === "owner";
   const currentPath = location.pathname;
   

@@ -320,8 +320,6 @@ const LockerForm = ({ member, onClose }: { member: Member, onClose: () => void }
 
 const MemberInfo = ({ member: initialMember }: { member: Member }) => {
   const [member, setMember] = useState<Member>(initialMember);
-  const [membershipDialogOpen, setMembershipDialogOpen] = useState(false);
-  const [lockerDialogOpen, setLockerDialogOpen] = useState(false);
   const [attendance, setAttendance] = useState<AttendanceRecord[]>([]);
   const [date, setDate] = useState<Date>(new Date());
   
@@ -472,59 +470,7 @@ const MemberInfo = ({ member: initialMember }: { member: Member }) => {
 
         {/* 회원 기본 정보 */}
         <Card className="border-0 shadow-md">
-          <CardHeader className="pb-4">
-            <div className="flex justify-end">
-              <div className="flex gap-3">
-                <Dialog open={membershipDialogOpen} onOpenChange={setMembershipDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button 
-                      variant="outline" 
-                      className="bg-white border-gray-200 hover:bg-gray-50 text-gray-700 font-medium px-3 py-2 text-sm"
-                    >
-                      <CreditCard className="h-4 w-4 mr-2 text-blue-600" />
-                      <span>이용권 등록/수정</span>
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-md">
-                    <DialogHeader>
-                      <DialogTitle>이용권 등록/수정</DialogTitle>
-                      <DialogDescription>
-                        {member.name} 회원의 이용권 정보를 등록하거나 수정합니다.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <MembershipForm 
-                      member={member} 
-                      onClose={() => setMembershipDialogOpen(false)} 
-                    />
-                  </DialogContent>
-                </Dialog>
-                
-                <Dialog open={lockerDialogOpen} onOpenChange={setLockerDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button 
-                      variant="outline" 
-                      className="bg-white border-gray-200 hover:bg-gray-50 text-gray-700 font-medium px-3 py-2 text-sm"
-                    >
-                      <Key className="h-4 w-4 mr-2 text-green-600" />
-                      <span>락커 등록</span>
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-md">
-                    <DialogHeader>
-                      <DialogTitle>락커 등록</DialogTitle>
-                      <DialogDescription>
-                        {member.name} 회원에게 락커를 등록합니다.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <LockerForm 
-                      member={member} 
-                      onClose={() => setLockerDialogOpen(false)} 
-                    />
-                  </DialogContent>
-                </Dialog>
-              </div>
-            </div>
-          </CardHeader>
+          <CardHeader className="pb-4" />
           <CardContent>
             <div className="grid grid-cols-2 gap-x-6 gap-y-4">
               <div className="space-y-4">
@@ -1020,6 +966,8 @@ const MemberDetail = (props: MemberDetailProps) => {
   const [member, setMember] = useState<Member | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [membershipDialogOpen, setMembershipDialogOpen] = useState(false);
+  const [lockerDialogOpen, setLockerDialogOpen] = useState(false);
 
   useEffect(() => {
     if (!id) {
@@ -1078,8 +1026,7 @@ const MemberDetail = (props: MemberDetailProps) => {
             <p className="text-sm text-gray-500 mt-0.5 font-medium">회원번호: {member.id}</p>
           </div>
         </div>
-        
-        <div className="flex space-x-3">
+        <div className="flex flex-row items-center justify-end gap-3 ml-0 sm:ml-auto min-w-[240px]">
           <Button 
             variant="outline" 
             onClick={() => navigate("/members")}
@@ -1093,27 +1040,74 @@ const MemberDetail = (props: MemberDetailProps) => {
           </Button>
         </div>
       </div>
-      
       <Tabs defaultValue="info">
-        <TabsList className="bg-gray-100 p-1 rounded-lg">
-          <TabsTrigger 
-            value="info" 
-            className="px-4 py-2 rounded-md data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm font-medium"
-          >
-            회원 정보
-          </TabsTrigger>
-          <TabsTrigger 
-            value="attendance"
-            className="px-4 py-2 rounded-md data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm font-medium"
-          >
-            출석 관리
-          </TabsTrigger>
-        </TabsList>
-        
+        <div className="flex flex-row items-center justify-between mt-2 mb-4 gap-2">
+          <TabsList className="bg-gray-100 p-1 rounded-lg">
+            <TabsTrigger 
+              value="info" 
+              className="px-4 py-2 rounded-md data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm font-medium"
+            >
+              회원 정보
+            </TabsTrigger>
+            <TabsTrigger 
+              value="attendance"
+              className="px-4 py-2 rounded-md data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm font-medium"
+            >
+              출석 관리
+            </TabsTrigger>
+          </TabsList>
+          <div className="flex flex-row gap-3">
+            <Dialog open={membershipDialogOpen} onOpenChange={setMembershipDialogOpen}>
+              <DialogTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  className="bg-white border-gray-200 hover:bg-gray-50 text-gray-700 font-medium px-3 py-2 text-sm"
+                >
+                  <CreditCard className="h-4 w-4 mr-2 text-blue-600" />
+                  <span>이용권 등록/수정</span>
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>이용권 등록/수정</DialogTitle>
+                  <DialogDescription>
+                    {member.name} 회원의 이용권 정보를 등록하거나 수정합니다.
+                  </DialogDescription>
+                </DialogHeader>
+                <MembershipForm 
+                  member={member} 
+                  onClose={() => setMembershipDialogOpen(false)} 
+                />
+              </DialogContent>
+            </Dialog>
+            <Dialog open={lockerDialogOpen} onOpenChange={setLockerDialogOpen}>
+              <DialogTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  className="bg-white border-gray-200 hover:bg-gray-50 text-gray-700 font-medium px-3 py-2 text-sm"
+                >
+                  <Key className="h-4 w-4 mr-2 text-green-600" />
+                  <span>락커 등록</span>
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>락커 등록</DialogTitle>
+                  <DialogDescription>
+                    {member.name} 회원에게 락커를 등록합니다.
+                  </DialogDescription>
+                </DialogHeader>
+                <LockerForm 
+                  member={member} 
+                  onClose={() => setLockerDialogOpen(false)} 
+                />
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
         <TabsContent value="info" className="space-y-2 mt-2">
           <MemberInfo member={member} />
         </TabsContent>
-        
         <TabsContent value="attendance" className="space-y-2 mt-2">
           <AttendanceTab memberId={member.id} />
         </TabsContent>

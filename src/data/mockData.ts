@@ -26,6 +26,11 @@ export interface Member {
   gender: string;
 }
 
+const today = new Date();
+const soon3 = addDays(today, 3).toISOString().split("T")[0];
+const soon5 = addDays(today, 5).toISOString().split("T")[0];
+const soon6 = addDays(today, 6).toISOString().split("T")[0];
+
 export const mockMembers: Member[] = [
   {
     id: "1001",
@@ -97,10 +102,10 @@ export const mockMembers: Member[] = [
     registrationDate: "2024-03-01",
     membershipActive: true,
     membershipStartDate: "2024-03-01",
-    membershipEndDate: "2024-09-01",
+    membershipEndDate: soon3,
     hasPT: true,
     ptRemaining: 20,
-    ptExpireDate: "2024-09-01",
+    ptExpireDate: soon3,
     attendanceRate: 90,
     lockerId: "B01",
     trainerAssigned: "최수진",
@@ -118,7 +123,7 @@ export const mockMembers: Member[] = [
     registrationDate: "2024-03-15",
     membershipActive: true,
     membershipStartDate: "2024-03-15",
-    membershipEndDate: "2024-09-15",
+    membershipEndDate: soon5,
     hasPT: false,
     ptRemaining: 0,
     ptExpireDate: null,
@@ -139,10 +144,10 @@ export const mockMembers: Member[] = [
     registrationDate: "2024-01-20",
     membershipActive: true,
     membershipStartDate: "2024-01-20",
-    membershipEndDate: "2024-07-20",
+    membershipEndDate: soon6,
     hasPT: true,
     ptRemaining: 10,
-    ptExpireDate: "2024-07-20",
+    ptExpireDate: soon6,
     attendanceRate: 80,
     lockerId: "C01",
     trainerAssigned: "박지훈",

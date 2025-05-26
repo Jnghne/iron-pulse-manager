@@ -173,7 +173,7 @@ const LockerAssign = ({ locker, onClose }: LockerAssignProps) => {
         <Button variant="outline" onClick={onClose}>
           취소
         </Button>
-        <Button onClick={handleAssign}>배정하기</Button>
+        <Button onClick={handleAssign} className="bg-gym-primary hover:bg-gym-primary/90">배정하기</Button>
       </div>
     </div>
   );

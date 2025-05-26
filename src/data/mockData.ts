@@ -12,11 +12,13 @@ export interface Member {
   membershipActive: boolean;
   membershipStartDate?: string;
   membershipEndDate?: string;
+  hasMembership?: boolean;
   hasPT: boolean;
   ptRemaining?: number;
   ptExpireDate?: string;
   trainerAssigned?: string;
   lockerId?: string;
+  hasLocker?: boolean;
   birthDate?: string;
   address?: string;
   memo?: string;
@@ -274,7 +276,7 @@ export const mockMembers: Member[] = [
     hasPT: true,
     ptRemaining: 12,
     ptExpireDate: "2024-07-30",
-    attendanceRate: 88,
+    attendanceRate: 45,
     lockerId: "E02",
     trainerAssigned: "박지훈",
     photoUrl: null,
@@ -400,7 +402,7 @@ export const mockMembers: Member[] = [
     hasPT: true,
     ptRemaining: 8,
     ptExpireDate: "2024-07-10",
-    attendanceRate: 78,
+    attendanceRate: 92,
     lockerId: "H01",
     trainerAssigned: "박지훈",
     photoUrl: null,
@@ -652,7 +654,7 @@ export const mockMembers: Member[] = [
     hasPT: true,
     ptRemaining: 9,
     ptExpireDate: "2024-07-30",
-    attendanceRate: 76,
+    attendanceRate: 63,
     lockerId: "M01",
     trainerAssigned: "박지훈",
     photoUrl: null,
@@ -778,7 +780,7 @@ export const mockMembers: Member[] = [
     hasPT: true,
     ptRemaining: 11,
     ptExpireDate: "2024-07-10",
-    attendanceRate: 79,
+    attendanceRate: 35,
     lockerId: "O02",
     trainerAssigned: "박지훈",
     photoUrl: null,
@@ -904,7 +906,7 @@ export const mockMembers: Member[] = [
     hasPT: true,
     ptRemaining: 13,
     ptExpireDate: "2024-07-20",
-    attendanceRate: 81,
+    attendanceRate: 88,
     lockerId: "R01",
     trainerAssigned: "박지훈",
     photoUrl: null,
@@ -1030,7 +1032,7 @@ export const mockMembers: Member[] = [
     hasPT: true,
     ptRemaining: 12,
     ptExpireDate: "2024-07-30",
-    attendanceRate: 77,
+    attendanceRate: 52,
     lockerId: "T02",
     trainerAssigned: "박지훈",
     photoUrl: null,

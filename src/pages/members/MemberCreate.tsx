@@ -331,7 +331,7 @@ const MemberCreate = () => {
           </Button>
           <Button 
             type="submit" 
-            className="bg-gym-primary hover:bg-gym-secondary"
+            className="bg-gym-primary hover:bg-gym-primary/90"
             disabled={isSubmitting}
           >
             {isSubmitting ? "처리 중..." : "회원 등록"}

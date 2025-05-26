@@ -158,7 +158,7 @@ const DailyTickets = () => {
         </div>
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="w-full sm:w-auto bg-gym-primary hover:bg-gym-secondary">
+            <Button className="w-full sm:w-auto bg-gym-primary hover:bg-gym-primary/90">
               <UserPlus className="mr-2 h-4 w-4" />
               일일권 등록
             </Button>
@@ -237,7 +237,7 @@ const DailyTickets = () => {
               <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
                 취소
               </Button>
-              <Button onClick={handleCreateTicket}>등록하기</Button>
+              <Button onClick={handleCreateTicket} className="bg-gym-primary hover:bg-gym-primary/90">등록하기</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -307,7 +307,7 @@ const DailyTickets = () => {
                         <TableCell>
                           <Badge 
                             variant={ticket.paymentMethod === "카드" ? "default" : "outline"}
-                            className={ticket.paymentMethod === "카드" ? "bg-gym-primary" : ""}
+                            className={ticket.paymentMethod === "카드" ? "bg-gym-primary hover:bg-gym-primary/90" : "border-gym-primary text-gym-primary hover:bg-gym-primary/10"}
                           >
                             {ticket.paymentMethod}
                           </Badge>

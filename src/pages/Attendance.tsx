@@ -75,7 +75,7 @@ const AttendanceQR = () => {
         </div>
         
         <Button 
-          className="mt-6 w-64 bg-gym-primary hover:bg-gym-secondary" 
+          className="mt-6 w-64 bg-gym-primary hover:bg-gym-primary/90" 
           onClick={handleScan}
           disabled={isScanning}
         >

@@ -10,12 +10,35 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Search, UserPlus, ChevronLeft, ChevronRight, CheckCircle, AlertTriangle, XCircle } from "lucide-react";
+import { 
+  Search, 
+  UserPlus, 
+  ChevronLeft, 
+  ChevronRight, 
+  CheckCircle, 
+  AlertTriangle, 
+  XCircle,
+  Users,
+  UserCheck,
+  Clock,
+  Filter,
+  Download,
+  MoreHorizontal,
+  CalendarClock,
+  User
+} from "lucide-react";
 import { mockMembers, Member } from "@/data/mockData";
 import { formatDate, formatPhoneNumber } from "@/lib/utils";
 import { differenceInDays, parseISO, isValid } from "date-fns";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -23,26 +46,46 @@ const MemberList = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredMembers, setFilteredMembers] = useState<Member[]>(mockMembers);
   const [currentPage, setCurrentPage] = useState(1);
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [membershipFilter, setMembershipFilter] = useState<string>("all");
   const navigate = useNavigate();
   
-  // Filter members based on search query
+  // Filter members based on search query and filters
   useEffect(() => {
-    if (!searchQuery.trim()) {
-      setFilteredMembers(mockMembers);
-      return;
+    let filtered = [...mockMembers];
+    
+    // 검색어 필터링
+    if (searchQuery.trim()) {
+      const lowercaseQuery = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (member) =>
+          member.name.toLowerCase().includes(lowercaseQuery) ||
+          member.id.includes(lowercaseQuery) ||
+          member.phoneNumber.replace(/-/g, "").includes(lowercaseQuery.replace(/-/g, ""))
+      );
     }
     
-    const lowercaseQuery = searchQuery.toLowerCase();
-    const filtered = mockMembers.filter(
-      (member) =>
-        member.name.toLowerCase().includes(lowercaseQuery) ||
-        member.id.includes(lowercaseQuery) ||
-        member.phoneNumber.replace(/-/g, "").includes(lowercaseQuery.replace(/-/g, ""))
-    );
+    // 회원권 상태 필터링
+    if (statusFilter !== "all") {
+      filtered = filtered.filter(member => {
+        const status = getMembershipStatus(member);
+        return status === statusFilter;
+      });
+    }
+    
+    // 회원권 유형 필터링
+    if (membershipFilter !== "all") {
+      filtered = filtered.filter(member => {
+        if (membershipFilter === "membership" && member.membershipActive) return true;
+        if (membershipFilter === "pt" && member.hasPT) return true;
+        if (membershipFilter === "locker" && member.lockerId) return true;
+        return false;
+      });
+    }
     
     setFilteredMembers(filtered);
-    setCurrentPage(1); // 검색 시 첫 페이지로 이동
-  }, [searchQuery]);
+    setCurrentPage(1); // 필터링 시 첫 페이지로 이동
+  }, [searchQuery, statusFilter, membershipFilter]);  
 
   const handleRowClick = (memberId: string) => {
     navigate(`/members/${memberId}`);
@@ -100,11 +143,21 @@ const MemberList = () => {
     return "active";
   };
 
+  // 통계 계산
+  const totalMembers = mockMembers.length;
+  const activeMembers = mockMembers.filter(m => getMembershipStatus(m) === "active").length;
+  const expiringMembers = mockMembers.filter(m => getMembershipStatus(m) === "expiring").length;
+  const expiredMembers = mockMembers.filter(m => getMembershipStatus(m) === "expired").length;
+
   return (
-    <div className="space-y-4">
-      <div className="flex justify-end">
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">회원 관리</h1>
+          <p className="text-muted-foreground">회원 정보를 조회하고 관리합니다.</p>
+        </div>
         <Button 
-          className="w-full sm:w-auto bg-gym-primary hover:bg-gym-secondary"
+          className="w-full sm:w-auto bg-gym-primary hover:bg-gym-primary/90"
           onClick={() => navigate("/members/new")}
         >
           <UserPlus className="mr-2 h-4 w-4" />
@@ -112,32 +165,129 @@ const MemberList = () => {
         </Button>
       </div>
       
+      {/* 통계 카드 */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">전체 회원</p>
+                <h3 className="text-2xl font-bold mt-1">{totalMembers}명</h3>
+              </div>
+              <div className="p-2 bg-blue-50 rounded-full">
+                <Users className="h-5 w-5 text-gym-primary" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">활성 회원</p>
+                <h3 className="text-2xl font-bold mt-1">{activeMembers}명</h3>
+              </div>
+              <div className="p-2 bg-green-50 rounded-full">
+                <UserCheck className="h-5 w-5 text-green-500" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">만료 임박</p>
+                <h3 className="text-2xl font-bold mt-1">{expiringMembers}명</h3>
+              </div>
+              <div className="p-2 bg-yellow-50 rounded-full">
+                <Clock className="h-5 w-5 text-yellow-500" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">만료된 회원</p>
+                <h3 className="text-2xl font-bold mt-1">{expiredMembers}명</h3>
+              </div>
+              <div className="p-2 bg-gray-100 rounded-full">
+                <CalendarClock className="h-5 w-5 text-gray-500" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+      
       <Card>
         <CardHeader>
-          {/* <CardTitle>회원 목록</CardTitle> */}
-          <div className="relative">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="회원 번호, 이름, 연락처로 검색..."
-              className="pl-8"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
+          <CardTitle>회원 목록</CardTitle>
+          <CardDescription>전체 {filteredMembers.length}명의 회원이 있습니다.</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
+          {/* 검색 및 필터 영역 */}
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="회원 번호, 이름, 연락처로 검색..."
+                className="pl-8"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            
+            <div className="flex flex-row gap-2">
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue placeholder="회원권 상태" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">모든 상태</SelectItem>
+                  <SelectItem value="active">활성</SelectItem>
+                  <SelectItem value="expiring">만료 임박</SelectItem>
+                  <SelectItem value="expired">만료됨</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              <Select value={membershipFilter} onValueChange={setMembershipFilter}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue placeholder="회원권 유형" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">모든 유형</SelectItem>
+                  <SelectItem value="membership">회원권</SelectItem>
+                  <SelectItem value="pt">PT 이용권</SelectItem>
+                  <SelectItem value="locker">락커 이용</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              <Button variant="outline" size="icon" title="엑셀 다운로드">
+                <Download className="h-4 w-4" />
+              </Button>
+              
+              <Button variant="outline" size="icon" title="추가 옵션">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
           <div className="rounded-md border overflow-hidden">
             <div className="relative w-full overflow-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-center">회원 번호</TableHead>
-                    <TableHead className="text-center">이름</TableHead>
-                    <TableHead className="text-center">연락처</TableHead>
-                    <TableHead className="text-center">등록일</TableHead>
-                    <TableHead className="text-center">출석률</TableHead>
-                    <TableHead className="text-center">회원권 상태</TableHead>
+                    <TableHead className="w-[150px] text-center pl-10">회원정보</TableHead>
+                    <TableHead className="text-center pl-4">회원구분</TableHead>
+                    <TableHead className="text-center pl-4">등록일</TableHead>
+                    <TableHead className="text-center">만료일</TableHead>
+                    <TableHead className="text-center">회원상태</TableHead>
+                    <TableHead className="text-center pr-4">출석률</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -145,63 +295,121 @@ const MemberList = () => {
                     currentMembers.map((member) => (
                       <TableRow 
                         key={member.id}
+                        className="cursor-pointer hover:bg-muted/50"
                         onClick={() => handleRowClick(member.id)}
-                        className="cursor-pointer"
                       >
-                        <TableCell className="text-center font-mono font-medium">
-                          {member.id}
-                        </TableCell>
-                        <TableCell className="text-center">{member.name}</TableCell>
-                        <TableCell className="text-center">{formatPhoneNumber(member.phoneNumber)}</TableCell>
-                        <TableCell className="text-center">{formatDate(member.registrationDate)}</TableCell>
-                        <TableCell className="text-center">
-                          <div className="flex flex-col items-center gap-1">
-                            <div className="w-20">
-                              <div className="w-full bg-muted rounded-full h-2.5">
-                                <div
-                                  className={`
-                                    h-2.5 rounded-full transition-all
-                                    ${member.attendanceRate >= 70
-                                      ? 'bg-primary/30'
-                                      : member.attendanceRate >= 50
-                                        ? 'bg-yellow-200'
-                                        : 'bg-red-200'
-                                    }
-                                  `}
-                                  style={{ width: `${member.attendanceRate}%` }}
+                        {/* 회원 정보 (프로필 사진, 이름, 회원번호) */}
+                        <TableCell className="w-[150px] pl-10">
+                          <div className="flex items-center space-x-3">
+                            {/* 프로필 사진 */}
+                            <div>
+                              {member.photoUrl ? (
+                                <img 
+                                  src={member.photoUrl} 
+                                  alt={`${member.name} 프로필`} 
+                                  className="h-10 w-10 rounded-full object-cover border border-gray-200"
                                 />
-                              </div>
+                              ) : (
+                                <div className={`h-10 w-10 rounded-full flex items-center justify-center text-white bg-gym-primary`}>
+                                  {member.name.charAt(0)}
+                                </div>
+                              )}
                             </div>
-                            <span className="text-xs font-semibold text-muted-foreground">{member.attendanceRate}%</span>
+                            {/* 이름 및 회원번호 */}
+                            <div className="flex flex-col">
+                              <span className="font-medium">{member.name}</span>
+                              <span className="text-xs text-muted-foreground font-mono">{member.id}</span>
+                            </div>
                           </div>
                         </TableCell>
+                        
+                        {/* 회원 구분 (PT, 헬스장, PT&헬스장) */}
+                        <TableCell className="text-center pl-4">
+                          <div className="flex flex-col gap-1 items-center">
+                            {member.membershipActive && member.hasPT ? (
+                              <span className="px-2 py-1 text-xs bg-gym-primary/10 text-gym-primary rounded-full font-medium">PT & 헬스장</span>
+                            ) : member.membershipActive ? (
+                              <span className="px-2 py-1 text-xs bg-blue-50 text-blue-700 rounded-full font-medium">헬스장</span>
+                            ) : member.hasPT ? (
+                              <span className="px-2 py-1 text-xs bg-purple-50 text-purple-700 rounded-full font-medium">PT</span>
+                            ) : (
+                              <span className="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded-full font-medium">없음</span>
+                            )}
+                            {member.lockerId && (
+                              <span className="px-2 py-1 text-xs bg-orange-50 text-orange-700 rounded-full font-medium">락커 {member.lockerId}</span>
+                            )}
+                          </div>
+                        </TableCell>
+                        
+                        {/* 등록일 */}
+                        <TableCell className="text-center pl-4">
+                          <div className="flex flex-col items-center">
+                            <span className="text-sm">{formatDate(member.registrationDate)}</span>
+                            {member.membershipStartDate && (
+                              <span className="text-xs text-muted-foreground">시작: {formatDate(member.membershipStartDate)}</span>
+                            )}
+                          </div>
+                        </TableCell>
+                        
+                        {/* 만료일 */}
+                        <TableCell className="text-center">
+                          <div className="flex flex-col items-center">
+                            <span className="text-sm">{formatDate(member.membershipEndDate || '')}</span>
+                            {member.hasPT && member.ptExpireDate && (
+                              <span className="text-xs text-muted-foreground">PT: {formatDate(member.ptExpireDate)}</span>
+                            )}
+                          </div>
+                        </TableCell>
+                        
+                        {/* 회원 상태 */}
                         <TableCell className="text-center">
                           {(() => {
                             const status = getMembershipStatus(member);
                             if (status === "active") {
                               return (
-                                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary shadow-sm">
-                                  <CheckCircle className="w-4 h-4 text-primary" />
+                                <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                                  <span className="h-1.5 w-1.5 rounded-full bg-green-600"></span>
                                   활성
                                 </span>
                               );
                             }
                             if (status === "expiring") {
                               return (
-                                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-700 shadow-sm">
-                                  <AlertTriangle className="w-4 h-4 text-yellow-500" />
+                                <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700">
+                                  <span className="h-1.5 w-1.5 rounded-full bg-yellow-600"></span>
                                   만료임박
                                 </span>
                               );
                             }
                             return (
-                              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-muted text-muted-foreground shadow-sm">
-                                <XCircle className="w-4 h-4 text-muted-foreground" />
+                              <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                                <span className="h-1.5 w-1.5 rounded-full bg-gray-600"></span>
                                 만료
                               </span>
                             );
                           })()}
+                          {member.hasPT && member.ptRemaining !== undefined && (
+                            <div className="mt-1 text-xs text-muted-foreground">
+                              PT {member.ptRemaining}회 남음
+                            </div>
+                          )}
                         </TableCell>
+                        
+                        {/* 출석률 */}
+                        <TableCell className="text-center pr-4">
+                          <div className="flex flex-col items-center gap-1">
+                            <div className="w-20">
+                              <div className="w-full bg-muted rounded-full h-2.5">
+                                <div
+                                  className="h-2.5 rounded-full bg-gym-primary"
+                                  style={{ width: `${member.attendanceRate}%` }}
+                                />
+                              </div>
+                            </div>
+                            <span className="text-xs font-medium">{member.attendanceRate}%</span>
+                          </div>
+                        </TableCell>
+
                       </TableRow>
                     ))
                   ) : (
@@ -238,7 +446,7 @@ const MemberList = () => {
                   variant={currentPage === pageNum ? "default" : "outline"}
                   size="sm"
                   onClick={() => handlePageChange(pageNum)}
-                  className={currentPage === pageNum ? "bg-gym-primary hover:bg-gym-secondary" : ""}
+                  className={currentPage === pageNum ? "bg-gym-primary hover:bg-gym-primary/90" : ""}
                 >
                   {pageNum}
                 </Button>

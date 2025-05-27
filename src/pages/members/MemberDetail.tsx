@@ -112,21 +112,21 @@ const MemberDetail = ({ id: propId }: MemberDetailProps) => {
   return (
     <div className="space-y-6">
       {/* 상단 네비게이션 및 액션 버튼 */}
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center gap-4">
         <Button 
           variant="ghost" 
           onClick={() => navigate("/members")}
-          className="flex items-center gap-1.5 text-sm"
+          className="flex items-center gap-2 text-sm"
         >
           <ChevronLeft className="h-4 w-4" />
           <span className="font-medium">목록으로</span>
         </Button>
         
-        <div className="flex gap-2">
+        <div className="flex gap-3">
           <Button 
             variant="outline"
             onClick={() => setLockerDialogOpen(true)}
-            className="flex items-center gap-1.5"
+            className="flex items-center gap-2 text-sm"
           >
             <Key className="h-4 w-4" />
             <span>락커 등록</span>
@@ -134,7 +134,7 @@ const MemberDetail = ({ id: propId }: MemberDetailProps) => {
           
           <Button 
             onClick={() => setEditDialogOpen(true)}
-            className="flex items-center gap-1.5 bg-gym-primary hover:bg-gym-primary/90"
+            className="flex items-center gap-2 text-sm bg-gym-primary hover:bg-gym-primary/90"
           >
             <Edit className="h-4 w-4" />
             <span>회원 정보 수정</span>
@@ -149,11 +149,11 @@ const MemberDetail = ({ id: propId }: MemberDetailProps) => {
       <Card>
         <CardContent className="pt-6">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="info">회원 정보</TabsTrigger>
-              <TabsTrigger value="membership">이용권 정보</TabsTrigger>
-              <TabsTrigger value="attendance">출석 관리</TabsTrigger>
-              <TabsTrigger value="payment">결제 내역</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-4 gap-2">
+              <TabsTrigger value="info" className="px-4 py-2 text-sm">회원 정보</TabsTrigger>
+              <TabsTrigger value="membership" className="px-4 py-2 text-sm">이용권 정보</TabsTrigger>
+              <TabsTrigger value="attendance" className="px-4 py-2 text-sm">출석 관리</TabsTrigger>
+              <TabsTrigger value="payment" className="px-4 py-2 text-sm">결제 내역</TabsTrigger>
             </TabsList>
             
             <TabsContent value="info" className="mt-6">
@@ -174,7 +174,7 @@ const MemberDetail = ({ id: propId }: MemberDetailProps) => {
                     {isOwner && (
                       <Button 
                         onClick={handlePaymentRegistration}
-                        className="flex items-center gap-1.5"
+                        className="flex items-center gap-2 text-sm"
                       >
                         <Plus className="h-4 w-4" />
                         결제 등록
@@ -183,7 +183,7 @@ const MemberDetail = ({ id: propId }: MemberDetailProps) => {
                   </CardHeader>
                   <CardContent>
                     {member.membershipActive ? (
-                      <div className="space-y-3">
+                      <div className="space-y-4">
                         <div className="flex items-center justify-between">
                           <span className="text-sm text-muted-foreground">상태</span>
                           <Badge className="bg-green-100 text-green-800">활성</Badge>
@@ -202,9 +202,12 @@ const MemberDetail = ({ id: propId }: MemberDetailProps) => {
                         </div>
                       </div>
                     ) : (
-                      <p className="text-muted-foreground text-center py-4">
-                        등록된 헬스장 이용권이 없습니다.
-                      </p>
+                      <div className="text-center py-6">
+                        <Badge variant="destructive">이용권 없음</Badge>
+                        <p className="mt-2 text-sm text-muted-foreground">
+                          현재 등록된 헬스장 이용권이 없습니다.
+                        </p>
+                      </div>
                     )}
                   </CardContent>
                 </Card>
@@ -221,7 +224,7 @@ const MemberDetail = ({ id: propId }: MemberDetailProps) => {
                     {isOwner && (
                       <Button 
                         onClick={handlePaymentRegistration}
-                        className="flex items-center gap-1.5"
+                        className="flex items-center gap-2 text-sm"
                       >
                         <Plus className="h-4 w-4" />
                         결제 등록

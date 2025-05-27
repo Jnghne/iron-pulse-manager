@@ -30,45 +30,45 @@ export const MemberSummary = ({ member }: MemberSummaryProps) => {
 
   return (
     <Card className="overflow-hidden">
-      <CardContent className="p-6">
-        <div className="flex items-center gap-6">
+      <CardContent className="p-8">
+        <div className="flex items-center gap-8">
           {/* 회원 사진 */}
-          <Avatar className="h-24 w-24 border-4 border-white shadow-lg">
+          <Avatar className="h-32 w-32 border-4 border-white shadow-xl">
             <AvatarImage src={member.photoUrl} alt={member.name} />
-            <AvatarFallback className="bg-gym-primary text-white text-2xl">
-              <User className="h-12 w-12" />
+            <AvatarFallback className="bg-gym-primary text-white text-3xl">
+              <User className="h-16 w-16" />
             </AvatarFallback>
           </Avatar>
 
           {/* 회원 기본 정보 */}
-          <div className="flex-1 space-y-3">
+          <div className="flex-1 space-y-4">
             <div>
-              <h1 className="text-2xl font-bold">{member.name}</h1>
-              <p className="text-muted-foreground flex items-center gap-2 mt-1">
-                <Phone className="h-4 w-4" />
-                {formatPhoneNumber(member.phoneNumber)}
+              <h1 className="text-3xl font-bold">{member.name}</h1>
+              <p className="text-muted-foreground flex items-center gap-3 mt-2">
+                <Phone className="h-5 w-5" />
+                <span className="text-lg">{formatPhoneNumber(member.phoneNumber)}</span>
               </p>
             </div>
 
             {/* 회원 유형 */}
-            <div className="flex gap-2">
+            <div className="flex gap-3">
               {getMemberTypes().map((type, index) => (
-                <Badge key={index} variant="outline" className="bg-blue-50 text-blue-700">
+                <Badge key={index} variant="outline" className="bg-blue-50 text-blue-700 px-4 py-1.5">
                   {type}
                 </Badge>
               ))}
             </div>
 
             {/* 출석률 */}
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-medium">출석률</span>
+            <div className="flex items-center gap-4">
+              <span className="text-lg font-medium">출석률</span>
               <Badge className={getAttendanceColor(member.attendanceRate)}>
                 {member.attendanceRate}%
               </Badge>
-              <div className="flex-1 max-w-xs">
-                <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div className="flex-1 max-w-sm">
+                <div className="h-2.5 bg-gray-200 rounded-full overflow-hidden">
                   <div
-                    className={`h-2 rounded-full transition-all ${
+                    className={`h-2.5 rounded-full transition-all ${
                       member.attendanceRate >= 80
                         ? "bg-green-500"
                         : member.attendanceRate >= 50

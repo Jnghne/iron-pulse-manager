@@ -1,27 +1,18 @@
-import type { Metadata } from "next"
-import { Inter } from "next/font/google"
-import "./globals.css"
 
+import "./globals.css"
 import { cn } from "@/lib/utils"
 import { SidebarProvider, SidebarHeader, SidebarMain, SidebarFooter, SidebarToggle } from "@/components/ui/sidebar"
 import { SidebarNav } from "@/components/ui/sidebar-nav"
 import Logo from "@/components/ui/logo"
 
-const inter = Inter({ subsets: ["latin"] })
-
-export const metadata: Metadata = {
-  title: "IronPulse Manager",
-  description: "A modern gym management system",
+interface RootLayoutProps {
+  children: React.ReactNode;
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en">
-      <body className={cn(inter.className, "min-h-screen bg-background")}>
+      <body className={cn("min-h-screen bg-background font-sans")}>
         <SidebarProvider defaultCollapsed={false}>
           <SidebarHeader>
             <Logo />
@@ -31,7 +22,7 @@ export default function RootLayout({
             <SidebarNav />
           </SidebarMain>
           <SidebarFooter>
-            {/* Add footer content here */}
+            <div></div>
           </SidebarFooter>
         </SidebarProvider>
         <main className="pl-[280px] transition-[padding] duration-300">

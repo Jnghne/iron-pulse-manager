@@ -47,3 +47,22 @@ export function getAttendanceStatus(rate: number) {
     return { label: "저조", color: "bg-red-100 text-red-800" };
   }
 }
+
+export function formatCurrency(amount: number): string {
+  return new Intl.NumberFormat('ko-KR', {
+    style: 'currency',
+    currency: 'KRW',
+  }).format(amount);
+}
+
+export function generateMemberId(): string {
+  const timestamp = Date.now();
+  const random = Math.floor(Math.random() * 1000);
+  return `M${timestamp}${random}`.slice(-8);
+}
+
+export function isValidPhoneNumber(phone: string): boolean {
+  if (!phone) return false;
+  const cleaned = phone.replace(/\D/g, '');
+  return cleaned.length === 11 && cleaned.startsWith('010');
+}

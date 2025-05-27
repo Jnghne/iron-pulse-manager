@@ -1,200 +1,49 @@
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
 
-/**
- * Combine multiple class names with Tailwind CSS
- */
-export function cn(...inputs: ClassValue[]): string {
-  return twMerge(clsx(inputs));
+import { type ClassValue, clsx } from "clsx"
+import { twMerge } from "tailwind-merge"
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
 }
 
-/**
- * Format a number as Korean currency (₩)
- */
-export function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('ko-KR', {
-    style: 'currency',
-    currency: 'KRW',
-    maximumFractionDigits: 0
-  }).format(amount);
+export function formatDate(date: string | Date): string {
+  if (!date) return '';
+  const d = new Date(date);
+  return d.toLocaleDateString('ko-KR', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  });
 }
 
-/**
- * Format a date as a human-readable string
- * Returns '-' for empty, null, or invalid dates
- */
-export function formatDate(date: Date | string | null | undefined): string {
-  // 빈 값 처리
-  if (!date || date === '') {
-    return '-';
+export function formatPhoneNumber(phone: string): string {
+  if (!phone) return '';
+  const cleaned = phone.replace(/\D/g, '');
+  const match = cleaned.match(/^(\d{3})(\d{3,4})(\d{4})$/);
+  if (match) {
+    return `${match[1]}-${match[2]}-${match[3]}`;
   }
-  
-  try {
-    const dateObj = typeof date === 'string' ? new Date(date) : date;
-    
-    // 유효한 날짜인지 확인
-    if (isNaN(dateObj.getTime())) {
-      return '-';
-    }
-    
-    return new Intl.DateTimeFormat('ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    }).format(dateObj);
-  } catch (error) {
-    console.error('날짜 포맷팅 오류:', error);
-    return '-';
-  }
-}
-
-/**
- * Format a date as YYYY-MM-DD
- */
-export function formatDateYYYYMMDD(date: Date | string): string {
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
-  return dateObj.toISOString().split('T')[0];
-}
-
-/**
- * Convert a Date to ISO string or return the string as is
- */
-export function toDateString(date: Date | string): string {
-  if (date instanceof Date) {
-    return date.toISOString();
-  }
-  return date;
-}
-
-/**
- * Get a random integer between min and max (inclusive)
- */
-export function getRandomInt(min: number, max: number): number {
-  min = Math.ceil(min);
-  max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-/**
- * Generate a random member ID
- */
-export function generateMemberId(): string {
-  // Generate a numeric ID starting from 1001
-  const randomNum = Math.floor(1000 + Math.random() * 8999);
-  return randomNum.toString();
-}
-
-/**
- * Generate a random trainer ID
- */
-export function generateTrainerId(): string {
-  return `T${Date.now().toString().slice(-6)}${Math.floor(Math.random() * 10)}`;
-}
-
-/**
- * Format a phone number as XXX-XXXX-XXXX
- */
-export function formatPhoneNumber(phoneNumber: string): string {
-  // Remove any non-numeric characters
-  const cleaned = phoneNumber.replace(/\D/g, '');
-  
-  // Format as XXX-XXXX-XXXX
-  if (cleaned.length === 11) {
-    return `${cleaned.slice(0, 3)}-${cleaned.slice(3, 7)}-${cleaned.slice(7)}`;
-  }
-  
-  // Return original if not valid
-  return phoneNumber;
-}
-
-/**
- * Check if a string is a valid phone number
- */
-export function isValidPhoneNumber(phoneNumber: string): boolean {
-  const regex = /^01[016789]-?\d{3,4}-?\d{4}$/;
-  return regex.test(phoneNumber);
-}
-
-/**
- * Convert attendance rate to a status label
- */
-export function getAttendanceStatus(rate: number): { label: string; color: string } {
-  if (rate >= 80) {
-    return { label: '우수', color: 'text-gym-success' };
-  } else if (rate >= 50) {
-    return { label: '보통', color: 'text-gym-warning' };
-  } else {
-    return { label: '저조', color: 'text-gym-danger' };
-  }
-}
-
-/**
- * Add days to a date
- */
-export function addDays(date: Date, days: number): Date {
-  const result = new Date(date);
-  result.setDate(result.getDate() + days);
-  return result;
-}
-
-/**
- * Check if a user has specific permission
- */
-export function hasPermission(userRole: string, requiredRole: string): boolean {
-  if (requiredRole === 'any') return true;
-  if (requiredRole === 'owner') return userRole === 'owner';
-  return false;
-}
-
-/**
- * Truncate a string to a given length
- */
-export function truncateString(str: string, maxLength: number): string {
-  if (str.length <= maxLength) return str;
-  return str.slice(0, maxLength) + '...';
+  return phone;
 }
 
 export function calculateAge(birthDate: string): number {
+  if (!birthDate) return 0;
   const today = new Date();
-  const birth = new Date(
-    parseInt(birthDate.substring(0, 4)),
-    parseInt(birthDate.substring(4, 6)) - 1,
-    parseInt(birthDate.substring(6, 8))
-  );
-  
+  const birth = new Date(birthDate);
   let age = today.getFullYear() - birth.getFullYear();
   const monthDiff = today.getMonth() - birth.getMonth();
-  
   if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
     age--;
   }
-  
   return age;
 }
 
-/**
- * Format a number with a specific unit
- */
-export function formatNumberWithUnit(value: number, unit: string): string {
-  return `${value.toLocaleString()}${unit}`;
-}
-
-/**
- * Calculate the difference in days between two dates
- */
-export function daysBetween(date1: Date, date2: Date): number {
-  const oneDay = 24 * 60 * 60 * 1000; // hours*minutes*seconds*milliseconds
-  const diffDays = Math.round(Math.abs((date1.getTime() - date2.getTime()) / oneDay));
-  return diffDays;
-}
-
-/**
- * Calculate the difference in months between two dates
- */
-export function monthsBetween(date1: Date, date2: Date): number {
-  const d1 = new Date(date1);
-  const d2 = new Date(date2);
-  const yearDiff = d2.getFullYear() - d1.getFullYear();
-  const monthDiff = d2.getMonth() - d1.getMonth();
-  return yearDiff * 12 + monthDiff;
+export function getAttendanceStatus(rate: number) {
+  if (rate >= 80) {
+    return { label: "우수", color: "bg-green-100 text-green-800" };
+  } else if (rate >= 50) {
+    return { label: "보통", color: "bg-yellow-100 text-yellow-800" };
+  } else {
+    return { label: "저조", color: "bg-red-100 text-red-800" };
+  }
 }

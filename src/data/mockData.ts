@@ -10,6 +10,14 @@ export interface Locker {
   endDate?: string;
   fee?: number;
   isPaid?: boolean;
+  notes?: string; // Added missing notes property
+}
+
+// 출석 기록 타입 정의
+export interface AttendanceRecord {
+  date: string;
+  attended: boolean;
+  timeIn?: string;
 }
 
 // 회원 타입 정의
@@ -27,6 +35,8 @@ export interface Member {
   membershipStatus: 'active' | 'expired' | 'pending';
   ptRemaining?: number;
   ptExpiryDate?: string;
+  ptStartDate?: string; // Added missing property
+  ptTotal?: number; // Added missing property
   gymMembershipDaysLeft?: number;
   gymMembershipExpiryDate?: string;
   attendanceRate: number;
@@ -629,3 +639,35 @@ export const mockLockers: Locker[] = [
     isOccupied: false
   }
 ];
+
+// 출석 기록 생성 함수
+export const getMockAttendance = (memberId: string, days: number = 90): AttendanceRecord[] => {
+  const records: AttendanceRecord[] = [];
+  const today = new Date();
+  
+  for (let i = 0; i < days; i++) {
+    const date = new Date(today);
+    date.setDate(today.getDate() - i);
+    
+    // 출석 확률을 회원에 따라 다르게 설정
+    const member = mockMembers.find(m => m.id === memberId);
+    const attendanceRate = member?.attendanceRate || 70;
+    const shouldAttend = Math.random() * 100 < attendanceRate;
+    
+    // 주말에는 출석률이 낮아지도록 설정
+    const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+    const finalShouldAttend = isWeekend ? shouldAttend && Math.random() > 0.3 : shouldAttend;
+    
+    const record: AttendanceRecord = {
+      date: date.toISOString().split('T')[0],
+      attended: finalShouldAttend,
+      timeIn: finalShouldAttend ? 
+        `${Math.floor(Math.random() * 4) + 6}:${Math.floor(Math.random() * 6)}${Math.floor(Math.random() * 10)}` : 
+        undefined
+    };
+    
+    records.push(record);
+  }
+  
+  return records.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+};

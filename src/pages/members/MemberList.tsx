@@ -354,9 +354,9 @@ const MemberList = () => {
                         {/* 만료일 */}
                         <TableCell className="text-center">
                           <div className="flex flex-col items-center">
-                            <span className="text-sm">{formatDate(member.membershipEndDate || '')}</span>
-                            {member.hasPT && member.ptExpireDate && (
-                              <span className="text-xs text-muted-foreground">PT: {formatDate(member.ptExpireDate)}</span>
+                            <span className="text-sm">{formatDate(member.expiryDate || '')}</span>
+                            {member.ptRemaining !== undefined && member.ptExpiryDate && (
+                              <span className="text-xs text-muted-foreground">PT: {formatDate(member.ptExpiryDate)}</span>
                             )}
                           </div>
                         </TableCell>

@@ -8,7 +8,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import MemberDetail from "./members/MemberDetail";
-import { mockMembers, Member } from "@/data/mockData";
+import { mockMembers } from "@/data/mockData";
 import { formatDate } from "@/lib/utils";
 import { differenceInDays, parseISO, isValid, format } from "date-fns";
 
@@ -89,7 +89,7 @@ const TrainerDashboard = () => {
     .filter(member => 
       member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       member.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (member.phoneNumber && member.phoneNumber.toLowerCase().includes(searchTerm.toLowerCase()))
+      (member.phone && member.phone.toLowerCase().includes(searchTerm.toLowerCase()))
     )
     .sort((a, b) => {
       const direction = sortDirection === "asc" ? 1 : -1;
@@ -228,17 +228,10 @@ const TrainerDashboard = () => {
                           <div className="flex items-center space-x-3">
                             {/* 프로필 사진 */}
                             <div>
-                              {member.photoUrl ? (
-                                <img 
-                                  src={member.photoUrl} 
-                                  alt={`${member.name} 프로필`} 
-                                  className="h-10 w-10 rounded-full object-cover border border-gray-200"
-                                />
-                              ) : (
+                              {/* 프로필 이미지 없음 - 이니셜 표시 */}
                                 <div className={`h-10 w-10 rounded-full flex items-center justify-center text-white bg-gym-primary`}>
                                   {member.name.charAt(0)}
                                 </div>
-                              )}
                             </div>
                             {/* 이름 및 회원번호 */}
                             <div className="flex flex-col">
@@ -252,8 +245,8 @@ const TrainerDashboard = () => {
                         <TableCell className="text-center pl-4">
                           <div className="flex flex-col items-center">
                             <span className="text-sm font-medium">{member.ptRemaining || 0}회</span>
-                            {member.ptExpireDate && (
-                              <span className="text-xs text-muted-foreground">만료: {formatDate(member.ptExpireDate)}</span>
+                            {member.ptExpiryDate && (
+                              <span className="text-xs text-muted-foreground">만료: {formatDate(member.ptExpiryDate)}</span>
                             )}
                           </div>
                         </TableCell>
@@ -261,14 +254,14 @@ const TrainerDashboard = () => {
                         {/* 잔여 헬스권 */}
                         <TableCell className="text-center pl-4">
                           <div className="flex flex-col items-center">
-                            {member.membershipEndDate ? (
+                            {member.gymMembershipExpiryDate ? (
                               <>
                                 <span className="text-sm font-medium">
-                                  {isValid(parseISO(member.membershipEndDate)) ? 
-                                    `${Math.max(0, differenceInDays(parseISO(member.membershipEndDate), new Date()))}일` : 
+                                  {isValid(parseISO(member.gymMembershipExpiryDate)) ? 
+                                    `${Math.max(0, differenceInDays(parseISO(member.gymMembershipExpiryDate), new Date()))}일` : 
                                     "-"}
                                 </span>
-                                <span className="text-xs text-muted-foreground">만료: {formatDate(member.membershipEndDate)}</span>
+                                <span className="text-xs text-muted-foreground">만료: {formatDate(member.gymMembershipExpiryDate)}</span>
                               </>
                             ) : (
                               <span className="text-sm">-</span>

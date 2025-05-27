@@ -82,9 +82,9 @@ const monthlyRevenueData = mockMonthlyRevenueData.slice(0, 6).map(item => {
 
 // Prepare visitor data for the last 7 days
 const visitorData = mockVisitorsData.slice(0, 7).map(item => ({
-  date: item.date.substring(5), // Get only MM-DD format
-  회원: item.members,
-  일일권: item.dailyTickets,
+  date: item.name, // Use the name property as date
+  회원: item.total, // Use total as member count
+  일일권: 0, // Set dailyTickets to 0 or calculate if needed
 })).reverse();
 
 const Dashboard = () => {

@@ -1,0 +1,1446 @@
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { 
+  Card, 
+  CardContent, 
+  CardDescription, 
+  CardFooter, 
+  CardHeader, 
+  CardTitle 
+} from "@/components/ui/card";
+import { 
+  Tabs, 
+  TabsContent, 
+  TabsList, 
+  TabsTrigger 
+} from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { 
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Separator } from "@/components/ui/separator";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { mockMembers, Member, getMockAttendance, AttendanceRecord } from "@/data/mockData";
+import { 
+  formatDate, 
+  formatPhoneNumber, 
+  getAttendanceStatus, 
+  formatDateYYYYMMDD, 
+  addDays, 
+  toDateString,
+  calculateAge 
+} from "@/lib/utils";
+import { 
+  Edit, 
+  User, 
+  CalendarIcon, 
+  Clock,
+  CreditCard,
+  Key,
+  Mail,
+  Plus,
+  Trash2,
+  ChevronLeft,
+  ChevronRight,
+  Phone,
+  Calendar as CalendarIcon2
+} from "lucide-react";
+import { toast } from "sonner";
+import { useForm } from "react-hook-form";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+
+// Components for member details tabs
+const MembershipForm = ({ member, onClose }: { member: Member, onClose: () => void }) => {
+  const [membershipType, setMembershipType] = useState(member.membershipActive ? "extend" : "new");
+  const [membershipMonths, setMembershipMonths] = useState("1");
+  const [ptSessions, setPtSessions] = useState(member.hasPT ? member.ptRemaining.toString() : "0");
+  const [startDate, setStartDate] = useState<Date>(
+    member.membershipStartDate ? new Date(member.membershipStartDate) : new Date()
+  );
+  const [endDate, setEndDate] = useState<Date>(
+    member.membershipEndDate ? new Date(member.membershipEndDate) : addDays(new Date(), 30)
+  );
+
+  // Calculate end date based on start date and months
+  useEffect(() => {
+    if (membershipType === "extend" && member.membershipEndDate) {
+      const months = parseInt(membershipMonths);
+      const baseDate = new Date(member.membershipEndDate);
+      setEndDate(new Date(baseDate.setMonth(baseDate.getMonth() + months)));
+    } else if (membershipType === "new") {
+      const months = parseInt(membershipMonths);
+      const baseDate = new Date(startDate);
+      setEndDate(new Date(baseDate.setMonth(baseDate.getMonth() + months)));
+    }
+  }, [startDate, membershipMonths, membershipType, member.membershipEndDate]);
+
+  const handleSubmit = () => {
+    const updatedMember = { ...member };
+    
+    // Update membership info
+    updatedMember.membershipActive = true;
+    updatedMember.membershipStartDate = toDateString(startDate);
+    updatedMember.membershipEndDate = toDateString(endDate);
+    
+    // Update PT info
+    const ptSessionsInt = parseInt(ptSessions);
+    if (ptSessionsInt > 0) {
+      updatedMember.hasPT = true;
+      updatedMember.ptRemaining = ptSessionsInt;
+      // Add PT expiration date (6 months from now)
+      const ptExpireDate = new Date();
+      ptExpireDate.setMonth(ptExpireDate.getMonth() + 6);
+      updatedMember.ptExpireDate = toDateString(ptExpireDate);
+    }
+    
+    // In a real app, this would be an API call
+    toast.success("회원권 정보가 업데이트되었습니다.");
+    onClose();
+  };
+
+  return (
+    <div className="space-y-4">
+      <RadioGroup 
+        value={membershipType} 
+        onValueChange={setMembershipType}
+        className="flex flex-col space-y-2"
+      >
+        <div className="flex items-center space-x-2">
+          <RadioGroupItem value="new" id="new" />
+          <label htmlFor="new" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            신규 등록
+          </label>
+        </div>
+        
+        <div className="flex items-center space-x-2">
+          <RadioGroupItem value="extend" id="extend" />
+          <label htmlFor="extend" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            기존 이용권 연장
+          </label>
+        </div>
+      </RadioGroup>
+
+      <div className="space-y-4 pt-2">
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium" htmlFor="start-date">시작일</label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start text-left font-normal"
+                  disabled={membershipType === "extend"}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {startDate ? formatDate(startDate) : "날짜 선택"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <CalendarComponent
+                  mode="single"
+                  selected={startDate}
+                  onSelect={(date) => date && setStartDate(date)}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+          
+          <div className="space-y-2">
+            <label className="text-sm font-medium" htmlFor="membership-months">개월 수</label>
+            <Select value={membershipMonths} onValueChange={setMembershipMonths}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="개월 선택" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="1">1개월</SelectItem>
+                <SelectItem value="3">3개월</SelectItem>
+                <SelectItem value="6">6개월</SelectItem>
+                <SelectItem value="12">12개월</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        
+        <div className="space-y-2">
+          <label className="text-sm font-medium" htmlFor="end-date">종료일</label>
+          <Input 
+            id="end-date" 
+            value={formatDate(endDate)} 
+            disabled 
+            className="bg-muted"
+          />
+        </div>
+      </div>
+      
+      <Separator className="my-4" />
+      
+      <div className="space-y-4">
+        <h3 className="text-sm font-medium">PT 이용권</h3>
+        
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium" htmlFor="pt-sessions">PT 횟수</label>
+            <Input 
+              id="pt-sessions" 
+              type="number" 
+              min="0" 
+              value={ptSessions} 
+              onChange={(e) => setPtSessions(e.target.value)}
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <label className="text-sm font-medium" htmlFor="trainer">담당 트레이너</label>
+            <Select defaultValue={member.trainerAssigned || ""}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="트레이너 선택" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="박지훈">박지훈</SelectItem>
+                <SelectItem value="김태양">김태양</SelectItem>
+                <SelectItem value="최수진">최수진</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </div>
+      
+      <DialogFooter className="mt-6">
+        <Button variant="outline" onClick={onClose}>취소</Button>
+        <Button onClick={handleSubmit}>저장하기</Button>
+      </DialogFooter>
+    </div>
+  );
+};
+
+const LockerForm = ({ member, onClose }: { member: Member, onClose: () => void }) => {
+  // In a real app, these would come from an API
+  const [availableLockers, setAvailableLockers] = useState([
+    { id: "A01", status: "available" },
+    { id: "A02", status: "occupied" },
+    { id: "A03", status: "available" },
+    { id: "B01", status: "available" },
+    { id: "B02", status: "available" },
+    { id: "B03", status: "occupied" },
+    { id: "B04", status: "occupied" },
+    { id: "C01", status: "available" },
+    { id: "C02", status: "available" },
+  ]);
+  
+  const [selectedLocker, setSelectedLocker] = useState<string | null>(
+    member.lockerId || null
+  );
+
+  const handleLockerSelect = (lockerId: string) => {
+    setSelectedLocker(lockerId === selectedLocker ? null : lockerId);
+  };
+
+  const handleSubmit = () => {
+    if (!selectedLocker) {
+      toast.error("락커를 선택해주세요.");
+      return;
+    }
+    
+    // In a real app, this would be an API call
+    toast.success(`${selectedLocker} 락커가 ${member.name} 회원에게 등록되었습니다.`);
+    onClose();
+  };
+
+  return (
+    <div className="space-y-4">
+      <p className="text-sm text-muted-foreground">
+        {member.lockerId 
+          ? `${member.name} 회원은 현재 ${member.lockerId} 락커를 사용 중입니다.`
+          : `${member.name} 회원은 현재 등록된 락커가 없습니다.`}
+      </p>
+      
+      <div className="grid grid-cols-3 gap-2 mt-4">
+        {availableLockers.map((locker) => (
+          <Button
+            key={locker.id}
+            variant={selectedLocker === locker.id ? "default" : "outline"}
+            className={`h-16 ${
+              locker.status === "occupied" && locker.id !== member.lockerId
+                ? "bg-muted text-muted-foreground cursor-not-allowed"
+                : locker.status === "available"
+                ? "hover:bg-primary/20"
+                : ""
+            }`}
+            onClick={() => locker.status === "available" && handleLockerSelect(locker.id)}
+            disabled={locker.status === "occupied" && locker.id !== member.lockerId}
+          >
+            <div className="text-center">
+              <div className="text-lg font-bold">{locker.id}</div>
+              <div className="text-xs">
+                {locker.id === member.lockerId
+                  ? "현재 사용 중"
+                  : locker.status === "available"
+                  ? "사용 가능"
+                  : "사용 중"}
+              </div>
+            </div>
+          </Button>
+        ))}
+      </div>
+      
+      <DialogFooter className="mt-6">
+        {member.lockerId && member.lockerId !== selectedLocker && (
+          <Button variant="destructive" className="mr-auto" onClick={() => onClose()}>
+            <Trash2 className="h-4 w-4 mr-2" />
+            락커 해지
+          </Button>
+        )}
+        <Button variant="outline" onClick={onClose}>취소</Button>
+        <Button onClick={handleSubmit}>저장하기</Button>
+      </DialogFooter>
+    </div>
+  );
+};
+
+const MemberInfo = ({ member: initialMember }: { member: Member }) => {
+  const [member, setMember] = useState<Member>(initialMember);
+  const [attendance, setAttendance] = useState<AttendanceRecord[]>([]);
+  const [date, setDate] = useState<Date>(new Date());
+  
+  useEffect(() => {
+    // Get mock attendance data
+    const attendanceData = getMockAttendance(member.id, 90);
+    setAttendance(attendanceData);
+  }, [member.id]);
+
+  // Calculate attendance rate
+  const calculateAttendanceRate = () => {
+    const totalDays = attendance.length;
+    if (totalDays === 0) return 0;
+    
+    const attendedDays = attendance.filter(record => record.attended).length;
+    return Math.round((attendedDays / totalDays) * 100);
+  };
+  
+  const attendanceRate = calculateAttendanceRate();
+  const status = getAttendanceStatus(attendanceRate);
+
+  // Customize calendar appearance
+  const modifiers = {
+    attended: attendance
+      .filter(record => record.attended)
+      .map(record => new Date(record.date)),
+    absent: attendance
+      .filter(record => !record.attended && record.date)
+      .map(record => new Date(record.date)),
+  };
+
+  const modifiersStyles = {
+    attended: { 
+      backgroundColor: "#f0fdf4",
+      color: "#15803d",
+      fontWeight: "bold"
+    },
+    absent: { 
+      backgroundColor: "#fef2f2",
+      color: "#dc2626"
+    }
+  };
+  
+  return (
+    <div className="grid grid-cols-1 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-[340px_1fr] gap-4">
+        {/* 출석 캘린더 및 통계 */}
+        <Card className="border-0 shadow-md w-[340px] h-full">
+          <CardContent className="h-full flex flex-col justify-between pt-8 pb-6">
+            <div className="space-y-12">
+              <div className="space-y-8">
+                <div className="space-y-6">
+                  <div className="flex justify-center">
+                    <div className="relative w-32 h-32">
+                      {member.photoUrl ? (
+                        <img
+                          src={member.photoUrl}
+                          alt={member.name}
+                          className="w-full h-full rounded-full object-cover border-4 border-white shadow-lg"
+                        />
+                      ) : (
+                        <div className="w-full h-full rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white shadow-lg">
+                          <User className="h-16 w-16" />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <p className="text-sm font-medium text-gray-600">출석률</p>
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1 mr-4">
+                        <div className="h-2.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                          <div
+                            className={`h-2.5 rounded-full transition-all ${
+                              attendanceRate >= 80
+                                ? "bg-green-500"
+                                : attendanceRate >= 50
+                                ? "bg-yellow-500"
+                                : "bg-red-500"
+                            }`}
+                            style={{ width: `${attendanceRate}%` }}
+                          />
+                        </div>
+                      </div>
+                      <span className="text-2xl font-semibold text-gray-900">{attendanceRate}%</span>
+                    </div>
+                    <div className={`text-sm font-medium text-center ${
+                      attendanceRate >= 80
+                        ? "text-green-600"
+                        : attendanceRate >= 50
+                        ? "text-yellow-600"
+                        : "text-red-600"
+                    }`}>
+                      {status.label}
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <p className="text-sm font-medium text-gray-600 mb-1 text-left">최근 30일</p>
+                    <p className="text-xl font-semibold text-gray-900">
+                      {attendance.slice(0, 30).filter(r => r.attended).length}
+                      <span className="text-base font-medium text-gray-600 ml-1">회 방문</span>
+                    </p>
+                  </div>
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <p className="text-sm font-medium text-gray-600 mb-1 text-left">최근 90일</p>
+                    <p className="text-xl font-semibold text-gray-900">
+                      {attendance.filter(r => r.attended).length}
+                      <span className="text-base font-medium text-gray-600 ml-1">회 방문</span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <p className="text-sm font-medium text-gray-600">이번 달 출석 기록</p>
+                <CalendarComponent
+                  mode="single"
+                  selected={date}
+                  onSelect={setDate}
+                  className="rounded-md border w-full"
+                  modifiers={modifiers}
+                  modifiersStyles={modifiersStyles}
+                  onDayClick={(day) => {
+                    const dateStr = day.toISOString().split("T")[0];
+                    const record = attendance.find(r => r.date === dateStr);
+                    if (record) {
+                      console.log(record);
+                    }
+                  }}
+                />
+                <div className="flex items-center justify-center space-x-4 text-sm">
+                  <div className="flex items-center">
+                    <div className="w-4 h-4 bg-green-100 rounded mr-2"></div>
+                    <span>출석</span>
+                  </div>
+                  <div className="flex items-center">
+                    <div className="w-4 h-4 bg-red-50 rounded mr-2"></div>
+                    <span>미출석</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 회원 기본 정보 */}
+        <Card className="border-0 shadow-md">
+          <CardHeader className="pb-4" />
+          <CardContent>
+            <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-gray-700">회원그룹</Label>
+                  <Select defaultValue="헬스">
+                    <SelectTrigger className="bg-white border-gray-200 hover:bg-gray-50 font-medium">
+                      <SelectValue placeholder="회원그룹 선택" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="헬스">헬스</SelectItem>
+                      <SelectItem value="PT">PT</SelectItem>
+                      <SelectItem value="필라테스">필라테스</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>담당</Label>
+                  <Select defaultValue={member.trainerAssigned || ""}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="담당 선택" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="박지훈">박지훈</SelectItem>
+                      <SelectItem value="김태양">김태양</SelectItem>
+                      <SelectItem value="최수진">최수진</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>회원명</Label>
+                  <Input value={member.name} />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>생년월일</Label>
+                  <div className="flex items-center gap-2">
+                    <Input value={member.birthDate || ""} placeholder="YYYYMMDD" />
+                    {member.birthDate && (
+                      <span className="text-sm text-muted-foreground whitespace-nowrap">
+                        만 {calculateAge(member.birthDate)}세
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>성별</Label>
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                      <input type="radio" id="male" name="gender" defaultChecked />
+                      <label htmlFor="male">남</label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <input type="radio" id="female" name="gender" />
+                      <label htmlFor="female">여</label>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>수신동의</Label>
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2">
+                      <input type="checkbox" id="sms" defaultChecked />
+                      <label htmlFor="sms">문자수신</label>
+                    </div>
+                    <Button variant="secondary" size="sm">문자전송</Button>
+                    <Button variant="secondary" size="sm">자동문자설정</Button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>회원그룹2</Label>
+                  <Select defaultValue="선택">
+                    <SelectTrigger>
+                      <SelectValue placeholder="회원그룹2 선택" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="선택">선택</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>담당2</Label>
+                  <Select defaultValue="선택">
+                    <SelectTrigger>
+                      <SelectValue placeholder="담당2 선택" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="선택">선택</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>휴대폰</Label>
+                  <Input value={formatPhoneNumber(member.phoneNumber)} />
+                </div>
+              </div>
+              
+              <div className="col-span-2 space-y-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-gray-700">우편번호</Label>
+                  <div className="flex gap-2">
+                    <Input 
+                      value={member.postalCode || ""} 
+                      className="w-32 bg-white border-gray-200" 
+                      readOnly 
+                    />
+                    <Button 
+                      variant="secondary" 
+                      size="sm"
+                      className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium"
+                      onClick={() => {
+                        // @ts-expect-error daum 우편번호 서비스 타입 정의가 없음
+                        const data: { zonecode: string; address: string } = new daum.Postcode({
+                          oncomplete: (data: { zonecode: string; address: string }) => {
+                            // Update member postal code and address
+                            const updatedMember = { ...member };
+                            updatedMember.postalCode = data.zonecode;
+                            updatedMember.address = data.address;
+                            setMember(updatedMember);
+                          }
+                        }).open();
+                      }}
+                    >
+                      우편번호 찾기
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Input 
+                    value={member.address || ""} 
+                    placeholder="상세주소를 입력하세요"
+                    className="bg-white border-gray-200"
+                    onChange={(e) => {
+                      const updatedMember = { ...member };
+                      updatedMember.address = e.target.value;
+                      setMember(updatedMember);
+                    }}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-gray-700">메모</Label>
+                  <Textarea 
+                    value={member.memo || ""} 
+                    placeholder="메모를 입력하세요"
+                    className="h-24 bg-white border-gray-200 resize-none"
+                    onChange={(e) => {
+                      const updatedMember = { ...member };
+                      updatedMember.memo = e.target.value;
+                      setMember(updatedMember);
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* 두 번째 행: 헬스장/PT 이용 정보 */}
+      <Card>
+        <CardHeader>
+          <CardTitle>헬스장 / PT 이용 정보</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <p className="text-sm font-medium">헬스장 이용권</p>
+              {member.membershipActive ? (
+                <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100">활성</Badge>
+              ) : (
+                <Badge variant="secondary" className="text-muted-foreground">만료</Badge>
+              )}
+            </div>
+            {member.membershipActive && member.membershipStartDate && member.membershipEndDate && (
+              <div className="text-sm text-gray-600 ml-1">
+                <div className="grid grid-cols-[60px_auto] items-center">
+                  <span className="text-gray-500 font-normal">이용기간</span>
+                  <span className="text-gray-700 font-medium ml-2">
+                    {formatDateYYYYMMDD(member.membershipStartDate)} ~ {formatDateYYYYMMDD(member.membershipEndDate)}
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+          
+          <Separator />
+          
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <p className="text-sm font-medium">PT 이용권</p>
+              {member.hasPT ? (
+                <Badge className="bg-blue-50 text-blue-700 hover:bg-blue-100">활성</Badge>
+              ) : (
+                <Badge variant="outline">미등록</Badge>
+              )}
+            </div>
+            {member.hasPT && (
+              <div className="space-y-1 ml-1">
+                <div className="grid grid-cols-[60px_auto] items-center text-sm text-gray-600">
+                  <span className="text-gray-500 font-normal">잔여횟수</span>
+                  <span className="text-gray-700 font-medium ml-2">
+                    {member.ptRemaining}회
+                  </span>
+                </div>
+                {member.ptExpireDate && (
+                  <div className="grid grid-cols-[60px_auto] items-center text-sm text-gray-600">
+                    <span className="text-gray-500 font-normal">만료일</span>
+                    <span className="text-gray-700 font-medium ml-2">
+                      {formatDateYYYYMMDD(member.ptExpireDate)}
+                    </span>
+                  </div>
+                )}
+                {member.trainerAssigned && (
+                  <div className="grid grid-cols-[60px_auto] items-center text-sm text-gray-600">
+                    <span className="text-gray-500 font-normal">담당</span>
+                    <span className="text-gray-700 font-medium ml-2">
+                      {member.trainerAssigned}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+          
+          <Separator />
+          
+          <div>
+            <p className="text-sm font-medium mb-1">락커 정보</p>
+            {member.lockerId ? (
+              <Badge variant="outline" className="bg-blue-50">{member.lockerId}</Badge>
+            ) : (
+              <Badge variant="outline">미등록</Badge>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* 세 번째 행: 결제 내역 */}
+      <Card>
+        <CardHeader>
+          <CardTitle>결제 내역</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableCell className="font-medium">결제일</TableCell>
+                <TableCell className="font-medium">구분</TableCell>
+                <TableCell className="font-medium">상품명</TableCell>
+                <TableCell className="font-medium">결제 금액</TableCell>
+                <TableCell className="font-medium">결제 수단</TableCell>
+                <TableCell className="font-medium">상태</TableCell>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {/* 결제 내역 데이터 매핑 필요 */}
+              <TableRow>
+                <TableCell>2024-03-15</TableCell>
+                <TableCell>PT</TableCell>
+                <TableCell>PT 20회</TableCell>
+                <TableCell>1,000,000원</TableCell>
+                <TableCell>카드</TableCell>
+                <TableCell>
+                  <Badge variant="outline" className="bg-emerald-50 text-emerald-700">완료</Badge>
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+const AttendanceTab = ({ memberId }: { memberId: string }) => {
+  const [attendance, setAttendance] = useState<AttendanceRecord[]>([]);
+  const [filteredAttendance, setFilteredAttendance] = useState<AttendanceRecord[]>([]);
+  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
+
+  useEffect(() => {
+    // Get mock attendance data
+    const attendanceData = getMockAttendance(memberId, 90);
+    setAttendance(attendanceData);
+    setFilteredAttendance(attendanceData);
+    setCurrentPage(1);
+  }, [memberId]);
+
+  // 날짜 검색 시 페이지를 1로 초기화
+  const handleSearch = () => {
+    if (!startDate || !endDate) return;
+    const filtered = attendance.filter(record => {
+      const recordDate = new Date(record.date);
+      return recordDate >= startDate && recordDate <= endDate;
+    });
+    setFilteredAttendance(filtered);
+    setCurrentPage(1);
+  };
+
+  // 초기화 시 페이지도 1로
+  const handleReset = () => {
+    setStartDate(undefined);
+    setEndDate(undefined);
+    setFilteredAttendance(attendance);
+    setCurrentPage(1);
+  };
+
+  // 페이징 관련 계산
+  const totalPages = Math.ceil(filteredAttendance.length / ITEMS_PER_PAGE);
+  const pagedAttendance = filteredAttendance.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  // 페이지 번호 배열 생성 (최대 5개씩, 그룹 이동)
+  const getPageNumbers = () => {
+    const pages = [];
+    const total = totalPages;
+    const start = Math.floor((currentPage - 1) / 5) * 5 + 1;
+    const end = Math.min(start + 4, total);
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+    return pages;
+  };
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-center gap-3">
+            <div className="flex items-center gap-4">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="w-[280px] font-normal relative"
+                  >
+                    <CalendarIcon className="absolute left-3 h-4 w-4" />
+                    <span className="text-center w-full">
+                      {startDate ? formatDate(startDate) : "시작일 선택"}
+                    </span>
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <CalendarComponent
+                    mode="single"
+                    selected={startDate}
+                    onSelect={setStartDate}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+              <span className="text-gray-500">~</span>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="w-[280px] font-normal relative"
+                  >
+                    <CalendarIcon className="absolute left-3 h-4 w-4" />
+                    <span className="text-center w-full">
+                      {endDate ? formatDate(endDate) : "종료일 선택"}
+                    </span>
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <CalendarComponent
+                    mode="single"
+                    selected={endDate}
+                    onSelect={setEndDate}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="outline"
+                className="bg-gray-100 hover:bg-gray-200 text-gray-600 border-gray-200"
+                onClick={handleReset}
+              >
+                초기화
+              </Button>
+              <Button 
+                variant="outline"
+                className="bg-white border-gray-200 hover:bg-gray-50"
+                onClick={handleSearch}
+              >
+                검색
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="rounded-md border max-w-4xl mx-auto">
+            <div className="relative w-full overflow-auto">
+              <table className="w-full caption-bottom text-sm">
+                <thead>
+                  <tr className="border-b bg-muted/50">
+                    <th className="h-12 px-4 text-center align-middle font-medium w-[200px]">날짜</th>
+                    <th className="h-12 px-4 text-center align-middle font-medium w-[120px]">출석 여부</th>
+                    <th className="h-12 px-4 text-center align-middle font-medium w-[120px]">입장 시간</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pagedAttendance.map((record, index) => (
+                    <tr key={index} className="border-b hover:bg-gray-50">
+                      <td className="p-4 align-middle text-center font-medium">{formatDate(record.date)}</td>
+                      <td className="p-4 align-middle text-center">
+                        {record.attended ? (
+                          <Badge className="bg-gym-success">출석</Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-gym-danger">
+                            미출석
+                          </Badge>
+                        )}
+                      </td>
+                      <td className="p-4 align-middle text-center text-gray-600">
+                        {record.timeIn || "-"}
+                      </td>
+                    </tr>
+                  ))}
+                  {pagedAttendance.length === 0 && (
+                    <tr>
+                      <td colSpan={3} className="text-center text-gray-400 py-8">출석 기록이 없습니다.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          {totalPages > 1 && (
+            <div className="flex justify-center items-center gap-1 py-4">
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </Button>
+              {getPageNumbers().map((page) => (
+                <Button
+                  key={page}
+                  variant={page === currentPage ? "default" : "outline"}
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => setCurrentPage(page)}
+                >
+                  {page}
+                </Button>
+              ))}
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+              >
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+interface MemberDetailProps {
+  id?: string;
+}
+
+const MemberDetail = (props: MemberDetailProps) => {
+  const params = useParams();
+  const navigate = useNavigate();
+  const id = props.id ?? params.id;
+  const [member, setMember] = useState<Member | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [membershipDialogOpen, setMembershipDialogOpen] = useState(false);
+  const [lockerDialogOpen, setLockerDialogOpen] = useState(false);
+
+  useEffect(() => {
+    if (!id) {
+      setError("회원을 찾을 수 없습니다.");
+      setIsLoading(false);
+      return;
+    }
+    // Find member in mock data
+    const foundMember = mockMembers.find(m => m.id === id);
+    if (foundMember) {
+      setMember(foundMember);
+      setError(null);
+    } else {
+      setError("회원을 찾을 수 없습니다.");
+      toast.error("회원을 찾을 수 없습니다.");
+    }
+    setIsLoading(false);
+  }, [id]);
+  
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <p className="text-muted-foreground">회원 정보를 불러오는 중...</p>
+        </div>
+      </div>
+    );
+  }
+  
+  if (!member) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <p className="text-muted-foreground">회원 정보를 찾을 수 없습니다.</p>
+          <Button
+            variant="link"
+            onClick={() => navigate("/members")}
+            className="mt-4"
+          >
+            회원 목록으로 돌아가기
+          </Button>
+        </div>
+      </div>
+    );
+  }
+  
+  // 회원 상태에 따른 배지 색상 결정
+  const getMembershipStatusBadge = () => {
+    if (member.membershipActive) {
+      return <Badge className="bg-green-500 hover:bg-green-600">활성</Badge>;
+    } else {
+      return <Badge variant="outline" className="text-red-500 border-red-200">만료</Badge>;
+    }
+  };
+
+  // PT 이용권 정보
+  const getPTInfo = () => {
+    if (!member.hasPT) {
+      return {
+        status: <Badge variant="outline" className="text-gray-500 border-gray-200">없음</Badge>,
+        remaining: '-',
+        expireDate: '-'
+      };
+    }
+    
+    const isActive = member.ptExpireDate && new Date(member.ptExpireDate) > new Date();
+    return {
+      status: isActive 
+        ? <Badge className="bg-green-500 hover:bg-green-600">활성</Badge>
+        : <Badge variant="outline" className="text-red-500 border-red-200">만료</Badge>,
+      remaining: `${member.ptRemaining}회 / ${member.ptTotal || 20}회`,
+      expireDate: member.ptExpireDate ? formatDate(new Date(member.ptExpireDate)) : '-'
+    };
+  };
+
+  // 헬스장 이용권 정보
+  const getGymMembershipInfo = () => {
+    if (!member.membershipActive) {
+      return {
+        status: <Badge variant="outline" className="text-red-500 border-red-200">만료</Badge>,
+        startDate: member.membershipStartDate ? formatDate(new Date(member.membershipStartDate)) : '-',
+        endDate: member.membershipEndDate ? formatDate(new Date(member.membershipEndDate)) : '-',
+        remainingDays: 0
+      };
+    }
+
+    const endDate = member.membershipEndDate ? new Date(member.membershipEndDate) : new Date();
+    const today = new Date();
+    const diffTime = endDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    return {
+      status: <Badge className="bg-green-500 hover:bg-green-600">활성</Badge>,
+      startDate: member.membershipStartDate ? formatDate(new Date(member.membershipStartDate)) : '-',
+      endDate: member.membershipEndDate ? formatDate(new Date(member.membershipEndDate)) : '-',
+      remainingDays: diffDays > 0 ? diffDays : 0
+    };
+  };
+
+  const ptInfo = getPTInfo();
+  const gymMembershipInfo = getGymMembershipInfo();
+  
+  return (
+    <div className="min-h-screen bg-gray-50 -mt-8 -mx-8 px-8 pt-8 pb-12">
+      {/* 상단 내비게이션 바 */}
+      <div className="sticky top-0 z-10 bg-white shadow-sm border-b border-gray-100 -mx-8 px-8 py-3 flex items-center justify-between">
+        <Button 
+          variant="ghost" 
+          onClick={() => navigate("/members")}
+          className="flex items-center gap-1.5 text-sm hover:bg-gray-50 transition-colors rounded-full"
+        >
+          <ChevronLeft className="h-4 w-4" />
+          <span className="font-medium">목록으로</span>
+        </Button>
+        <div className="flex gap-3">
+          <Button variant="outline" className="text-sm font-medium px-4 py-2 rounded-full border-gray-200 hover:border-gym-primary hover:text-gym-primary transition-colors">
+            <Edit className="h-4 w-4 mr-2" />
+            회원 수정
+          </Button>
+          <Button className="bg-gym-primary hover:bg-gym-primary/90 text-white text-sm font-medium px-4 py-2 rounded-full shadow-sm hover:shadow transition-all">
+            <Plus className="h-4 w-4 mr-2" />
+            새 회원
+          </Button>
+        </div>
+      </div>
+
+      {/* 회원 프로필 카드 */}
+      <div className="mt-8 bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
+        <div className="relative overflow-hidden">
+          {/* 배경 그라데이션 */}
+          <div className="absolute inset-0 bg-gradient-to-r from-gym-primary/5 via-blue-50 to-gym-primary/5 opacity-70"></div>
+          
+          {/* 프로필 내용 */}
+          <div className="relative p-8">
+            <div className="flex flex-col md:flex-row items-center gap-8">
+              {/* 프로필 이미지 */}
+              <div className="relative flex-shrink-0">
+                <div className="w-28 h-28 rounded-full bg-gradient-to-br from-gym-primary to-blue-400 flex items-center justify-center text-white font-bold text-4xl shadow-md border-4 border-white">
+                  {member.name.charAt(0)}
+                </div>
+                <div className="absolute -bottom-1 -right-1 bg-gradient-to-r from-green-500 to-green-400 text-white text-xs font-bold rounded-full w-10 h-10 flex items-center justify-center border-2 border-white shadow-md">
+                  {member.attendanceRate}%
+                </div>
+              </div>
+              
+              {/* 회원 정보 */}
+              <div className="text-center md:text-left">
+                <h1 className="text-3xl font-bold text-gray-800 tracking-tight">{member.name}</h1>
+                <p className="text-gray-500 text-sm mt-1 flex items-center justify-center md:justify-start gap-1">
+                  <Phone className="h-3.5 w-3.5" />
+                  {formatPhoneNumber(member.phoneNumber)}
+                </p>
+                
+                {/* 회원 상태 배지 */}
+                <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mt-4">
+                  {member.hasPT && (
+                    <Badge className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-4 py-1.5 rounded-full shadow-sm font-medium">
+                      <span className="flex items-center gap-1.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"></path><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path><line x1="6" y1="1" x2="6" y2="4"></line><line x1="10" y1="1" x2="10" y2="4"></line><line x1="14" y1="1" x2="14" y2="4"></line></svg>
+                        PT 회원
+                      </span>
+                    </Badge>
+                  )}
+                  {member.membershipActive && (
+                    <Badge className="bg-gradient-to-r from-gym-primary to-blue-500 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-1.5 rounded-full shadow-sm font-medium">
+                      <span className="flex items-center gap-1.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 4h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                        헬스장 이용권
+                      </span>
+                    </Badge>
+                  )}
+                  {member.lockerId && (
+                    <Badge className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white px-4 py-1.5 rounded-full shadow-sm font-medium">
+                      <span className="flex items-center gap-1.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                        락커 {member.lockerId}
+                      </span>
+                    </Badge>
+                  )}
+                </div>
+              </div>
+              
+              {/* 추가 정보 */}
+              <div className="ml-auto hidden md:grid grid-cols-1 gap-3 mt-4 md:mt-0">
+                <div className="flex items-center gap-2 bg-white/90 backdrop-blur-sm px-5 py-2.5 rounded-xl shadow-sm border border-gray-100">
+                  <User className="h-4 w-4 text-gym-primary" />
+                  <span className="text-sm font-medium text-gray-500">회원 ID:</span>
+                  <span className="font-mono font-medium text-gray-700">{member.id}</span>
+                </div>
+                <div className="flex items-center gap-2 bg-white/90 backdrop-blur-sm px-5 py-2.5 rounded-xl shadow-sm border border-gray-100">
+                  <CalendarIcon2 className="h-4 w-4 text-gym-primary" />
+                  <span className="text-sm font-medium text-gray-500">등록일:</span>
+                  <span className="font-medium text-gray-700">{formatDate(new Date(member.registrationDate))}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-8">
+        <Tabs defaultValue="detail" className="w-full">
+          <div className="bg-white rounded-2xl shadow-md overflow-hidden">
+            <div className="px-6 pt-4 border-b border-gray-100">
+              <TabsList className="bg-transparent w-full justify-start gap-1 p-0 h-auto">
+                <TabsTrigger 
+                  value="detail" 
+                  className="px-5 py-3 rounded-full data-[state=active]:bg-gray-50 data-[state=active]:text-gym-primary font-medium text-gray-600 hover:text-gym-primary/80 transition-colors"
+                >
+                  <User className="h-4 w-4 mr-2" />
+                  상세 정보
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="gym" 
+                  className="px-5 py-3 rounded-full data-[state=active]:bg-gray-50 data-[state=active]:text-gym-primary font-medium text-gray-600 hover:text-gym-primary/80 transition-colors"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 mr-2"><path d="M6 4h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                  헬스장 이용권
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="pt" 
+                  className="px-5 py-3 rounded-full data-[state=active]:bg-gray-50 data-[state=active]:text-gym-primary font-medium text-gray-600 hover:text-gym-primary/80 transition-colors"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 mr-2"><path d="M18 8h1a4 4 0 0 1 0 8h-1"></path><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path><line x1="6" y1="1" x2="6" y2="4"></line><line x1="10" y1="1" x2="10" y2="4"></line><line x1="14" y1="1" x2="14" y2="4"></line></svg>
+                  PT 이용권
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="attendance" 
+                  className="px-5 py-3 rounded-full data-[state=active]:bg-gray-50 data-[state=active]:text-gym-primary font-medium text-gray-600 hover:text-gym-primary/80 transition-colors"
+                >
+                  <CalendarIcon2 className="h-4 w-4 mr-2" />
+                  출석 관리
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="payment" 
+                  className="px-5 py-3 rounded-full data-[state=active]:bg-gray-50 data-[state=active]:text-gym-primary font-medium text-gray-600 hover:text-gym-primary/80 transition-colors"
+                >
+                  <CreditCard className="h-4 w-4 mr-2" />
+                  결제 내역
+                </TabsTrigger>
+              </TabsList>
+            </div>
+            
+            {/* 상세 정보 탭 */}
+            <TabsContent value="detail" className="mt-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card className="border-0 shadow-sm overflow-hidden">
+                  <CardHeader className="bg-gradient-to-r from-gray-50 to-white border-b p-4">
+                    <CardTitle className="text-base font-medium flex items-center">
+                      <User className="h-4 w-4 mr-2 text-gym-primary" />
+                      기본 정보
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-5">
+                    <div className="space-y-4">
+                      <div className="flex border-b border-gray-100 pb-3">
+                        <div className="w-1/3">
+                          <h3 className="text-sm font-medium text-gray-500">회원번호</h3>
+                        </div>
+                        <div className="w-2/3">
+                          <p className="font-medium text-gray-800">{member.id}</p>
+                        </div>
+                      </div>
+                      <div className="flex border-b border-gray-100 pb-3">
+                        <div className="w-1/3">
+                          <h3 className="text-sm font-medium text-gray-500">성별</h3>
+                        </div>
+                        <div className="w-2/3">
+                          <p className="font-medium text-gray-800">{member.gender === 'female' ? '여성' : '남성'}</p>
+                        </div>
+                      </div>
+                      <div className="flex border-b border-gray-100 pb-3">
+                        <div className="w-1/3">
+                          <h3 className="text-sm font-medium text-gray-500">생년월일</h3>
+                        </div>
+                        <div className="w-2/3">
+                          <p className="font-medium text-gray-800">
+                            {member.birthDate ? formatDateYYYYMMDD(member.birthDate) : '-'}
+                            {member.birthDate && ` (만 ${calculateAge(member.birthDate)}세)`}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex">
+                        <div className="w-1/3">
+                          <h3 className="text-sm font-medium text-gray-500">주소</h3>
+                        </div>
+                        <div className="w-2/3">
+                          <p className="font-medium text-gray-800">{member.address || '-'}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+            
+                <Card className="border-0 shadow-sm overflow-hidden">
+                  <CardHeader className="bg-gradient-to-r from-gray-50 to-white border-b p-4">
+                    <CardTitle className="text-base font-medium flex items-center">
+                      <Mail className="h-4 w-4 mr-2 text-gym-primary" />
+                      추가 정보
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-5">
+                    <div className="space-y-4">
+                      <div className="flex border-b border-gray-100 pb-3">
+                        <div className="w-1/3">
+                          <h3 className="text-sm font-medium text-gray-500">회원 수신 동의</h3>
+                        </div>
+                        <div className="w-2/3">
+                          <Badge className={member.smsConsent ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}>
+                            {member.smsConsent ? '동의' : '미동의'}
+                          </Badge>
+                        </div>
+                      </div>
+                      <div className="flex">
+                        <div className="w-1/3">
+                          <h3 className="text-sm font-medium text-gray-500">트레이너 메모</h3>
+                        </div>
+                        <div className="w-2/3">
+                          <p className="font-medium text-gray-700 bg-gray-50 p-3 rounded-md">
+                            {member.trainerNotes || '등록된 메모가 없습니다.'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+        
+        {/* 헬스장 이용권 탭 */}
+        <TabsContent value="gym" className="mt-4">
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-bold">헬스장 이용권 정보</h3>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setMembershipDialogOpen(true)}
+                  className="text-sm"
+                >
+                  결제 등록
+                </Button>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500 mb-1">이용권 상태</h3>
+                    <div>{gymMembershipInfo.status}</div>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500 mb-1">시작일</h3>
+                    <p className="font-medium">{gymMembershipInfo.startDate}</p>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500 mb-1">종료일</h3>
+                    <p className="font-medium">{gymMembershipInfo.endDate}</p>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500 mb-1">남은 기간</h3>
+                    <p className="font-medium text-blue-600">{gymMembershipInfo.remainingDays}일</p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        {/* PT 이용권 탭 */}
+        <TabsContent value="pt" className="mt-4">
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-bold">PT 이용권 정보</h3>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setMembershipDialogOpen(true)}
+                  className="text-sm"
+                >
+                  결제 등록
+                </Button>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500 mb-1">이용권 상태</h3>
+                    <div>{ptInfo.status}</div>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500 mb-1">남은 PT 횟수</h3>
+                    <p className="font-medium text-green-600">{ptInfo.remaining}</p>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500 mb-1">담당 트레이너</h3>
+                    <p className="font-medium">{member.trainerAssigned || '-'}</p>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500 mb-1">만료일</h3>
+                    <p className="font-medium">{ptInfo.expireDate}</p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        {/* 출석 관리 탭 */}
+        <TabsContent value="attendance" className="mt-4">
+          <AttendanceTab memberId={member.id} />
+        </TabsContent>
+        
+        {/* 결제 내역 탭 */}
+        <TabsContent value="payment" className="mt-4">
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-bold">결제 내역</h3>
+              </div>
+              
+              <Table>
+                <TableHeader>
+                  <tr>
+                    <th className="text-left pl-4">결제일</th>
+                    <th className="text-left">결제 상품</th>
+                    <th className="text-left">구분</th>
+                    <th className="text-left">상품명</th>
+                    <th className="text-right">결제 금액</th>
+                    <th className="text-center">결제 수단</th>
+                    <th className="text-center">할부</th>
+                    <th className="text-center">상태</th>
+                  </tr>
+                </TableHeader>
+                <TableBody>
+                  <TableRow>
+                    <TableCell className="pl-4">2024-12-01</TableCell>
+                    <TableCell>헬스장 이용권</TableCell>
+                    <TableCell>신규</TableCell>
+                    <TableCell>12개월 회원권</TableCell>
+                    <TableCell className="text-right">600,000원</TableCell>
+                    <TableCell className="text-center">카드</TableCell>
+                    <TableCell className="text-center">일시불</TableCell>
+                    <TableCell className="text-center">
+                      <Badge className="bg-green-100 text-green-700 hover:bg-green-100">완료</Badge>
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="pl-4">2024-12-01</TableCell>
+                    <TableCell>PT</TableCell>
+                    <TableCell>신규</TableCell>
+                    <TableCell>PT 20회</TableCell>
+                    <TableCell className="text-right">800,000원</TableCell>
+                    <TableCell className="text-center">카드</TableCell>
+                    <TableCell className="text-center">3개월</TableCell>
+                    <TableCell className="text-center">
+                      <Badge className="bg-green-100 text-green-700 hover:bg-green-100">완료</Badge>
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+
+};
+
+export default MemberDetail;

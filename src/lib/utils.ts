@@ -21,14 +21,31 @@ export function formatCurrency(amount: number): string {
 
 /**
  * Format a date as a human-readable string
+ * Returns '-' for empty, null, or invalid dates
  */
-export function formatDate(date: Date | string): string {
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
-  return new Intl.DateTimeFormat('ko-KR', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  }).format(dateObj);
+export function formatDate(date: Date | string | null | undefined): string {
+  // 빈 값 처리
+  if (!date || date === '') {
+    return '-';
+  }
+  
+  try {
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    
+    // 유효한 날짜인지 확인
+    if (isNaN(dateObj.getTime())) {
+      return '-';
+    }
+    
+    return new Intl.DateTimeFormat('ko-KR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    }).format(dateObj);
+  } catch (error) {
+    console.error('날짜 포맷팅 오류:', error);
+    return '-';
+  }
 }
 
 /**

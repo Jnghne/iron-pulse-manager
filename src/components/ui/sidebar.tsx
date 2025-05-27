@@ -48,7 +48,7 @@ function SidebarProvider({ defaultCollapsed = false, children, className, onColl
       <aside
         className={cn(
           "fixed inset-y-0 left-0 z-30 flex flex-col border-r bg-background transition-all",
-          collapsed ? "w-[80px]" : "w-[280px]",
+          collapsed ? "w-[70px]" : "w-[240px]",
           className
         )}
       >

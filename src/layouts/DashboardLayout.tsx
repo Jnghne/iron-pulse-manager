@@ -94,7 +94,7 @@ const DashboardLayout = () => {
       </div>
       
       {/* 메인 콘텐츠 - 사이드바 상태에 따라 마진 동적 조정 */}
-      <div className={`flex-1 transition-all duration-300 ${collapsed ? 'ml-[80px]' : 'ml-[280px]'}`}>
+      <div className={`flex-1 transition-all duration-300 ${collapsed ? 'ml-[70px]' : 'ml-[240px]'}`}>
         <main className="h-screen overflow-y-auto p-8">
           <Outlet />
         </main>

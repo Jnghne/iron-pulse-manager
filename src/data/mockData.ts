@@ -50,6 +50,38 @@ export interface Member {
   membershipStartDate?: string;
   phoneNumber?: string; // 추가: MemberList에서 사용하는 속성
   membershipEndDate?: string; // 추가: MemberList에서 사용하는 속성
+  
+  // 회원 상세 페이지 리뉴얼에 필요한 추가 필드
+  availableBranches?: string[]; // 이용 가능 지점 목록
+  unpaidAmount?: number; // 잔여 미수금
+  registrationPath?: string; // 방문/가입 경로
+  memberNotes?: string; // 특이사항 메모
+  
+  // 락커 이용권 정보
+  lockerInfo?: {
+    name: string; // 락커 상품명
+    daysLeft: number; // 남은 기간
+    startDate: string; // 시작일
+    endDate: string; // 종료일
+    lockerNumber: string; // 락커 번호
+    notes?: string; // 락커 특이사항
+  };
+  
+  // 기타 상품 정보
+  otherProducts?: {
+    name: string; // 상품명
+    startDate: string; // 시작일
+    endDate: string; // 종료일
+    type: string; // 상품 유형 (식음료, 공간대여, 촬영협조 등)
+  }[];
+  
+  // 정지 기록
+  suspensionRecords?: {
+    date: string; // 정지 일시
+    duration: number; // 정지 기간 (일)
+    reason: string; // 정지 사유
+    approver: string; // 승인 담당자
+  }[];
 }
 
 // 회원 목록 데이터

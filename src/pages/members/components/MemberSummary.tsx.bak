@@ -114,12 +114,12 @@ export const MemberSummary = ({ member }: MemberSummaryProps) => {
                 기본 정보
               </h3>
               
-              <div className="space-y-6">
+              <div className="space-y-3">
                 {/* 생년월일 및 만나이 */}
                 <div className="flex items-start gap-2">
                   <Calendar className="h-5 w-5 text-muted-foreground mt-0.5" />
                   <div>
-                    <p className="text-sm text-muted-foreground mb-2">생년월일</p>
+                    <p className="text-sm text-muted-foreground">생년월일</p>
                     <p className="font-medium">
                       {formatDate(member.birthDate || '')} 
                       {member.birthDate && (
@@ -135,7 +135,7 @@ export const MemberSummary = ({ member }: MemberSummaryProps) => {
                 <div className="flex items-start gap-2">
                   <User className="h-5 w-5 text-muted-foreground mt-0.5" />
                   <div>
-                    <p className="text-sm text-muted-foreground mb-2">성별</p>
+                    <p className="text-sm text-muted-foreground">성별</p>
                     <Badge variant="outline" className={member.gender === 'male' ? 'text-blue-600 bg-blue-50' : 'text-pink-600 bg-pink-50'}>
                       {member.gender === 'male' ? '남성' : '여성'}
                     </Badge>
@@ -146,7 +146,7 @@ export const MemberSummary = ({ member }: MemberSummaryProps) => {
                 <div className="flex items-start gap-2">
                   <Building className="h-5 w-5 text-muted-foreground mt-0.5" />
                   <div>
-                    <p className="text-sm text-muted-foreground mb-2">이용 가능 지점</p>
+                    <p className="text-sm text-muted-foreground">이용 가능 지점</p>
                     <div className="flex flex-wrap gap-1 mt-1">
                       {availableBranches.map((branch, index) => (
                         <Badge key={index} variant="outline" className="bg-gray-100">
@@ -162,7 +162,7 @@ export const MemberSummary = ({ member }: MemberSummaryProps) => {
                   <div className="flex items-start gap-2">
                     <CreditCard className="h-5 w-5 text-muted-foreground mt-0.5" />
                     <div>
-                      <p className="text-sm text-muted-foreground mb-2">잔여 미수금</p>
+                      <p className="text-sm text-muted-foreground">잔여 미수금</p>
                       <p className="font-medium">
                         {member.unpaidAmount.toLocaleString()}원
                       </p>
@@ -175,7 +175,7 @@ export const MemberSummary = ({ member }: MemberSummaryProps) => {
                   <div className="flex items-start gap-2">
                     <UserPlus className="h-5 w-5 text-muted-foreground mt-0.5" />
                     <div>
-                      <p className="text-sm text-muted-foreground mb-2">방문/가입 경로</p>
+                      <p className="text-sm text-muted-foreground">방문/가입 경로</p>
                       <p className="font-medium">{member.registrationPath}</p>
                     </div>
                   </div>
@@ -190,12 +190,12 @@ export const MemberSummary = ({ member }: MemberSummaryProps) => {
                 연락처 정보
               </h3>
               
-              <div className="space-y-6">
+              <div className="space-y-3">
                 {/* 핸드폰 번호 */}
                 <div className="flex items-start gap-2">
                   <Phone className="h-5 w-5 text-muted-foreground mt-0.5" />
                   <div>
-                    <p className="text-sm text-muted-foreground mb-2">핸드폰 번호</p>
+                    <p className="text-sm text-muted-foreground">핸드폰 번호</p>
                     <p className="font-medium">{formatPhoneNumber(member.phoneNumber)}</p>
                   </div>
                 </div>
@@ -205,7 +205,7 @@ export const MemberSummary = ({ member }: MemberSummaryProps) => {
                   <div className="flex items-start gap-2">
                     <Mail className="h-5 w-5 text-muted-foreground mt-0.5" />
                     <div>
-                      <p className="text-sm text-muted-foreground mb-2">이메일</p>
+                      <p className="text-sm text-muted-foreground">이메일</p>
                       <p className="font-medium">{member.email}</p>
                     </div>
                   </div>
@@ -216,7 +216,7 @@ export const MemberSummary = ({ member }: MemberSummaryProps) => {
                   <div className="flex items-start gap-2">
                     <MapPin className="h-5 w-5 text-muted-foreground mt-0.5" />
                     <div>
-                      <p className="text-sm text-muted-foreground mb-2">주소</p>
+                      <p className="text-sm text-muted-foreground">주소</p>
                       <p className="font-medium">{member.address}</p>
                     </div>
                   </div>
@@ -226,7 +226,7 @@ export const MemberSummary = ({ member }: MemberSummaryProps) => {
                 <div className="flex items-start gap-2">
                   <MessageSquare className="h-5 w-5 text-muted-foreground mt-0.5" />
                   <div>
-                    <p className="text-sm text-muted-foreground mb-2">문자 수신 동의</p>
+                    <p className="text-sm text-muted-foreground">문자 수신 동의</p>
                     <Badge variant={member.smsConsent ? "default" : "outline"} className={member.smsConsent ? "bg-gym-primary" : ""}>
                       {member.smsConsent ? "동의" : "미동의"}
                     </Badge>

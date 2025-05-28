@@ -16,16 +16,22 @@ import {
   Edit, 
   Plus,
   Users,
-  Key
+  Key,
+  AlertTriangle,
+  Clock,
+  Dumbbell
 } from "lucide-react";
 import { mockMembers, Member } from "@/data/mockData";
 import { formatDate, formatPhoneNumber, calculateAge } from "@/lib/utils";
 import { MemberSummary } from "./components/MemberSummary";
-import { MemberInfoTab } from "./components/MemberInfoTab";
 import { AttendanceTab } from "./components/AttendanceTab";
 import { PaymentHistoryTab } from "./components/PaymentHistoryTab";
 import { MemberEditDialog } from "./components/MemberEditDialog";
 import { LockerRegistrationDialog } from "./components/LockerRegistrationDialog";
+import { MembershipTab } from "./components/MembershipTab";
+import { MemberSuspensionDialog } from "./components/MemberSuspensionDialog";
+import { PaymentRegistrationDialog } from "./components/PaymentRegistrationDialog";
+import { PaymentDetailDialog } from "./components/PaymentDetailDialog";
 
 interface MemberDetailProps {
   id?: string;
@@ -40,13 +46,18 @@ const MemberDetail = ({ id: propId }: MemberDetailProps) => {
   
   const [member, setMember] = useState<Member | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("info");
+  const [activeTab, setActiveTab] = useState("membership");
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [lockerDialogOpen, setLockerDialogOpen] = useState(false);
+  const [suspensionDialogOpen, setSuspensionDialogOpen] = useState(false);
+  const [paymentRegistrationOpen, setPaymentRegistrationOpen] = useState(false);
+  const [paymentRegistrationType, setPaymentRegistrationType] = useState<'gym' | 'pt' | 'locker' | 'other' | null>(null);
+  const [paymentDetailOpen, setPaymentDetailOpen] = useState(false);
+  const [selectedPayment, setSelectedPayment] = useState<any>(null);
 
   // Mock auth check - replace with actual auth implementation
   const userRole = localStorage.getItem("userRole") || "trainer";
-  const isOwner = userRole === "owner";
+  const isOwner = userRole === "owner" || userRole === "admin";
 
   useEffect(() => {
     const fetchMember = () => {
@@ -70,8 +81,18 @@ const MemberDetail = ({ id: propId }: MemberDetailProps) => {
     }
   }, [id]);
 
-  const handlePaymentRegistration = () => {
-    navigate("/payment-registration", { state: { memberId: member?.id } });
+  const handlePaymentRegistration = (type: 'gym' | 'pt' | 'locker' | 'other') => {
+    setPaymentRegistrationType(type);
+    setPaymentRegistrationOpen(true);
+  };
+  
+  const handleSuspension = () => {
+    setSuspensionDialogOpen(true);
+  };
+  
+  const handleViewPaymentDetail = (payment: any) => {
+    setSelectedPayment(payment);
+    setPaymentDetailOpen(true);
   };
 
   if (loading) {
@@ -125,11 +146,11 @@ const MemberDetail = ({ id: propId }: MemberDetailProps) => {
         <div className="flex gap-3">
           <Button 
             variant="outline"
-            onClick={() => setLockerDialogOpen(true)}
+            onClick={handleSuspension}
             className="flex items-center gap-2 text-sm"
           >
-            <Key className="h-4 w-4" />
-            <span>락커 등록</span>
+            <AlertTriangle className="h-4 w-4" />
+            <span>정지 등록</span>
           </Button>
           
           <Button 
@@ -149,120 +170,18 @@ const MemberDetail = ({ id: propId }: MemberDetailProps) => {
       <Card>
         <CardContent className="pt-6">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-4 gap-2">
-              <TabsTrigger value="info" className="px-4 py-2 text-sm">회원 정보</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-3 gap-2">
               <TabsTrigger value="membership" className="px-4 py-2 text-sm">이용권 정보</TabsTrigger>
-              <TabsTrigger value="attendance" className="px-4 py-2 text-sm">출석 관리</TabsTrigger>
-              <TabsTrigger value="payment" className="px-4 py-2 text-sm">결제 내역</TabsTrigger>
+              <TabsTrigger value="attendance" className="px-4 py-2 text-sm">출석 현황</TabsTrigger>
+              <TabsTrigger value="payment" className="px-4 py-2 text-sm">결제/정지 내역</TabsTrigger>
             </TabsList>
             
-            <TabsContent value="info" className="mt-6">
-              <MemberInfoTab member={member} />
-            </TabsContent>
-            
             <TabsContent value="membership" className="mt-6">
-              <div className="space-y-6">
-                {/* 헬스장 이용권 정보 */}
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between">
-                    <div>
-                      <CardTitle className="text-lg">헬스장 이용권</CardTitle>
-                      <CardDescription>
-                        헬스장 이용권 상태 및 정보
-                      </CardDescription>
-                    </div>
-                    {isOwner && (
-                      <Button 
-                        onClick={handlePaymentRegistration}
-                        className="flex items-center gap-2 text-sm"
-                      >
-                        <Plus className="h-4 w-4" />
-                        결제 등록
-                      </Button>
-                    )}
-                  </CardHeader>
-                  <CardContent>
-                    {member.membershipActive ? (
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-muted-foreground">상태</span>
-                          <Badge className="bg-green-100 text-green-800">활성</Badge>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-muted-foreground">시작일</span>
-                          <span>{formatDate(member.membershipStartDate || '')}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-muted-foreground">종료일</span>
-                          <span>{formatDate(member.membershipEndDate || '')}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-muted-foreground">남은 기간</span>
-                          <span>{member.gymMembershipDaysLeft || 0}일</span>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="text-center py-6">
-                        <Badge variant="destructive">이용권 없음</Badge>
-                        <p className="mt-2 text-sm text-muted-foreground">
-                          현재 등록된 헬스장 이용권이 없습니다.
-                        </p>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-
-                {/* PT 이용권 정보 */}
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between">
-                    <div>
-                      <CardTitle className="text-lg">PT 이용권</CardTitle>
-                      <CardDescription>
-                        퍼스널 트레이닝 이용권 상태 및 정보
-                      </CardDescription>
-                    </div>
-                    {isOwner && (
-                      <Button 
-                        onClick={handlePaymentRegistration}
-                        className="flex items-center gap-2 text-sm"
-                      >
-                        <Plus className="h-4 w-4" />
-                        결제 등록
-                      </Button>
-                    )}
-                  </CardHeader>
-                  <CardContent>
-                    {member.hasPT ? (
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-muted-foreground">상태</span>
-                          <Badge className="bg-blue-100 text-blue-800">활성</Badge>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-muted-foreground">시작일</span>
-                          <span>{formatDate(member.ptStartDate || '')}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-muted-foreground">종료일</span>
-                          <span>{formatDate(member.ptExpiryDate || '')}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-muted-foreground">이용 횟수</span>
-                          <span>{member.ptRemaining}회 / {member.ptTotal || 20}회</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-muted-foreground">담당 트레이너</span>
-                          <span>{member.trainerAssigned || '미지정'}</span>
-                        </div>
-                      </div>
-                    ) : (
-                      <p className="text-muted-foreground text-center py-4">
-                        등록된 PT 이용권이 없습니다.
-                      </p>
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
+              <MembershipTab 
+                member={member} 
+                onPaymentRegister={handlePaymentRegistration} 
+                isOwner={isOwner} 
+              />
             </TabsContent>
             
             <TabsContent value="attendance" className="mt-6">
@@ -270,7 +189,11 @@ const MemberDetail = ({ id: propId }: MemberDetailProps) => {
             </TabsContent>
             
             <TabsContent value="payment" className="mt-6">
-              <PaymentHistoryTab memberId={member.id} />
+              <PaymentHistoryTab 
+                memberId={member.id} 
+                onViewDetail={handleViewPaymentDetail}
+                isOwner={isOwner}
+              />
             </TabsContent>
           </Tabs>
         </CardContent>
@@ -293,6 +216,122 @@ const MemberDetail = ({ id: propId }: MemberDetailProps) => {
         onOpenChange={setLockerDialogOpen}
         onSave={() => {
           setLockerDialogOpen(false);
+        }}
+      />
+      
+      <MemberSuspensionDialog
+        member={member}
+        open={suspensionDialogOpen}
+        onOpenChange={setSuspensionDialogOpen}
+        onSave={(duration, reason) => {
+          // 실제 구현에서는 API 호출 등의 로직이 들어갈 수 있음
+          console.log(`회원 정지 등록: ${duration}일, 사유: ${reason}`);
+          setSuspensionDialogOpen(false);
+          
+          // 임시 데이터 업데이트 (실제 구현에서는 API 응답으로 업데이트)
+          if (member) {
+            const updatedMember = { ...member };
+            if (!updatedMember.suspensionRecords) {
+              updatedMember.suspensionRecords = [];
+            }
+            
+            updatedMember.suspensionRecords.push({
+              date: new Date().toISOString().split('T')[0],
+              duration,
+              reason,
+              approver: userRole
+            });
+            
+            setMember(updatedMember);
+          }
+        }}
+      />
+      
+      <PaymentRegistrationDialog
+        member={member}
+        type={paymentRegistrationType}
+        open={paymentRegistrationOpen}
+        onOpenChange={setPaymentRegistrationOpen}
+        onSave={(paymentData) => {
+          // 실제 구현에서는 API 호출 등의 로직이 들어갈 수 있음
+          console.log('결제 등록:', paymentData);
+          setPaymentRegistrationOpen(false);
+          setPaymentRegistrationType(null);
+          
+          // 임시 데이터 업데이트 (실제 구현에서는 API 응답으로 업데이트)
+          if (member) {
+            const updatedMember = { ...member };
+            
+            // 결제 유형에 따라 회원 데이터 업데이트
+            switch (paymentData.type) {
+              case 'gym':
+                updatedMember.membershipActive = true;
+                updatedMember.membershipStartDate = paymentData.startDate;
+                // 임의로 1년 후로 설정 (실제로는 상품에 따라 다름)
+                const endDate = new Date(paymentData.startDate);
+                endDate.setFullYear(endDate.getFullYear() + 1);
+                updatedMember.membershipEndDate = endDate.toISOString().split('T')[0];
+                updatedMember.gymMembershipDaysLeft = 365;
+                break;
+              case 'pt':
+                updatedMember.hasPT = true;
+                updatedMember.ptStartDate = paymentData.startDate;
+                updatedMember.ptTotal = 10; // 임의 설정 (실제로는 상품에 따라 다름)
+                updatedMember.ptRemaining = 10;
+                // 임의로 6개월 후로 설정
+                const ptEndDate = new Date(paymentData.startDate);
+                ptEndDate.setMonth(ptEndDate.getMonth() + 6);
+                updatedMember.ptExpiryDate = ptEndDate.toISOString().split('T')[0];
+                updatedMember.trainerAssigned = paymentData.trainer;
+                break;
+              case 'locker':
+                updatedMember.lockerInfo = {
+                  name: paymentData.product,
+                  daysLeft: 30, // 임의 설정
+                  startDate: paymentData.startDate,
+                  endDate: new Date(new Date(paymentData.startDate).setMonth(new Date(paymentData.startDate).getMonth() + 1)).toISOString().split('T')[0],
+                  lockerNumber: paymentData.lockerNumber,
+                  notes: paymentData.memo
+                };
+                break;
+              case 'other':
+                if (!updatedMember.otherProducts) {
+                  updatedMember.otherProducts = [];
+                }
+                
+                updatedMember.otherProducts.push({
+                  name: paymentData.product,
+                  startDate: paymentData.startDate,
+                  endDate: new Date(new Date(paymentData.startDate).setMonth(new Date(paymentData.startDate).getMonth() + 1)).toISOString().split('T')[0],
+                  type: paymentData.product.split(' ')[0] // 임의 설정
+                });
+                break;
+            }
+            
+            // 미수금 업데이트
+            if (paymentData.unpaidAmount > 0) {
+              updatedMember.unpaidAmount = (updatedMember.unpaidAmount || 0) + paymentData.unpaidAmount;
+            }
+            
+            setMember(updatedMember);
+          }
+        }}
+      />
+      
+      <PaymentDetailDialog
+        payment={selectedPayment}
+        open={paymentDetailOpen}
+        onOpenChange={setPaymentDetailOpen}
+        isOwner={isOwner}
+        onEdit={(updatedPayment) => {
+          // 실제 구현에서는 API 호출 등의 로직이 들어갈 수 있음
+          console.log('결제 수정:', updatedPayment);
+          setPaymentDetailOpen(false);
+        }}
+        onDelete={(paymentId) => {
+          // 실제 구현에서는 API 호출 등의 로직이 들어갈 수 있음
+          console.log('결제 삭제:', paymentId);
+          setPaymentDetailOpen(false);
         }}
       />
     </div>

@@ -124,138 +124,143 @@ export const AttendanceTab = ({ memberId }: AttendanceTabProps) => {
         </Card>
       </div>
 
-      {/* 출석 현황 달력 */}
-      <Card>
-        <CardHeader>
-          <CardTitle>출석 현황 달력</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex justify-center">
-            <CalendarComponent
-              mode="single"
-              className="rounded-md border"
-              modifiers={modifiers}
-              modifiersStyles={modifiersStyles}
-            />
-          </div>
-          <div className="flex items-center justify-center space-x-4 text-sm mt-4">
-            <div className="flex items-center">
-              <div className="w-4 h-4 bg-green-100 rounded mr-2"></div>
-              <span>출석</span>
+      {/* 출석 현황 달력과 출석 기록 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* 출석 현황 달력 - 왼쪽 */}
+        <Card>
+          <CardHeader>
+            <CardTitle>출석 현황 달력</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex justify-center">
+              <CalendarComponent
+                mode="single"
+                className="rounded-md border"
+                modifiers={modifiers}
+                modifiersStyles={modifiersStyles}
+              />
             </div>
-            <div className="flex items-center">
-              <div className="w-4 h-4 bg-red-50 rounded mr-2"></div>
-              <span>미출석</span>
+            <div className="flex items-center justify-center space-x-4 text-sm mt-4">
+              <div className="flex items-center">
+                <div className="w-4 h-4 bg-green-100 rounded mr-2"></div>
+                <span>출석</span>
+              </div>
+              <div className="flex items-center">
+                <div className="w-4 h-4 bg-red-50 rounded mr-2"></div>
+                <span>미출석</span>
+              </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      {/* 출석 기록 테이블 */}
-      <Card>
-        <CardHeader>
-          <CardTitle>출석 기록</CardTitle>
-          <div className="flex items-center gap-4">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" className="w-[240px] justify-start">
-                  <Calendar className="mr-2 h-4 w-4" />
-                  {startDate ? formatDate(startDate) : "시작일 선택"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
-                <CalendarComponent
-                  mode="single"
-                  selected={startDate}
-                  onSelect={setStartDate}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
+        {/* 출석 기록 테이블 - 오른쪽 */}
+        <Card>
+          <CardHeader>
+            <CardTitle>출석 기록</CardTitle>
+            <div className="flex flex-wrap items-center gap-2">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-[120px] justify-start">
+                    <Calendar className="mr-2 h-4 w-4" />
+                    {startDate ? formatDate(startDate) : "시작일"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <CalendarComponent
+                    mode="single"
+                    selected={startDate}
+                    onSelect={setStartDate}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
 
-            <span>~</span>
+              <span>~</span>
 
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" className="w-[240px] justify-start">
-                  <Calendar className="mr-2 h-4 w-4" />
-                  {endDate ? formatDate(endDate) : "종료일 선택"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
-                <CalendarComponent
-                  mode="single"
-                  selected={endDate}
-                  onSelect={setEndDate}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-[120px] justify-start">
+                    <Calendar className="mr-2 h-4 w-4" />
+                    {endDate ? formatDate(endDate) : "종료일"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <CalendarComponent
+                    mode="single"
+                    selected={endDate}
+                    onSelect={setEndDate}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
 
-            <Button onClick={handleSearch}>검색</Button>
-            <Button variant="outline" onClick={handleReset}>초기화</Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>날짜</TableHead>
-                <TableHead>출석 여부</TableHead>
-                <TableHead>입장 시간</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {pagedAttendance.map((record, index) => (
-                <TableRow key={index}>
-                  <TableCell>{formatDate(record.date)}</TableCell>
-                  <TableCell>
-                    {record.attended ? (
-                      <Badge className="bg-green-100 text-green-800">출석</Badge>
-                    ) : (
-                      <Badge variant="outline" className="text-red-600">미출석</Badge>
-                    )}
-                  </TableCell>
-                  <TableCell>{record.timeIn || "-"}</TableCell>
-                </TableRow>
-              ))}
-              {pagedAttendance.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={3} className="text-center text-muted-foreground py-8">
-                    출석 기록이 없습니다.
-                  </TableCell>
-                </TableRow>
+              <Button size="sm" onClick={handleSearch}>검색</Button>
+              <Button size="sm" variant="outline" onClick={handleReset}>초기화</Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="max-h-[400px] overflow-y-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>날짜</TableHead>
+                    <TableHead>출석 여부</TableHead>
+                    <TableHead>입장 시간</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {pagedAttendance.map((record, index) => (
+                    <TableRow key={index}>
+                      <TableCell>{formatDate(record.date)}</TableCell>
+                      <TableCell>
+                        {record.attended ? (
+                          <Badge className="bg-green-100 text-green-800">출석</Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-red-600">미출석</Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>{record.timeIn || "-"}</TableCell>
+                    </TableRow>
+                  ))}
+                  {pagedAttendance.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={3} className="text-center text-muted-foreground py-8">
+                        출석 기록이 없습니다.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+              
+              {totalPages > 1 && (
+                <div className="flex justify-center items-center gap-2 mt-4">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  
+                  <span className="text-sm">
+                    {currentPage} / {totalPages}
+                  </span>
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
               )}
-            </TableBody>
-          </Table>
-          
-          {totalPages > 1 && (
-            <div className="flex justify-center items-center gap-2 mt-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              
-              <span className="text-sm">
-                {currentPage} / {totalPages}
-              </span>
-              
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                disabled={currentPage === totalPages}
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };

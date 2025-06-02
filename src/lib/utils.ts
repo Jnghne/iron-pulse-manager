@@ -40,11 +40,11 @@ export function calculateAge(birthDate: string): number {
 
 export function getAttendanceStatus(rate: number) {
   if (rate >= 80) {
-    return { label: "우수", color: "bg-green-100 text-green-800" };
+    return { label: "우수", color: "bg-green-500", badgeColor: "bg-green-600" };
   } else if (rate >= 50) {
-    return { label: "보통", color: "bg-yellow-100 text-yellow-800" };
+    return { label: "보통", color: "bg-yellow-400", badgeColor: "bg-yellow-500" };
   } else {
-    return { label: "저조", color: "bg-red-100 text-red-800" };
+    return { label: "저조", color: "bg-red-500", badgeColor: "bg-red-600" };
   }
 }
 

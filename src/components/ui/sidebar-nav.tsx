@@ -11,6 +11,7 @@ import {
   Settings,
   BarChart3,
   UserPlus,
+  Package, // 상품 관리 아이콘 추가
 } from "lucide-react"
 import { SidebarItem } from "./sidebar"
 import { cn } from "@/lib/utils"
@@ -45,9 +46,9 @@ export function SidebarNav({ className, ...props }: SidebarNavProps) {
       icon: <CreditCard className="h-5 w-5" />,
     },
     {
-      title: "결제 등록",
-      href: "/payments",
-      icon: <CreditCard className="h-5 w-5" />,
+      title: "상품 관리",
+      href: "/products",
+      icon: <Package className="h-5 w-5" />,
     },
     {
       title: "락커룸 관리",

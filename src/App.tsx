@@ -16,13 +16,15 @@ import MemberList from "./pages/members/MemberList";
 import MemberDetail from "./pages/members/MemberDetail";
 import MemberCreate from "./pages/members/MemberCreate";
 import DailyTickets from "./pages/DailyTickets";
-import PaymentRegistration from "./pages/PaymentRegistration";
+
 import LockerRoom from "./pages/LockerRoom";
 import Attendance from "./pages/Attendance";
 import MessageSystem from "./pages/MessageSystem";
 import Calendar from "./pages/Calendar";
 import Statistics from "./pages/Statistics";
 import TrainerManagement from "./pages/TrainerManagement";
+import ProductListPage from "./pages/products/ProductListPage"; // 상품 관리 페이지 임포트
+import ProductFormPage from "./pages/products/ProductFormPage"; // 상품 폼 페이지 임포트
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -46,7 +48,10 @@ const App = () => (
             <Route path="members/:id" element={<MemberDetail />} />
             <Route path="members/new" element={<MemberCreate />} />
             <Route path="daily-tickets" element={<DailyTickets />} />
-            <Route path="payments" element={<PaymentRegistration />} />
+            {/* <Route path="payments" element={<PaymentRegistration />} /> */}
+            <Route path="products" element={<ProductListPage />} /> {/* 상품 관리 페이지 라우트 추가 */}
+            <Route path="products/new" element={<ProductFormPage />} /> {/* 새 상품 추가 라우트 */}
+            <Route path="products/edit/:productId" element={<ProductFormPage />} /> {/* 상품 수정 라우트 */}
             <Route path="locker-room" element={<LockerRoom />} />
             <Route path="attendance" element={<Attendance />} />
             <Route path="messages" element={<MessageSystem />} />

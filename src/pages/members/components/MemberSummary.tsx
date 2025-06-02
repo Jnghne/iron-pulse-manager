@@ -35,11 +35,7 @@ export const MemberSummary = ({ member }: MemberSummaryProps) => {
     return types.length > 0 ? types : ["일반 회원"];
   };
 
-  const getAttendanceColor = (rate: number) => {
-    if (rate >= 80) return "bg-green-100 text-green-800";
-    if (rate >= 50) return "bg-yellow-100 text-yellow-800";
-    return "bg-red-100 text-red-800";
-  };
+  // 출석률 관련 함수 제거
 
   // 이용 가능 지점 목록 (예시 데이터)
   const availableBranches = member.availableBranches || ["본점"];
@@ -49,7 +45,7 @@ export const MemberSummary = ({ member }: MemberSummaryProps) => {
       <CardContent className="p-6">
         <div className="flex flex-col md:flex-row gap-8">
           {/* 왼쪽 섹션: 회원 사진 및 기본 정보 */}
-          <div className="flex flex-col items-center space-y-4 md:w-1/3 justify-center">
+          <div className="flex flex-col items-center space-y-4 md:w-1/4 justify-center">
             {/* 회원 사진 */}
             <Avatar className="h-40 w-40 border-4 border-white shadow-xl">
               <AvatarImage src={member.photoUrl} alt={member.name} />
@@ -69,35 +65,19 @@ export const MemberSummary = ({ member }: MemberSummaryProps) => {
             {/* 회원 유형 */}
             <div className="flex flex-wrap gap-2 justify-center">
               {getMemberTypes().map((type, index) => (
-                <Badge key={index} variant="outline" className="bg-blue-50 text-blue-700 px-4 py-1.5">
+                <Badge key={index} variant="outline" className={
+                  type === "헬스권" 
+                    ? "bg-blue-50 text-blue-700 px-4 py-1.5" 
+                    : type === "PT" 
+                      ? "bg-purple-50 text-purple-700 px-4 py-1.5" 
+                      : "bg-gray-50 text-gray-700 px-4 py-1.5"
+                }>
                   {type}
                 </Badge>
               ))}
             </div>
 
-            {/* 출석률 */}
-            <div className="w-full space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-lg font-medium">출석률</span>
-                <Badge className={getAttendanceColor(member.attendanceRate)}>
-                  {member.attendanceRate}%
-                </Badge>
-              </div>
-              <div className="w-full">
-                <div className="h-2.5 bg-gray-200 rounded-full overflow-hidden">
-                  <div
-                    className={`h-2.5 rounded-full transition-all ${
-                      member.attendanceRate >= 80
-                        ? "bg-green-500"
-                        : member.attendanceRate >= 50
-                        ? "bg-yellow-500"
-                        : "bg-red-500"
-                    }`}
-                    style={{ width: `${member.attendanceRate}%` }}
-                  />
-                </div>
-              </div>
-            </div>
+            {/* 출석률 섹션 제거됨 */}
           </div>
 
           {/* 구분선 (모바일에서만 표시) */}
@@ -106,15 +86,17 @@ export const MemberSummary = ({ member }: MemberSummaryProps) => {
           </div>
 
           {/* 오른쪽 섹션: 회원 상세 정보 */}
-          <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 py-4">
-            {/* 기본 정보 섹션 */}
-            <div className="space-y-4 flex flex-col">
-              <h3 className="text-lg font-semibold flex items-center gap-2">
-                <User className="h-5 w-5 text-gym-primary" />
-                기본 정보
-              </h3>
-              
-              <div className="space-y-6">
+          <div className="flex-1 flex flex-col gap-4 py-4">
+            {/* 회원 정보 타이틀 */}
+            <h3 className="text-xl font-semibold flex items-center gap-2 mb-4">
+              <User className="h-6 w-6 text-gym-primary" />
+              회원 정보
+            </h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+              {/* 기본 정보 섹션 */}
+              <div className="space-y-4 flex flex-col">
+                <div className="space-y-6">
                 {/* 생년월일 및 만나이 */}
                 <div className="flex items-start gap-2">
                   <Calendar className="h-5 w-5 text-muted-foreground mt-0.5" />
@@ -185,10 +167,7 @@ export const MemberSummary = ({ member }: MemberSummaryProps) => {
             
             {/* 연락처 정보 섹션 */}
             <div className="space-y-4 flex flex-col">
-              <h3 className="text-lg font-semibold flex items-center gap-2">
-                <Phone className="h-5 w-5 text-gym-primary" />
-                연락처 정보
-              </h3>
+              {/* 연락처 정보 타이틀 제거 */}
               
               <div className="space-y-6">
                 {/* 핸드폰 번호 */}
@@ -248,6 +227,7 @@ export const MemberSummary = ({ member }: MemberSummaryProps) => {
               </div>
             )}
           </div>
+        </div>
         </div>
       </CardContent>
     </Card>

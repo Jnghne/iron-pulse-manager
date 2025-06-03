@@ -18,6 +18,9 @@ import { formatDate } from "@/lib/utils";
 import { MembershipDialog, MembershipType } from "./MembershipDialog";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/use-toast";
+import { PassDetailModal } from '@/components/features/pass/PassDetailModal';
+import type { PassDetails } from '@/types/pass';
+import type { MembershipFormDataType } from './MembershipDialog';
 
 // Member 타입 확장 (실제로는 mockData에서 정의해야 함)
 declare module "@/data/mockData" {
@@ -61,10 +64,14 @@ export const MembershipTab = ({
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogType, setDialogType] = useState<MembershipType>('gym');
   const [dialogMode, setDialogMode] = useState<'edit' | 'create'>('create');
-  const [currentMembershipData, setCurrentMembershipData] = useState<MembershipDetailData | null>(null);
+  const [currentDialogData, setCurrentDialogData] = useState<MembershipFormDataType | undefined>();
 
   // 토스트 알림
   const { toast } = useToast();
+
+  // PassDetailModal 상태 관리
+  const [isPassDetailModalOpen, setIsPassDetailModalOpen] = useState(false);
+  const [selectedPassDetails, setSelectedPassDetails] = useState<PassDetails | null>(null);
 
   // 상품 존재 여부 확인 (실제로는 API에서 가져와야 함)
   const [productsExist, setProductsExist] = useState({
@@ -75,12 +82,15 @@ export const MembershipTab = ({
   });
 
   // 이용권 카드 클릭 핸들러
-  const handleMembershipCardClick = (type: MembershipType, data: MembershipDetailData) => {
+  const handleMembershipCardClick = (
+    type: MembershipType,
+    data?: MembershipFormDataType
+  ) => {
     if (!isOwner) return; // 관리자만 수정 가능
 
     setDialogType(type);
     setDialogMode('edit');
-    setCurrentMembershipData(data);
+    setCurrentDialogData(data);
     setDialogOpen(true);
   };
 
@@ -98,7 +108,7 @@ export const MembershipTab = ({
 
     setDialogType(type);
     setDialogMode('create');
-    setCurrentMembershipData(null);
+    setCurrentDialogData(undefined);
     setDialogOpen(true);
   };
 
@@ -107,7 +117,7 @@ export const MembershipTab = ({
     if (onMembershipUpdate) {
       onMembershipUpdate(dialogType, {
         ...data,
-        id: currentMembershipData?.id
+        id: currentDialogData?.id
       });
 
       toast({
@@ -118,9 +128,126 @@ export const MembershipTab = ({
   };
 
   // 이용권 삭제 핸들러
+  // PassDetails 객체로 변환하는 헬퍼 함수
+  const mapToPassDetails = (
+    type: 'gym' | 'pt' | 'locker',
+    memberData: Member,
+    specificData?: MembershipDetailData
+  ): PassDetails => {
+    const commonDetails = {
+      consultant: '오정석', // 예시 데이터 (이미지 참조)
+      instructor: memberData.trainerAssigned || '배정 예정', // 수정: memberData.trainerAssigned 사용
+      paymentDate: '2025. 05. 27. 19:35', // 예시 데이터 (이미지 참조)
+      paymentMethod: '카드 결제', // 예시 데이터 (이미지 참조)
+      purchasePurpose: '다이어트', // 예시 데이터 (이미지 참조)
+      actualPaymentAmount: specificData?.price || 0,
+      consultantSalesShare: 0, // 예시 데이터
+      unpaidAmountShare: 0, // 예시 데이터
+    };
+
+    let serviceStartDateStr = 'N/A';
+    let serviceEndDateStr = 'N/A';
+
+    const formatDateForPass = (dateInput: Date | string | undefined): string => {
+      if (!dateInput) return 'N/A';
+      try {
+        const dateObj = typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
+        if (isNaN(dateObj.getTime())) return 'N/A';
+        const year = dateObj.getFullYear();
+        const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+        const day = dateObj.getDate().toString().padStart(2, '0');
+        const hours = dateObj.getHours();
+        const period = hours >= 12 ? '오후' : '오전';
+        return `${year}. ${month}. ${day}. ${period}`;
+      } catch (e) {
+        return 'N/A';
+      }
+    };
+
+    if (type === 'gym') {
+      serviceStartDateStr = formatDateForPass(specificData?.startDate || memberData.membershipStartDate);
+      serviceEndDateStr = formatDateForPass(specificData?.endDate || memberData.membershipEndDate);
+      return {
+        id: specificData?.id || memberData.id || 'gym-pass',
+        name: specificData?.name || `헬스 이용권 ${memberData.memberType || ''}`,
+        type: '회원권',
+        category: '기간제',
+        subCategory: '헬스',
+        serviceStartDate: serviceStartDateStr,
+        serviceEndDate: serviceEndDateStr,
+        productAmount: specificData?.price || memberData.membershipPrice || 0,
+        instructor: memberData.trainerAssigned || commonDetails.instructor, // 수정: memberData.trainerAssigned 우선 사용
+        ...commonDetails,
+        actualPaymentAmount: specificData?.price || memberData.membershipPrice || 0,
+      };
+    } else if (type === 'pt') {
+      serviceStartDateStr = formatDateForPass(specificData?.startDate || memberData.ptStartDate);
+      serviceEndDateStr = formatDateForPass(specificData?.endDate || memberData.ptExpiryDate);   // 수정: ptExpiryDate 사용
+      return {
+        id: specificData?.id || memberData.id || 'pt-pass',
+        name: specificData?.name || `PT 이용권 ${specificData?.totalSessions || memberData.ptTotal || ''}회`, // 수정: ptTotal 사용
+        type: '회원권',
+        category: '횟수제',
+        subCategory: 'PT',
+        serviceStartDate: serviceStartDateStr,
+        serviceEndDate: serviceEndDateStr,
+        productAmount: specificData?.price || memberData.ptPrice || 0,
+        instructor: memberData.trainerAssigned || commonDetails.instructor, // 수정: memberData.trainerAssigned 우선 사용
+        ...commonDetails,
+        actualPaymentAmount: specificData?.price || memberData.ptPrice || 0,
+      };
+    }
+    // 기본 반환값
+    return {
+        id: 'unknown-pass',
+        name: '알 수 없는 이용권',
+        type: '기타',
+        category: '기타',
+        subCategory: '기타',
+        serviceStartDate: 'N/A',
+        serviceEndDate: 'N/A',
+        productAmount: 0,
+        ...commonDetails, // commonDetails에 이미 instructor가 포함됨
+    };
+  };
+
+  // PassDetailModal 열기 핸들러
+  const openPassDetailModalHandler = (pass: PassDetails) => {
+    setSelectedPassDetails(pass);
+    setIsPassDetailModalOpen(true);
+  };
+
+  const closePassDetailModalHandler = () => {
+    setIsPassDetailModalOpen(false);
+    setSelectedPassDetails(null);
+    // 수정 모드에서 닫을 때 PassDetailModal 내부에서 isEditing을 false로 처리하므로 여기서는 별도 처리 불필요
+  };
+
+  // PassDetailModal에서 호출될 이용권 업데이트 핸들러
+  const handleUpdatePass = (updatedPassDetails: PassDetails) => {
+    console.log('Update Pass:', updatedPassDetails);
+    // TODO: API 호출하여 서버 데이터 업데이트
+    // 예시: updateMembershipPass(updatedPassDetails).then(() => {
+    //   refetchMembershipList(); // 목록 새로고침
+    //   closePassDetailModalHandler();
+    // });
+    // 현재는 모달 내부에서 저장 후 닫지 않으므로, 필요시 여기서 closePassDetailModalHandler() 호출
+  };
+
+  // PassDetailModal에서 호출될 이용권 삭제 핸들러
+  const handleDeletePass = (passId: string) => {
+    console.log('Delete Pass ID:', passId);
+    // TODO: API 호출하여 서버 데이터 삭제
+    // 예시: deleteMembershipPass(passId).then(() => {
+    //   refetchMembershipList(); // 목록 새로고침
+    //   closePassDetailModalHandler(); // 삭제 후 모달은 PassDetailModal 내부에서 닫힘
+    // });
+  };
+
+  // 이용권 삭제 핸들러
   const handleDeleteMembership = () => {
     if (onMembershipDelete) {
-      onMembershipDelete(dialogType, currentMembershipData?.id);
+      onMembershipDelete(dialogType, currentDialogData?.id);
 
       toast({
         title: "이용권이 삭제되었습니다",
@@ -132,9 +259,9 @@ export const MembershipTab = ({
 
   // 카드 클릭 가능 여부 스타일
   const getCardStyle = (hasData: boolean) => {
-    if (!isOwner) return "";
+    // if (!isOwner) return ""; // isOwner 조건 제거
     return hasData
-      ? "cursor-pointer hover:shadow-md transition-shadow duration-200"
+      ? "cursor-pointer hover:border-gym-primary hover:shadow-lg transition-all duration-200 ease-in-out"
       : "";
   };
 
@@ -150,14 +277,19 @@ export const MembershipTab = ({
       {/* 헬스장 이용권 정보 */}
       <Card
         className={getCardStyle(!!member.membershipActive)}
-        onClick={() => member.membershipActive && handleMembershipCardClick('gym', {
-          id: member.id,
-          productId: member.membershipId,
-          name: `헬스 이용권 ${member.memberType}`,
-          startDate: new Date(member.membershipStartDate || ''),
-          endDate: new Date(member.membershipEndDate || ''),
-          price: member.membershipPrice,
-        })}
+        onClick={() => {
+          if (member.membershipActive) {
+            const passDetailsData = mapToPassDetails('gym', member, {
+              id: member.id,
+              productId: member.membershipId,
+              name: `헬스 이용권 ${member.memberType}`,
+              startDate: new Date(member.membershipStartDate || ''),
+              endDate: new Date(member.membershipEndDate || ''),
+              price: member.membershipPrice,
+            });
+            openPassDetailModalHandler(passDetailsData);
+          }
+        }}
       >
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
@@ -169,27 +301,7 @@ export const MembershipTab = ({
               헬스장 이용권 상태 및 정보
             </CardDescription>
           </div>
-          {isOwner && (
-            <Button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleRegisterClick('gym');
-              }}
-              className="flex items-center gap-2 text-sm bg-gym-primary hover:bg-gym-primary/90"
-            >
-              {member.membershipActive ? (
-                <>
-                  <Edit className="h-4 w-4" />
-                  수정
-                </>
-              ) : (
-                <>
-                  <Plus className="h-4 w-4" />
-                  결제 등록
-                </>
-              )}
-            </Button>
-          )}
+
         </CardHeader>
         <CardContent>
           {member.membershipActive ? (
@@ -236,17 +348,22 @@ export const MembershipTab = ({
       {/* PT 레슨권 정보 */}
       <Card
         className={getCardStyle(!!member.hasPT)}
-        onClick={() => member.hasPT && handleMembershipCardClick('pt', {
-          id: member.id,
-          productId: member.ptId,
-          name: `PT ${member.ptTotal}회권`,
-          startDate: new Date(member.ptStartDate || ''),
-          endDate: new Date(member.ptExpiryDate || ''),
-          price: member.ptPrice,
-          remainingSessions: member.ptRemaining,
-          totalSessions: member.ptTotal,
-          notes: `담당 트레이너: ${member.trainerAssigned || '미지정'}`
-        })}
+        onClick={() => {
+          if (member.hasPT) {
+            const passDetailsData = mapToPassDetails('pt', member, {
+              id: member.id,
+              productId: member.ptId,
+              name: `PT ${member.ptTotal}회권`,
+              startDate: new Date(member.ptStartDate || ''),
+              endDate: new Date(member.ptExpiryDate || ''),
+              price: member.ptPrice,
+              remainingSessions: member.ptRemaining,
+              totalSessions: member.ptTotal,
+              notes: `담당 트레이너: ${member.trainerAssigned || '미지정'}`
+            });
+            openPassDetailModalHandler(passDetailsData);
+          }
+        }}
       >
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
@@ -258,27 +375,7 @@ export const MembershipTab = ({
               퍼스널 트레이닝 이용권 상태 및 정보
             </CardDescription>
           </div>
-          {isOwner && (
-            <Button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleRegisterClick('pt');
-              }}
-              className="flex items-center gap-2 text-sm bg-gym-primary hover:bg-gym-primary/90"
-            >
-              {member.hasPT ? (
-                <>
-                  <Edit className="h-4 w-4" />
-                  수정
-                </>
-              ) : (
-                <>
-                  <Plus className="h-4 w-4" />
-                  결제 등록
-                </>
-              )}
-            </Button>
-          )}
+
         </CardHeader>
         <CardContent>
           {member.hasPT ? (
@@ -451,10 +548,22 @@ export const MembershipTab = ({
     onOpenChange={setDialogOpen}
     type={dialogType}
     mode={dialogMode}
-    currentData={currentMembershipData}
+    currentData={currentDialogData}
     onSave={handleSaveMembership}
     onDelete={handleDeleteMembership}
+  />
+
+  {/* PassDetailModal 렌더링 */}
+  {selectedPassDetails && (
+    <PassDetailModal
+      isOpen={isPassDetailModalOpen}
+      onClose={closePassDetailModalHandler}
+      passDetails={selectedPassDetails}
+      isOwner={isOwner}
+      onUpdatePass={handleUpdatePass}
+      onDeletePass={handleDeletePass}
     />
-    </>
-  );
+  )}
+</>
+);
 };

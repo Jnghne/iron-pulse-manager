@@ -20,6 +20,20 @@ import { cn } from "@/lib/utils";
 
 export type MembershipType = 'gym' | 'pt' | 'locker' | 'other';
 
+// MembershipDialog에서 사용하는 폼 데이터 타입을 정의하고 export 합니다.
+export interface MembershipFormDataType {
+  id?: string; // 이용권 인스턴스 ID (수정 시)
+  productId?: string; // 원본 상품 ID (필요한 경우)
+  name?: string; // 상품명
+  startDate?: Date;
+  endDate?: Date;
+  price?: number;
+  totalSessions?: number; // PT 총 횟수
+  remainingSessions?: number; // PT 잔여 횟수
+  lockerNumber?: string;
+  notes?: string;
+}
+
 interface Product {
   id: string;
   name: string;
@@ -34,19 +48,8 @@ interface MembershipDialogProps {
   onOpenChange: (open: boolean) => void;
   type: MembershipType;
   mode: 'edit' | 'create';
-  currentData?: {
-    id?: string;
-    productId?: string;
-    name?: string;
-    startDate?: Date;
-    endDate?: Date;
-    price?: number;
-    remainingSessions?: number;
-    totalSessions?: number;
-    lockerNumber?: string;
-    notes?: string;
-  };
-  onSave: (data: any) => void;
+  currentData?: MembershipFormDataType;
+  onSave: (data: MembershipFormDataType) => void;
   onDelete?: () => void;
 }
 
@@ -79,16 +82,24 @@ export const MembershipDialog: React.FC<MembershipDialogProps> = ({
   const filteredProducts = products.filter(product => product.type === type);
 
   React.useEffect(() => {
+    if (mode === 'create' && filteredProducts.length > 0) {
+      setSelectedProduct(filteredProducts[0].id);
+    } else if (mode === 'edit' && currentData?.productId) {
+      setSelectedProduct(currentData.productId);
+    }
+  }, [mode, currentData, filteredProducts, filteredProducts.length]);
+
+  React.useEffect(() => {
     // 실제 구현에서는 API 호출로 상품 목록을 가져와야 함
     setHasProducts(filteredProducts.length > 0);
-  }, [type]);
+  }, [type, filteredProducts.length]);
 
   const handleSave = () => {
     const selectedProductData = products.find(p => p.id === selectedProduct);
     
-    const data = {
+    const data: MembershipFormDataType = {
       productId: selectedProduct,
-      productName: selectedProductData?.name,
+      name: selectedProductData?.name, // productName 대신 name 사용
       startDate,
       endDate,
       price: parseInt(price),

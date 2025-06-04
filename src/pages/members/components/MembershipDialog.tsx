@@ -17,6 +17,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { CalendarIcon, Trash2 } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import { cn } from "@/lib/utils";
+import { mockProducts } from '@/data/mockProducts';
+import { ProductType } from '@/types/product';
 
 export type MembershipType = 'gym' | 'pt' | 'locker' | 'other';
 
@@ -34,14 +36,7 @@ export interface MembershipFormDataType {
   notes?: string;
 }
 
-interface Product {
-  id: string;
-  name: string;
-  type: MembershipType;
-  price: number;
-  duration?: number; // 일 단위
-  sessions?: number; // PT 횟수
-}
+// 내부에서 사용할 Product 타입 (mockProducts의 타입과 호환되도록 수정)
 
 interface MembershipDialogProps {
   open: boolean;
@@ -70,16 +65,19 @@ export const MembershipDialog: React.FC<MembershipDialogProps> = ({
   const [notes, setNotes] = React.useState<string>(currentData?.notes || '');
   const [hasProducts, setHasProducts] = React.useState<boolean>(true); // 상품 존재 여부
 
-  // 임시 상품 목록 (실제로는 API에서 가져와야 함)
-  const products: Product[] = [
-    { id: '1', name: '헬스 1개월권', type: 'gym', price: 100000, duration: 30 },
-    { id: '2', name: '헬스 3개월권', type: 'gym', price: 270000, duration: 90 },
-    { id: '3', name: 'PT 10회권', type: 'pt', price: 500000, sessions: 10 },
-    { id: '4', name: '락커 1개월', type: 'locker', price: 30000, duration: 30 },
-  ];
+  // mockProducts에서 해당 타입에 맞는 상품 가져오기
+  const getProductType = (membershipType: MembershipType): ProductType => {
+    switch (membershipType) {
+      case 'gym': return ProductType.MEMBERSHIP;
+      case 'pt': return ProductType.PT;
+      case 'locker': return ProductType.LOCKER;
+      case 'other': return ProductType.OTHER;
+      default: return ProductType.OTHER;
+    }
+  };
 
   // 해당 타입의 상품만 필터링
-  const filteredProducts = products.filter(product => product.type === type);
+  const filteredProducts = mockProducts.filter(product => product.type === getProductType(type) && product.isActive);
 
   React.useEffect(() => {
     if (mode === 'create' && filteredProducts.length > 0) {
@@ -95,7 +93,7 @@ export const MembershipDialog: React.FC<MembershipDialogProps> = ({
   }, [type, filteredProducts.length]);
 
   const handleSave = () => {
-    const selectedProductData = products.find(p => p.id === selectedProduct);
+    const selectedProductData = mockProducts.find(p => p.id === selectedProduct);
     
     const data: MembershipFormDataType = {
       productId: selectedProduct,
@@ -123,14 +121,14 @@ export const MembershipDialog: React.FC<MembershipDialogProps> = ({
 
   const handleProductChange = (value: string) => {
     setSelectedProduct(value);
-    const product = products.find(p => p.id === value);
+    const product = mockProducts.find(p => p.id === value);
     if (product) {
       setPrice(product.price.toString());
       
       // 시작일이 설정되어 있으면 종료일 자동 계산
-      if (startDate && product.duration) {
+      if (startDate && product.type === ProductType.MEMBERSHIP && product.durationDays) {
         const end = new Date(startDate);
-        end.setDate(end.getDate() + product.duration);
+        end.setDate(end.getDate() + product.durationDays);
         setEndDate(end);
       }
     }
@@ -141,10 +139,10 @@ export const MembershipDialog: React.FC<MembershipDialogProps> = ({
     
     // 상품이 선택되어 있고 기간이 있으면 종료일 자동 계산
     if (date && selectedProduct) {
-      const product = products.find(p => p.id === selectedProduct);
-      if (product && product.duration) {
+      const product = mockProducts.find(p => p.id === selectedProduct);
+      if (product && product.type === ProductType.MEMBERSHIP && product.durationDays) {
         const end = new Date(date);
-        end.setDate(end.getDate() + product.duration);
+        end.setDate(end.getDate() + product.durationDays);
         setEndDate(end);
       }
     }

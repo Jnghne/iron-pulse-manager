@@ -30,6 +30,8 @@ import {
   User
 } from "lucide-react";
 import { mockMembers, Member } from "@/data/mockData";
+import { mockProducts, Product } from "@/data/mockProducts";
+import { ProductType } from "@/types/product";
 import { formatDate, formatPhoneNumber } from "@/lib/utils";
 import { differenceInDays, parseISO, isValid } from "date-fns";
 import { 
@@ -315,29 +317,48 @@ const MemberList = () => {
                                 </div>
                               )}
                             </div>
-                            {/* 이름 및 회원번호 */}
+                            {/* 이름 */}
                             <div className="flex flex-col">
                               <span className="font-medium">{member.name}</span>
-                              <span className="text-xs text-muted-foreground font-mono">{member.id}</span>
                             </div>
                           </div>
                         </TableCell>
                         
                         {/* 회원 구분 (PT, 헬스장, PT&헬스장) */}
                         <TableCell className="text-center pl-4">
-                          <div className="flex flex-col gap-1 items-center">
-                            {member.membershipActive && member.hasPT ? (
-                              <span className="px-2 py-1 text-xs bg-gym-primary/10 text-gym-primary rounded-full font-medium">PT & 헬스장</span>
-                            ) : member.membershipActive ? (
-                              <span className="px-2 py-1 text-xs bg-blue-50 text-blue-700 rounded-full font-medium">헬스장</span>
-                            ) : member.hasPT ? (
-                              <span className="px-2 py-1 text-xs bg-purple-50 text-purple-700 rounded-full font-medium">PT</span>
-                            ) : (
-                              <span className="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded-full font-medium">없음</span>
-                            )}
-                            {member.lockerId && (
-                              <span className="px-2 py-1 text-xs bg-orange-50 text-orange-700 rounded-full font-medium">락커 {member.lockerId}</span>
-                            )}
+                          <div className="flex flex-row flex-wrap gap-1 items-center justify-center">
+                            {(() => {
+                              const badges: JSX.Element[] = [];
+
+                              const hasActivePT = member.ptId && mockProducts.find(p => p.id === member.ptId && p.type === ProductType.PT && p.isActive);
+                              if (hasActivePT) {
+                                badges.push(
+                                  <span key="pt" className={`px-2 py-1 text-xs bg-purple-50 text-purple-700 rounded-full font-medium`}>
+                                    PT
+                                  </span>
+                                );
+                              }
+
+                              const hasActiveMembership = member.membershipId && mockProducts.find(p => p.id === member.membershipId && p.type === ProductType.MEMBERSHIP && p.isActive);
+                              if (hasActiveMembership) {
+                                badges.push(
+                                  <span key="membership" className={`px-2 py-1 text-xs bg-blue-50 text-blue-700 rounded-full font-medium`}>
+                                    헬스
+                                  </span>
+                                );
+                              }
+
+                              // 락커 뱃지 관련 로직은 여기에 포함하지 않음
+
+                              if (badges.length === 0) {
+                                return (
+                                  <span className="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded-full font-medium">
+                                    없음
+                                  </span>
+                                );
+                              }
+                              return badges;
+                            })()}
                           </div>
                         </TableCell>
                         

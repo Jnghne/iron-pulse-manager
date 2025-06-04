@@ -2,6 +2,7 @@
 
 export interface PassDetails {
   id: string;
+  productId?: string; // 상품 ID (상품 관리 메뉴의 상품과 연결)
   status?: '사용중' | '만료' | '정지'; // 이용권 상태
   name: string; // 예: "헬스이용권 12개월권"
   type: string; // 예: "회원권"
@@ -21,8 +22,26 @@ export interface PassDetails {
   ptTotalSessions?: number; // PT 총 횟수 (PT 이용권인 경우)
   ptRemainingSessions?: number; // PT 잔여 횟수 (PT 이용권인 경우)
   revenueDistributionNotes?: string; // 실적 배분 관련 메모
-  // 향후 다른 탭의 데이터 필드를 추가할 수 있습니다。
-  // 예: contractDetails, suspensionInfo, editHistory 등
+  
+  // 계약서 관련 필드
+  contractImages?: string[]; // 계약서 이미지 URL 배열
+  
+  // 이용 정지 관련 필드
+  suspensionStartDate?: string | null; // YYYY.MM.DD. 형식
+  suspensionEndDate?: string | null; // YYYY.MM.DD. 형식
+  suspensionReason?: string | null;
+
+  // 수정 기록 관련 필드
+  editHistory?: EditHistoryEntry[];
+}
+
+export interface EditHistoryEntry {
+  timestamp: string; // ISO 8601 형식의 날짜-시간 문자열
+  modifiedBy?: string; // 수정한 사람 (예: "관리자", "오정석 트레이너")
+  field: string; // 변경된 필드의 이름 (예: "서비스 만료일", "정지 사유")
+  oldValue: string | number | boolean | null | undefined;
+  newValue: string | number | boolean | null | undefined;
+  reason?: string; // 변경 사유 (선택 사항)
 }
 
 export interface SidebarMenuItem {

@@ -1,5 +1,17 @@
 // src/data/mockProducts.ts
-import { Product, ProductType } from '@/types/product';
+import { ProductType } from '@/types/product';
+
+export interface Product {
+  id: string;
+  name: string;
+  type: ProductType;
+  price: number;
+  durationDays?: number;
+  totalSessions?: number;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 export const mockProducts: Product[] = [
   {
@@ -28,15 +40,52 @@ export const mockProducts: Product[] = [
     type: ProductType.LOCKER,
     price: 10000,
     durationDays: 30,
-    isActive: false,
+    isActive: true,
     createdAt: new Date(),
     updatedAt: new Date(),
   },
+  // 기타 이용권 상품들
   {
     id: 'prod_004',
     name: '프로틴 음료',
     type: ProductType.OTHER,
     price: 3000,
+    isActive: true,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+  {
+    id: 'prod_005',
+    name: '운동복 대여',
+    type: ProductType.OTHER,
+    price: 2000,
+    isActive: true,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+  {
+    id: 'prod_006',
+    name: '타월 대여',
+    type: ProductType.OTHER,
+    price: 1000,
+    isActive: true,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+  {
+    id: 'prod_007',
+    name: '체성분 측정',
+    type: ProductType.OTHER,
+    price: 5000,
+    isActive: true,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+  {
+    id: 'prod_008',
+    name: '스포츠 마사지 30분',
+    type: ProductType.OTHER,
+    price: 30000,
     isActive: true,
     createdAt: new Date(),
     updatedAt: new Date(),

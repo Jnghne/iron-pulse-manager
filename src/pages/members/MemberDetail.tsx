@@ -38,7 +38,7 @@ const MemberDetail = ({ id: propId }: MemberDetailProps) => {
   const [lockerDialogOpen, setLockerDialogOpen] = useState(false);
   const [suspensionDialogOpen, setSuspensionDialogOpen] = useState(false);
   const [paymentRegistrationOpen, setPaymentRegistrationOpen] = useState(false);
-  const [paymentRegistrationType, setPaymentRegistrationType] = useState<'gym' | 'pt' | 'locker' | 'other' | null>(null);
+  const [paymentRegistrationType, setPaymentRegistrationType] = useState<'gym' | 'pt' | 'locker' | 'other' | 'merchandise' | null>(null);
   const [paymentDetailOpen, setPaymentDetailOpen] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState<any>(null);
 
@@ -68,7 +68,8 @@ const MemberDetail = ({ id: propId }: MemberDetailProps) => {
     }
   }, [id]);
 
-  const handlePaymentRegistration = (type: 'gym' | 'pt' | 'locker' | 'other') => {
+  const handlePaymentRegistration = (type: 'gym' | 'pt' | 'locker' | 'other' | 'merchandise') => {
+    // 타입을 그대로 사용 (PaymentRegistrationDialog에서 처리)
     setPaymentRegistrationType(type);
     setPaymentRegistrationOpen(true);
   };

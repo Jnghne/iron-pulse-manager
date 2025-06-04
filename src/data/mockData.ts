@@ -1,3 +1,7 @@
+// ProductType enum import
+import { ProductType } from '@/types/product';
+import type { Product } from '@/types/product'; // Product interface import
+
 // 락커 타입 정의
 export interface Locker {
   id: string;
@@ -46,11 +50,13 @@ export interface Member {
   photoUrl?: string;
   membershipActive?: boolean;
   hasPT?: boolean;
-  lockerId?: string;
+  membershipId?: string; // 추가
+  ptId?: string; // 추가
+  lockerId?: string; // Lint 오류 수정을 위해 다시 추가 (선택적 필드)
   membershipStartDate?: string;
-  phoneNumber?: string; // 추가: MemberList에서 사용하는 속성
   membershipEndDate?: string; // 추가: MemberList에서 사용하는 속성
-  
+  phoneNumber?: string; // 추가: MemberList에서 사용하는 속성
+
   // 회원 상세 페이지 리뉴얼에 필요한 추가 필드
   availableBranches?: string[]; // 이용 가능 지점 목록
   unpaidAmount?: number; // 잔여 미수금
@@ -84,7 +90,83 @@ export interface Member {
   }[];
 }
 
-// 회원 목록 데이터
+// 이용권 데이터 샘플
+export const mockPasses = [
+  {
+    id: 'pass1',
+    productId: 'product1', // 헬스 3개월권
+    status: '사용중',
+    name: '헬스이용권 3개월권',
+    type: '회원권',
+    category: '기간제',
+    subCategory: '헬스',
+    serviceStartDate: '2025. 05. 27. 오후',
+    serviceEndDate: '2025. 08. 26. 오후',
+    consultant: '오정석',
+    instructor: '배정 예정',
+    paymentDate: '2025. 05. 27. 19:35',
+    paymentMethod: '카드 결제',
+    purchasePurpose: '다이어트',
+    productAmount: 358800,
+    actualPaymentAmount: 358800,
+    consultantSalesShare: 35880,
+    unpaidAmount: 0,
+    revenueDistributionNotes: '담당자 10% 지급',
+    contractImages: [
+      'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=2070&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1964&auto=format&fit=crop'
+    ]
+  },
+  {
+    id: 'pass2',
+    productId: 'product2', // 헬스 6개월권
+    status: '사용중',
+    name: '헬스이용권 6개월권',
+    type: '회원권',
+    category: '기간제',
+    subCategory: '헬스',
+    serviceStartDate: '2025. 04. 15. 오전',
+    serviceEndDate: '2025. 10. 14. 오전',
+    consultant: '김민수',
+    instructor: '배정 예정',
+    paymentDate: '2025. 04. 15. 10:22',
+    paymentMethod: '현금 결제',
+    purchasePurpose: '체력 증진',
+    productAmount: 598000,
+    actualPaymentAmount: 550000,
+    consultantSalesShare: 55000,
+    unpaidAmount: 0,
+    revenueDistributionNotes: '담당자 10% 지급, 할인 적용'
+  },
+  {
+    id: 'pass3',
+    productId: 'product5', // PT 10회권
+    status: '사용중',
+    name: 'PT 10회권',
+    type: 'PT',
+    category: '횟수제',
+    subCategory: 'PT',
+    serviceStartDate: '2025. 05. 10. 오전',
+    serviceEndDate: '2025. 08. 09. 오전',
+    consultant: '이지원',
+    instructor: '박지훈',
+    paymentDate: '2025. 05. 10. 11:15',
+    paymentMethod: '카드 결제',
+    purchasePurpose: '근력 강화',
+    productAmount: 550000,
+    actualPaymentAmount: 550000,
+    consultantSalesShare: 55000,
+    unpaidAmount: 0,
+    ptTotalSessions: 10,
+    ptRemainingSessions: 8,
+    revenueDistributionNotes: '담당자 10% 지급',
+    contractImages: [
+      'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?q=80&w=2070&auto=format&fit=crop'
+    ]
+  }
+];
+
+// 회원 데이터 샘플
 export const mockMembers: Member[] = [
   {
     id: 'M00001',
@@ -100,7 +182,11 @@ export const mockMembers: Member[] = [
     expiryDate: '2025-01-14',
     membershipStatus: 'active',
     ptRemaining: 15,
+    ptTotal: 30,
     ptExpiryDate: '2025-06-30',
+    ptStartDate: '2024-01-15',
+    ptPrice: 700000,
+    ptId: 'prod_002',
     gymMembershipDaysLeft: 230,
     gymMembershipExpiryDate: '2025-01-14',
     attendanceRate: 85,
@@ -108,6 +194,8 @@ export const mockMembers: Member[] = [
     trainerNotes: '운동 성장이 빠르고 열정적임. 사이클링 선호.',
     smsConsent: true,
     membershipActive: true,
+    membershipId: 'prod_001',
+    membershipPrice: 50000,
     hasPT: true,
     membershipStartDate: '2023-01-15'
   },
@@ -125,6 +213,10 @@ export const mockMembers: Member[] = [
     expiryDate: '2024-08-09',
     membershipStatus: 'active',
     ptRemaining: 8,
+    ptTotal: 10,
+    ptStartDate: '2024-01-10',
+    ptPrice: 700000,
+    ptId: 'prod_002',
     ptExpiryDate: '2024-09-30',
     gymMembershipDaysLeft: 75,
     gymMembershipExpiryDate: '2024-08-09',
@@ -133,8 +225,10 @@ export const mockMembers: Member[] = [
     trainerNotes: '근력 향상에 관심이 많음. 웨이트 트레이닝 위주로 진행.',
     smsConsent: true,
     membershipActive: true,
+    membershipId: 'prod_001',
+    membershipPrice: 50000,
     hasPT: true,
-    lockerId: 'A03',
+    lockerId: 'prod_003',
     membershipStartDate: '2023-02-10'
   },
   {
@@ -154,7 +248,8 @@ export const mockMembers: Member[] = [
     trainerAssigned: '박지훈',
     smsConsent: false,
     membershipActive: false,
-    hasPT: true
+    hasPT: true,
+    ptId: 'prod_002' // PT 상품 ID 추가
   },
   {
     id: 'M00004',
@@ -174,7 +269,8 @@ export const mockMembers: Member[] = [
     trainerAssigned: '김지원',
     smsConsent: true,
     membershipActive: false,
-    hasPT: false
+    hasPT: false,
+    lockerId: 'prod_003' // 락커 상품 ID 추가
   },
   {
     id: 'M00005',
@@ -198,7 +294,9 @@ export const mockMembers: Member[] = [
     smsConsent: true,
     membershipActive: true,
     hasPT: true,
-    lockerId: 'A01',
+    lockerId: undefined, // 김영희 회원은 락커 미사용 (명시적으로 undefined 설정)
+    membershipId: 'prod_001', // 헬스 6개월 상품 ID
+    ptId: 'prod_002', // PT 10회 상품 ID
     membershipStartDate: '2023-01-02'
   },
   {
@@ -349,6 +447,15 @@ export const mockMembers: Member[] = [
     membershipActive: false,
     hasPT: false
   }
+];
+
+export const mockProducts: Product[] = [
+  { id: 'prod_001', name: '헬스 6개월', type: ProductType.MEMBERSHIP, price: 300000, durationDays: 180, isActive: true, createdAt: new Date(), updatedAt: new Date() },
+  { id: 'prod_002', name: 'PT 10회', type: ProductType.PT, price: 500000, totalSessions: 10, isActive: true, createdAt: new Date(), updatedAt: new Date() },
+  { id: 'prod_003', name: '개인 락커 1개월', type: ProductType.LOCKER, price: 10000, durationDays: 30, isActive: true, createdAt: new Date(), updatedAt: new Date() },
+  { id: 'prod_004', name: '헬스 12개월', type: ProductType.MEMBERSHIP, price: 550000, durationDays: 365, isActive: true, createdAt: new Date(), updatedAt: new Date() },
+  { id: 'prod_005', name: 'PT 30회', type: ProductType.PT, price: 1350000, totalSessions: 30, isActive: true, createdAt: new Date(), updatedAt: new Date() },
+  { id: 'prod_006', name: '학생 헬스 3개월', type: ProductType.MEMBERSHIP, price: 150000, durationDays: 90, isActive: false, createdAt: new Date(), updatedAt: new Date() }, // 비활성 상품 예시
 ];
 
 // 일일 매출 데이터
@@ -549,127 +656,124 @@ export const mockVisitorsData = [
   { name: '어제', total: 38, male: 20, female: 18 },
   { name: '2일전', total: 42, male: 22, female: 20 },
   { name: '3일전', total: 40, male: 21, female: 19 },
-  { name: '4일전', total: 35, male: 18, female: 17 },
-  { name: '5일전', total: 28, male: 15, female: 13 },
-  { name: '6일전', total: 30, male: 16, female: 14 },
 ];
 
 // 락커 데이터
 export const mockLockers: Locker[] = [
-  {
-    id: 'L001',
-    zone: 'A',
-    number: 1,
-    isOccupied: true,
-    memberId: 'M00001',
-    memberName: '김지원',
-    startDate: '2024-01-15',
-    endDate: '2025-01-14',
-    fee: 120000,
-    isPaid: true
-  },
-  {
-    id: 'L002',
-    zone: 'A',
-    number: 2,
-    isOccupied: false
-  },
-  {
-    id: 'L003',
-    zone: 'A',
-    number: 3,
-    isOccupied: true,
-    memberId: 'M00005',
-    memberName: '김영희',
-    startDate: '2024-01-02',
-    endDate: '2025-01-01',
-    fee: 120000,
-    isPaid: true
-  },
-  {
-    id: 'L004',
-    zone: 'A',
-    number: 4,
-    isOccupied: false
-  },
-  {
-    id: 'L005',
-    zone: 'A',
-    number: 5,
-    isOccupied: false
-  },
-  {
-    id: 'L006',
-    zone: 'B',
-    number: 1,
-    isOccupied: true,
-    memberId: 'M00002',
-    memberName: '이지훈',
-    startDate: '2024-02-10',
-    endDate: '2024-08-09',
-    fee: 80000,
-    isPaid: true
-  },
-  {
-    id: 'L007',
-    zone: 'B',
-    number: 2,
-    isOccupied: true,
-    memberId: 'M00003',
-    memberName: '박수진',
-    startDate: '2024-03-20',
-    endDate: '2024-09-19',
-    fee: 80000,
-    isPaid: true
-  },
-  {
-    id: 'L008',
-    zone: 'B',
-    number: 3,
-    isOccupied: false
-  },
-  {
-    id: 'L009',
-    zone: 'B',
-    number: 4,
-    isOccupied: false
-  },
-  {
-    id: 'L010',
-    zone: 'B',
-    number: 5,
-    isOccupied: false
-  },
-  {
-    id: 'L011',
-    zone: 'C',
-    number: 1,
-    isOccupied: false
-  },
-  {
-    id: 'L012',
-    zone: 'C',
-    number: 2,
-    isOccupied: false
-  },
-  {
-    id: 'L013',
-    zone: 'C',
-    number: 3,
-    isOccupied: false
-  },
-  {
-    id: 'L014',
-    zone: 'C',
-    number: 4,
-    isOccupied: false
-  },
-  {
-    id: 'L015',
-    zone: 'C',
-    number: 5,
-    isOccupied: false
-  }
+{
+id: 'L001',
+zone: 'A',
+number: 1,
+isOccupied: true,
+memberId: 'M00001',
+memberName: '김지원',
+startDate: '2024-01-15',
+endDate: '2025-01-14',
+fee: 120000,
+isPaid: true
+},
+{
+id: 'L002',
+zone: 'A',
+number: 2,
+isOccupied: false
+},
+{
+id: 'L003',
+zone: 'A',
+number: 3,
+isOccupied: true,
+memberId: 'M00005',
+memberName: '김영희',
+startDate: '2024-01-02',
+endDate: '2025-01-01',
+fee: 120000,
+isPaid: true
+},
+{
+id: 'L004',
+zone: 'A',
+number: 4,
+isOccupied: false
+},
+{
+id: 'L005',
+zone: 'A',
+number: 5,
+isOccupied: false
+},
+{
+id: 'L006',
+zone: 'B',
+number: 1,
+isOccupied: true,
+memberId: 'M00002',
+memberName: '이지훈',
+startDate: '2024-02-10',
+endDate: '2024-08-09',
+fee: 80000,
+isPaid: true
+},
+{
+id: 'L007',
+zone: 'B',
+number: 2,
+isOccupied: true,
+memberId: 'M00003',
+memberName: '박수진',
+startDate: '2024-03-20',
+endDate: '2024-09-19',
+fee: 80000,
+isPaid: true
+},
+{
+id: 'L008',
+zone: 'B',
+number: 3,
+isOccupied: false
+},
+{
+id: 'L009',
+zone: 'B',
+number: 4,
+isOccupied: false
+},
+{
+id: 'L010',
+zone: 'B',
+number: 5,
+isOccupied: false
+},
+{
+id: 'L011',
+zone: 'C',
+number: 1,
+isOccupied: false
+},
+{
+id: 'L012',
+zone: 'C',
+number: 2,
+isOccupied: false
+},
+{
+id: 'L013',
+zone: 'C',
+number: 3,
+isOccupied: false
+},
+{
+id: 'L014',
+zone: 'C',
+number: 4,
+isOccupied: false
+},
+{
+id: 'L015',
+zone: 'C',
+number: 5,
+isOccupied: false
+}
 ];
 
 // 출석 기록 생성 함수

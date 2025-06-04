@@ -57,7 +57,9 @@ export const PaymentRegistrationDialog = ({
   onOpenChange, 
   onSave 
 }: PaymentRegistrationDialogProps) => {
-  const [selectedCategory, setSelectedCategory] = useState<string>(type || 'gym'); // 'gym', 'pt', 'locker', 'merchandise'
+  // 초기 탭 선택 설정 - type이 'merchandise' 또는 'other'인 경우 'merchandise' 탭으로 설정
+  const initialCategory = (type === 'merchandise' || type === 'other') ? 'merchandise' : (type || 'gym');
+  const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory); // 'gym', 'pt', 'locker', 'merchandise'
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [product, setProduct] = useState<string>("");
   const [price, setPrice] = useState<string>("");

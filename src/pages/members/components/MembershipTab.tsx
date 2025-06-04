@@ -47,7 +47,7 @@ export interface MembershipDetailData {
 
 interface MembershipTabProps {
   member: Member;
-  onPaymentRegister: (type: 'gym' | 'pt' | 'locker' | 'other') => void;
+  onPaymentRegister: (type: 'gym' | 'pt' | 'locker' | 'other' | 'merchandise') => void;
   isOwner: boolean;
   onMembershipUpdate?: (type: MembershipType, data: MembershipDetailData) => void;
   onMembershipDelete?: (type: MembershipType, id?: string) => void;
@@ -301,7 +301,10 @@ export const MembershipTab = ({
               헬스장 이용권 상태 및 정보
             </CardDescription>
           </div>
-
+          <Button variant="outline" size="sm" onClick={() => onPaymentRegister('gym')}>
+            <Plus className="mr-2 h-4 w-4" />
+            신규 등록
+          </Button>
         </CardHeader>
         <CardContent>
           {member.membershipActive ? (
@@ -375,7 +378,10 @@ export const MembershipTab = ({
               퍼스널 트레이닝 이용권 상태 및 정보
             </CardDescription>
           </div>
-
+          <Button variant="outline" size="sm" onClick={() => onPaymentRegister('pt')}>
+            <Plus className="mr-2 h-4 w-4" />
+            신규 등록
+          </Button>
         </CardHeader>
         <CardContent>
           {member.hasPT ? (
@@ -435,27 +441,10 @@ export const MembershipTab = ({
               락커 이용권 상태 및 정보
             </CardDescription>
           </div>
-          {isOwner && (
-            <Button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleRegisterClick('locker');
-              }}
-              className="flex items-center gap-2 text-sm bg-gym-primary hover:bg-gym-primary/90"
-            >
-              {member.lockerInfo ? (
-                <>
-                  <Edit className="h-4 w-4" />
-                  수정
-                </>
-              ) : (
-                <>
-                  <Plus className="h-4 w-4" />
-                  결제 등록
-                </>
-              )}
-            </Button>
-          )}
+          <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); onPaymentRegister('locker'); }}>
+            <Plus className="mr-2 h-4 w-4" />
+            신규 등록
+          </Button>
         </CardHeader>
         <CardContent>
           {member.lockerInfo ? (
@@ -503,39 +492,31 @@ export const MembershipTab = ({
 
       {/* 기타 결제 정보 */}
       <Card
-        className={getCardStyle(false)} // 현재는 기타 상품 데이터가 없음
+        className={getCardStyle(false)} // 현재는 기타 이용권 데이터가 없음
         onClick={() => member.otherProducts && handleMembershipCardClick('other', {
-          // 기타 상품 데이터가 있다면 여기에 추가
+          // 기타 이용권 데이터가 있다면 여기에 추가
         })}
       >
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle className="text-lg flex items-center gap-2">
               <ShoppingBag className="h-5 w-5 text-gym-primary" />
-              기타 상품
+              기타 이용권
             </CardTitle>
             <CardDescription>
-              기타 상품 결제 내역
+              기타 이용권 결제 내역
             </CardDescription>
           </div>
-          {isOwner && (
-            <Button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleRegisterClick('other');
-              }}
-              className="flex items-center gap-2 text-sm bg-gym-primary hover:bg-gym-primary/90"
-            >
-              <Plus className="h-4 w-4" />
-              결제 등록
-            </Button>
-          )}
+          <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); onPaymentRegister('merchandise'); }}>
+            <Plus className="mr-2 h-4 w-4" />
+            신규 등록
+          </Button>
         </CardHeader>
         <CardContent>
           <div className="text-center py-6">
-            <Badge variant="outline" className="bg-gray-100">기록 없음</Badge>
+            <Badge variant="destructive">이용권 없음</Badge>
             <p className="mt-2 text-sm text-muted-foreground">
-              등록된 기타 상품 결제 내역이 없습니다.
+              등록된 기타 이용권 결제 내역이 없습니다.
             </p>
           </div>
         </CardContent>

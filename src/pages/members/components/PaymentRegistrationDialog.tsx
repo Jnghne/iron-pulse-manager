@@ -4,68 +4,115 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, CreditCard, Plus } from "lucide-react";
+import { CalendarIcon, CreditCard, Plus, Ticket, Users, Lock, Shirt, HelpCircle, X } from "lucide-react";
 import { Member } from "@/data/mockData";
 import { formatDate, cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 
+// Define the structure for payment data
+export interface PaymentData {
+  memberId: string;
+  memberName: string;
+  category: string; // 'gym', 'pt', 'locker', 'merchandise'
+  product: string;
+  paymentDate: string; 
+  paymentTime: string;
+  paymentMethod: string;
+  actualPrice: string; 
+  unpaidAmount: string; 
+  memo?: string;
+
+  // Gym/PT specific
+  serviceStartDate?: string; 
+  serviceStartTimeOption?: '오전' | '오후';
+  purchasePurpose?: string;
+  consultant?: string; 
+  instructor?: string; 
+  price?: string; // Product price
+  consultantSalesPerformance?: string; 
+  unpaidOrPerformanceShare?: string; 
+
+  // Locker specific
+  lockerNumber?: string;
+  lockerEndDate?: string; // 락커 종료일
+}
+
 interface PaymentRegistrationDialogProps {
   member: Member;
-  type: 'gym' | 'pt' | 'locker' | 'other' | null;
+  type: 'gym' | 'pt' | 'locker' | 'other' | 'merchandise' | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (paymentData: any) => void;
+  onSave: (paymentData: PaymentData) => void;
 }
 
 export const PaymentRegistrationDialog = ({ 
   member, 
-  type,
+  type, // This 'type' prop will determine the initial selectedCategory
   open, 
   onOpenChange, 
   onSave 
 }: PaymentRegistrationDialogProps) => {
-  const [activeTab, setActiveTab] = useState<string>(type || 'gym');
+  const [selectedCategory, setSelectedCategory] = useState<string>(type || 'gym'); // 'gym', 'pt', 'locker', 'merchandise'
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [product, setProduct] = useState<string>("");
   const [price, setPrice] = useState<string>("");
   const [actualPrice, setActualPrice] = useState<string>("");
   const [unpaidAmount, setUnpaidAmount] = useState<string>("0");
+  // New state variables based on the image
+  const [serviceStartTimeOption, setServiceStartTimeOption] = useState<'오전' | '오후'>('오전');
+  const [paymentDate, setPaymentDate] = useState<Date>(new Date());
+  const [paymentTime, setPaymentTime] = useState<string>(format(new Date(), 'HH:mm'));
+  const [purchasePurpose, setPurchasePurpose] = useState<string>("");
+  const [consultant, setConsultant] = useState<string>(""); // 상품 상담자 (기존 selectedStaff 대체 가능)
+  const [instructor, setInstructor] = useState<string>(""); // 담당 강사 (기존 selectedTrainer 대체 가능)
+  // For PT: 담당 강사 2, 3 (추후 확장)
+  // const [instructor2, setInstructor2] = useState<string>("");
+  // const [instructor3, setInstructor3] = useState<string>("");
+  const [consultantSalesPerformance, setConsultantSalesPerformance] = useState<string>("0");
+  const [unpaidOrPerformanceShare, setUnpaidOrPerformanceShare] = useState<string>("0");
   const [paymentMethod, setPaymentMethod] = useState<string>("card");
   const [selectedTrainer, setSelectedTrainer] = useState<string>("");
   const [selectedStaff, setSelectedStaff] = useState<string>("");
   const [marketingSource, setMarketingSource] = useState<string>("");
   const [lockerNumber, setLockerNumber] = useState<string>("");
   const [memo, setMemo] = useState<string>("");
+  const [lockerEndDate, setLockerEndDate] = useState<Date | undefined>(undefined);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // 타입이 변경될 때 activeTab 업데이트
   useEffect(() => {
     if (type) {
-      setActiveTab(type);
+      setSelectedCategory(type);
+    } else {
+      setSelectedCategory('gym'); // 기본값 설정
     }
-  }, [type]);
+  }, [type, open]); // open 시에도 초기화될 수 있도록
 
   // 상품 목록 (실제로는 API에서 가져올 수 있음)
   const products = {
     gym: ["헬스 이용권 1개월", "헬스 이용권 3개월", "헬스 이용권 6개월", "헬스 이용권 12개월"],
     pt: ["PT 10회권", "PT 20회권", "PT 30회권", "PT 50회권"],
     locker: ["락커 1개월", "락커 3개월", "락커 6개월", "락커 12개월"],
-    other: ["운동복", "식음료", "공간대여", "촬영협조", "기타"]
+    other: ["운동복", "식음료", "공간대여", "촬영협조", "기타"],
+    merchandise: ["운동복 상의", "운동복 하의", "스포츠 양말", "물통", "쉐이커"]
   };
 
   // 트레이너 목록 (실제로는 API에서 가져올 수 있음)
   const trainers = ["박지훈", "김지원", "이서연", "최민준"];
 
   // 직원 목록 (실제로는 API에서 가져올 수 있음)
-  const staffs = ["관리자", "박지훈", "김지원", "이서연", "최민준"];
+  const staffs = ["오정석", "박지훈", "김지원", "이서연", "최민준", "관리자"]; // 이미지 기반으로 '오정석' 추가
 
   // 마케팅 경로 목록
   const marketingSources = ["인스타그램", "네이버 검색", "지인 소개", "전단지", "기타"];
+  const purchasePurposes = ["다이어트", "근력 증가", "체형 교정", "재활", "바디프로필", "기타"];
+  const timeOptions = ['오전', '오후'];
+  const paymentMethods = ['카드 결제', '현금 결제', '계좌 이체', '간편 결제'];
 
   // 락커 번호 목록 (실제로는 API에서 가져올 수 있음)
   const lockers = ["A-01", "A-02", "A-03", "B-01", "B-02", "B-03"];
@@ -91,12 +138,12 @@ export const PaymentRegistrationDialog = ({
       return;
     }
 
-    if (activeTab === 'pt' && !selectedTrainer) {
+    if (selectedCategory === 'pt' && !instructor) {
       alert("담당 트레이너를 선택해주세요.");
       return;
     }
 
-    if (activeTab === 'locker' && !lockerNumber) {
+    if (selectedCategory === 'locker' && !lockerNumber) {
       alert("락커 번호를 선택해주세요.");
       return;
     }
@@ -104,24 +151,34 @@ export const PaymentRegistrationDialog = ({
     setIsSubmitting(true);
     
     // 결제 데이터 구성
-    const paymentData = {
-      type: activeTab,
+    const paymentDataToSave: PaymentData = {
+      memberId: member.id,
+      memberName: member.name,
+      category: selectedCategory,
       product,
-      startDate: format(selectedDate, 'yyyy-MM-dd'),
-      price: parseInt(price.replace(/,/g, '')),
-      actualPrice: parseInt(actualPrice.replace(/,/g, '')),
-      unpaidAmount: parseInt(unpaidAmount.replace(/,/g, '')),
+      serviceStartDate: format(selectedDate, 'yyyy-MM-dd'),
+      serviceStartTimeOption,
+      price: price, 
+      actualPrice: actualPrice, 
+      unpaidAmount: unpaidAmount, 
+      consultantSalesPerformance: consultantSalesPerformance, 
+      unpaidOrPerformanceShare: unpaidOrPerformanceShare, 
+      paymentDate: format(paymentDate, 'yyyy-MM-dd'),
+      paymentTime,
       paymentMethod,
-      staff: selectedStaff,
-      trainer: activeTab === 'pt' ? selectedTrainer : undefined,
-      lockerNumber: activeTab === 'locker' ? lockerNumber : undefined,
-      marketingSource,
+      purchasePurpose,
+      consultant: consultant || selectedStaff,
+      instructor: selectedCategory === 'pt' ? (instructor || selectedTrainer) : undefined,
+      lockerNumber: selectedCategory === 'locker' ? lockerNumber : undefined,
+      lockerEndDate: selectedCategory === 'locker' && lockerEndDate ? format(lockerEndDate, 'yyyy-MM-dd') : undefined,
+      // marketingSource, // PaymentData에 없으므로 제거 또는 인터페이스에 추가 필요
       memo
     };
+    // TODO: 담당 강사 2, 3 (PT) 데이터 추가
     
     // 실제 구현에서는 API 호출 등의 로직이 들어갈 수 있음
     setTimeout(() => {
-      onSave(paymentData);
+      onSave(paymentDataToSave);
       setIsSubmitting(false);
       resetForm();
     }, 500);
@@ -132,11 +189,20 @@ export const PaymentRegistrationDialog = ({
     setPrice("");
     setActualPrice("");
     setUnpaidAmount("0");
-    setPaymentMethod("card");
-    setSelectedTrainer("");
-    setSelectedStaff("");
+    setPaymentMethod(paymentMethods[0]);
+    setInstructor("");
+    setConsultant("");
+    // setSelectedTrainer(""); // 기존 상태 제거 또는 마이그레이션
+    // setSelectedStaff(""); // 기존 상태 제거 또는 마이그레이션
+    setServiceStartTimeOption('오전');
+    setPaymentDate(new Date());
+    setPaymentTime(format(new Date(), 'HH:mm'));
+    setPurchasePurpose("");
+    setConsultantSalesPerformance("0");
+    setUnpaidOrPerformanceShare("0");
     setMarketingSource("");
     setLockerNumber("");
+    setLockerEndDate(undefined);
     setMemo("");
     setSelectedDate(new Date());
   };
@@ -152,237 +218,513 @@ export const PaymentRegistrationDialog = ({
       if (!isOpen) resetForm();
       onOpenChange(isOpen);
     }}>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-xl">
-            <CreditCard className="h-5 w-5 text-gym-primary" />
-            결제 등록
-          </DialogTitle>
-          <DialogDescription>
-            {member.name} 회원의 결제 정보를 등록합니다.
-          </DialogDescription>
-        </DialogHeader>
-
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="gym">헬스 이용권</TabsTrigger>
-            <TabsTrigger value="pt">PT 레슨권</TabsTrigger>
-            <TabsTrigger value="locker">락커 이용권</TabsTrigger>
-            <TabsTrigger value="other">기타 상품</TabsTrigger>
-          </TabsList>
-
-          <div className="space-y-4 py-4">
-            {/* 공통 필드: 상품 선택 */}
-            <div className="space-y-2">
-              <Label htmlFor="product">구매 상품</Label>
-              <Select value={product} onValueChange={setProduct}>
-                <SelectTrigger>
-                  <SelectValue placeholder="상품을 선택하세요" />
-                </SelectTrigger>
-                <SelectContent>
-                  {products[activeTab as keyof typeof products].map((prod) => (
-                    <SelectItem key={prod} value={prod}>{prod}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* 공통 필드: 시작일 */}
-            <div className="space-y-2">
-              <Label>시작일</Label>
-              <Popover>
-                <PopoverTrigger asChild>
+      <DialogContent className="lg:max-w-[960px] p-0 border-none shadow-lg">
+        <TooltipProvider>
+          <div className="flex h-[600px] border rounded-lg overflow-hidden"> {/* Fixed height for scrollable content */}
+            {/* Sidebar */}
+            <div className="w-1/4 bg-slate-50 p-4 border-r flex flex-col space-y-2">
+              <DialogHeader className="mb-4">
+                <DialogTitle className="text-lg">상품 등록</DialogTitle>
+              </DialogHeader>
+              {
+                [
+                  { id: 'gym', label: '회원권', icon: Ticket },
+                  { id: 'pt', label: '개인 레슨', icon: Users },
+                  { id: 'locker', label: '락커', icon: Lock },
+                  { id: 'merchandise', label: '기타 이용권', icon: Shirt },
+                ].map(item => (
                   <Button
-                    variant={"outline"}
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !selectedDate && "text-muted-foreground"
-                    )}
+                    key={item.id}
+                    variant={selectedCategory === item.id ? 'default' : 'ghost'}
+                    className={`w-full justify-start text-sm h-10 ${selectedCategory === item.id ? 'bg-slate-800 text-white hover:bg-slate-700' : 'hover:bg-slate-200'}`}
+                    onClick={() => setSelectedCategory(item.id)}
                   >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {selectedDate ? format(selectedDate, 'PPP', { locale: ko }) : "날짜를 선택하세요"}
+                    <item.icon className="mr-2 h-4 w-4" />
+                    {item.label}
                   </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={selectedDate}
-                    onSelect={(date) => date && setSelectedDate(date)}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
+                ))
+              }
             </div>
 
-            {/* PT 전용 필드: 담당 트레이너 */}
-            {activeTab === 'pt' && (
-              <div className="space-y-2">
-                <Label htmlFor="trainer">담당 트레이너</Label>
-                <Select value={selectedTrainer} onValueChange={setSelectedTrainer}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="트레이너를 선택하세요" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {trainers.map((trainer) => (
-                      <SelectItem key={trainer} value={trainer}>{trainer}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
+            {/* Content Area */}
+            <div className="w-3/4 flex flex-col">
+              <DialogHeader className="p-6 border-b">
+                <DialogTitle className="text-xl font-semibold">
+                  {selectedCategory === 'gym' && '회원권 추가'}
+                  {selectedCategory === 'pt' && '개인 레슨 추가'}
+                  {selectedCategory === 'locker' && '락커 추가'}
+                  {selectedCategory === 'merchandise' && '기타 이용권 추가'}
+                </DialogTitle>
+              </DialogHeader>
+              
+              <div className="p-6 space-y-6 overflow-y-auto flex-grow">
+                {/* 회원권 폼 */}
+                {(selectedCategory === 'gym' || selectedCategory === 'pt') && (
+                  <>
+                    {/* 상품 정보 */}
+                    <div className="space-y-3">
+                      <div className="flex items-center">
+                        <h3 className="text-md font-medium">상품 정보</h3>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button variant="ghost" size="icon" className="ml-1 w-5 h-5">
+                              <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>구매할 상품과 서비스 시작일을 선택합니다.</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
+                      <div className="grid grid-cols-1 gap-4">
+                        <div className="space-y-1.5">
+                          <Label htmlFor="product">구매 상품</Label>
+                          <Select value={product} onValueChange={setProduct}>
+                            <SelectTrigger id="product">
+                              <SelectValue placeholder="상품을 선택하세요" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {products[selectedCategory as keyof typeof products]?.map((prod) => (
+                                <SelectItem key={prod} value={prod}>{prod}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                          <Label htmlFor="serviceStartDate">서비스 시작일</Label>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button id="serviceStartDate" variant={"outline"} className={cn("w-full justify-start text-left font-normal", !selectedDate && "text-muted-foreground")}>
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {selectedDate ? format(selectedDate, "yyyy. MM. dd") : <span>날짜 선택</span>}
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0">
+                              <Calendar mode="single" selected={selectedDate} onSelect={(date) => setSelectedDate(date || new Date())} initialFocus />
+                            </PopoverContent>
+                          </Popover>
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label htmlFor="serviceStartTimeOption" className="opacity-0">시간</Label> {/* Label for spacing */}
+                          <Select value={serviceStartTimeOption} onValueChange={(value) => setServiceStartTimeOption(value as '오전' | '오후')}>
+                            <SelectTrigger id="serviceStartTimeOption">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {timeOptions.map(opt => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    </div>
 
-            {/* 락커 전용 필드: 락커 번호 */}
-            {activeTab === 'locker' && (
-              <div className="space-y-2">
-                <Label htmlFor="lockerNumber">락커 번호</Label>
-                <Select value={lockerNumber} onValueChange={setLockerNumber}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="락커 번호를 선택하세요" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {lockers.map((locker) => (
-                      <SelectItem key={locker} value={locker}>{locker}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
+                    {/* 상담 및 강사 정보 */}
+                    <div className="space-y-3">
+                      <div className="flex items-center">
+                        <h3 className="text-md font-medium">{selectedCategory === 'gym' ? '상품 상담자 및 담당 강사' : '상품 상담자 및 담당 강사 (PT)'}</h3>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                          <Label htmlFor="consultant">상품 상담자</Label>
+                          <Select value={consultant} onValueChange={setConsultant}>
+                            <SelectTrigger id="consultant">
+                              <SelectValue placeholder="상담 직원을 선택하세요" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {staffs.map(staff => <SelectItem key={staff} value={staff}>{staff}</SelectItem>)}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label htmlFor="instructor">담당 강사 {selectedCategory === 'pt' ? '1' : ''}</Label>
+                          <Select value={instructor} onValueChange={setInstructor} disabled={selectedCategory === 'gym' && !product.toLowerCase().includes('pt')}>
+                            <SelectTrigger id="instructor">
+                              <SelectValue placeholder="강사를 선택하세요" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {trainers.map(name => <SelectItem key={name} value={name}>{name}</SelectItem>)}
+                              <SelectItem value="배정 예정">배정 예정</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      {selectedCategory === 'pt' && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                           {/* 담당 강사 2, 3 - 추후 구현 */}
+                          <div className="space-y-1.5">
+                            <Label htmlFor="instructor2">담당 강사 2 (선택)</Label>
+                            <Select onValueChange={() => {}} >
+                              <SelectTrigger id="instructor2"><SelectValue placeholder="선택" /></SelectTrigger>
+                              <SelectContent>{trainers.map(name => <SelectItem key={name} value={name}>{name}</SelectItem>)}</SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-1.5">
+                            <Label htmlFor="instructor3">담당 강사 3 (선택)</Label>
+                            <Select onValueChange={() => {}} >
+                              <SelectTrigger id="instructor3"><SelectValue placeholder="선택" /></SelectTrigger>
+                              <SelectContent>{trainers.map(name => <SelectItem key={name} value={name}>{name}</SelectItem>)}</SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      )}
+                    </div>
 
-            {/* 공통 필드: 결제 직원 */}
-            <div className="space-y-2">
-              <Label htmlFor="staff">결제 직원</Label>
-              <Select value={selectedStaff} onValueChange={setSelectedStaff}>
-                <SelectTrigger>
-                  <SelectValue placeholder="직원을 선택하세요" />
-                </SelectTrigger>
-                <SelectContent>
-                  {staffs.map((staff) => (
-                    <SelectItem key={staff} value={staff}>{staff}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+                    {/* 결제 정보 */}
+                    <div className="space-y-3">
+                      <div className="flex items-center">
+                        <h3 className="text-md font-medium">결제 정보</h3>
+                        <Tooltip>
+                          <TooltipTrigger asChild><Button variant="ghost" size="icon" className="ml-1 w-5 h-5"><HelpCircle className="h-4 w-4 text-muted-foreground" /></Button></TooltipTrigger>
+                          <TooltipContent><p>결제 관련 정보를 입력합니다.</p></TooltipContent>
+                        </Tooltip>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                          <Label htmlFor="paymentDate">결제 일시</Label>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button id="paymentDate" variant={"outline"} className={cn("w-full justify-start text-left font-normal", !paymentDate && "text-muted-foreground")}>
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {paymentDate ? format(paymentDate, "yyyy. MM. dd") : <span>날짜 선택</span>}
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0">
+                              <Calendar mode="single" selected={paymentDate} onSelect={(date) => setPaymentDate(date || new Date())} initialFocus />
+                            </PopoverContent>
+                          </Popover>
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label htmlFor="paymentTime" className="opacity-0">시간</Label>
+                          <Input id="paymentTime" type="time" value={paymentTime} onChange={(e) => setPaymentTime(e.target.value)} />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                          <Label htmlFor="paymentMethod">결제 수단</Label>
+                          <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+                            <SelectTrigger id="paymentMethod"><SelectValue placeholder="결제 수단을 선택하세요" /></SelectTrigger>
+                            <SelectContent>{paymentMethods.map(method => <SelectItem key={method} value={method}>{method}</SelectItem>)}</SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label htmlFor="purchasePurpose">구매 목적</Label>
+                          <Select value={purchasePurpose} onValueChange={setPurchasePurpose}>
+                            <SelectTrigger id="purchasePurpose"><SelectValue placeholder="구매 목적을 선택하세요" /></SelectTrigger>
+                            <SelectContent>{purchasePurposes.map(purpose => <SelectItem key={purpose} value={purpose}>{purpose}</SelectItem>)}</SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* 금액 정보 */}
+                    <div className="space-y-3">
+                      <div className="flex items-center">
+                        <h3 className="text-md font-medium">금액 정보</h3>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                          <Label htmlFor="price">상품 금액</Label>
+                          <div className="relative"><Input id="price" value={price} onChange={(e) => setPrice(formatCurrency(e.target.value))} /><span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">원</span></div>
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label htmlFor="actualPrice">실제 결제 금액</Label>
+                          <div className="relative"><Input id="actualPrice" value={actualPrice} onChange={(e) => setActualPrice(formatCurrency(e.target.value))} /><span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">원</span></div>
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label htmlFor="consultantSalesPerformance">상품 상담자 매출 실적</Label>
+                          <div className="relative"><Input id="consultantSalesPerformance" value={consultantSalesPerformance} onChange={(e) => setConsultantSalesPerformance(formatCurrency(e.target.value))} /><span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">원</span></div>
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label htmlFor="unpaidOrPerformanceShare">미수금 / 실적 배분</Label>
+                          <div className="relative"><Input id="unpaidOrPerformanceShare" value={unpaidOrPerformanceShare} onChange={(e) => setUnpaidOrPerformanceShare(formatCurrency(e.target.value))} /><span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">원</span></div>
+                        </div>
+                      </div>
+                    </div>
 
-            {/* 공통 필드: 결제 정보 */}
-            <div className="space-y-4">
-              <Label>결제 정보</Label>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="paymentMethod">결제 수단</Label>
-                  <Select value={paymentMethod} onValueChange={setPaymentMethod}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="card">카드</SelectItem>
-                      <SelectItem value="cash">현금</SelectItem>
-                      <SelectItem value="transfer">계좌이체</SelectItem>
-                      <SelectItem value="other">기타</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="marketingSource">방문 경로</Label>
-                  <Select value={marketingSource} onValueChange={setMarketingSource}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="선택 (선택사항)" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {marketingSources.map((source) => (
-                        <SelectItem key={source} value={source}>{source}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </div>
+                    {/* 메모 */}
+                     <div className="space-y-1.5">
+                       <Label htmlFor="memo">메모</Label>
+                       <Textarea id="memo" value={memo} onChange={(e) => setMemo(e.target.value)} placeholder="특이사항을 입력하세요 (선택 사항)" />
+                     </div>
+                  </> 
+                )}
 
-            {/* 공통 필드: 금액 정보 */}
-            <div className="space-y-4">
-              <Label>금액 정보</Label>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="price">상품 금액</Label>
-                  <div className="relative">
-                    <Input
-                      id="price"
-                      value={price}
-                      onChange={(e) => setPrice(formatCurrency(e.target.value))}
-                      className="pl-8"
-                    />
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">₩</span>
+                {/* 락커 관련 필드 */}
+                {selectedCategory === 'locker' && (
+                  <div className="space-y-4">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="product-locker">상품 선택</Label>
+                      <Select value={product} onValueChange={(value) => { setProduct(value); /* 상품 선택 시 가격 자동 설정 로직 추가 가능 */ }}>
+                        <SelectTrigger id="product-locker"><SelectValue placeholder="락커 종류를 선택하세요" /></SelectTrigger>
+                        <SelectContent>{products.locker.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}</SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="locker-serviceStartDate">시작일</Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-full justify-start text-left font-normal",
+                              !selectedDate && "text-muted-foreground"
+                            )}
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {selectedDate ? format(selectedDate, "PPP", { locale: ko }) : <span>날짜 선택</span>}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0">
+                          <Calendar
+                            mode="single"
+                            selected={selectedDate}
+                            onSelect={(date) => setSelectedDate(date || new Date())}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="locker-endDate">종료일</Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-full justify-start text-left font-normal",
+                              !lockerEndDate && "text-muted-foreground"
+                            )}
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {lockerEndDate ? format(lockerEndDate, "PPP", { locale: ko }) : <span>날짜 선택</span>}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0">
+                          <Calendar
+                            mode="single"
+                            selected={lockerEndDate}
+                            onSelect={(date) => setLockerEndDate(date || undefined)}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="price-locker">결제 금액</Label>
+                      <div className="relative">
+                        <Input 
+                          id="price-locker" 
+                          value={price} // 락커 선택 시 가격 자동 설정 또는 직접 입력
+                          onChange={(e) => setPrice(formatCurrency(e.target.value))} 
+                          placeholder="결제 금액 입력" 
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">원</span>
+                      </div>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="lockerNumber">락커 번호</Label>
+                      <Select value={lockerNumber} onValueChange={setLockerNumber}>
+                        <SelectTrigger id="lockerNumber">
+                          <SelectValue placeholder="락커 번호 선택" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {lockers.map((lockerItem) => (
+                            <SelectItem key={lockerItem} value={lockerItem}>{lockerItem}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1.5">
+                       <Label htmlFor="memo-locker">메모</Label>
+                       <Textarea id="memo-locker" value={memo} onChange={(e) => setMemo(e.target.value)} placeholder="특이사항을 입력하세요 (선택 사항)" />
+                     </div>
                   </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="actualPrice">실제 결제 금액</Label>
-                  <div className="relative">
-                    <Input
-                      id="actualPrice"
-                      value={actualPrice}
-                      onChange={(e) => setActualPrice(formatCurrency(e.target.value))}
-                      className="pl-8"
-                    />
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">₩</span>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="staffCommission">직원 매출 실적</Label>
-                  <div className="relative">
-                    <Input
-                      id="staffCommission"
-                      value={actualPrice}
-                      disabled
-                      className="pl-8 bg-muted"
-                    />
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">₩</span>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="unpaidAmount">미수금</Label>
-                  <div className="relative">
-                    <Input
-                      id="unpaidAmount"
-                      value={unpaidAmount}
-                      onChange={(e) => setUnpaidAmount(formatCurrency(e.target.value))}
-                      className="pl-8"
-                    />
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">₩</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+                )}
 
-            {/* 공통 필드: 메모 */}
-            <div className="space-y-2">
-              <Label htmlFor="memo">메모</Label>
-              <Textarea
-                id="memo"
-                placeholder="추가 메모 사항이 있으면 입력하세요"
-                value={memo}
-                onChange={(e) => setMemo(e.target.value)}
-                rows={2}
-              />
-            </div>
+                {/* 기타 이용권 폼 */}
+                {selectedCategory === 'merchandise' && (
+                  <>
+                    {/* 상품 정보 */}
+                    <div className="space-y-3">
+                      <div className="flex items-center">
+                        <h3 className="text-md font-medium">상품 정보</h3>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button variant="ghost" size="icon" className="ml-1 w-5 h-5">
+                              <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>구매할 기타 이용권과 서비스 시작일을 선택합니다.</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
+                      <div className="grid grid-cols-1 gap-4">
+                        <div className="space-y-1.5">
+                          <Label htmlFor="product-other">구매 상품</Label>
+                          <Select value={product} onValueChange={setProduct}>
+                            <SelectTrigger id="product-other">
+                              <SelectValue placeholder="기타 이용권을 선택하세요" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {products.merchandise.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                          <Label htmlFor="serviceStartDate-other">서비스 시작일</Label>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button id="serviceStartDate-other" variant={"outline"} className={cn("w-full justify-start text-left font-normal", !selectedDate && "text-muted-foreground")}>
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {selectedDate ? format(selectedDate, "yyyy. MM. dd") : <span>날짜 선택</span>}
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0">
+                              <Calendar mode="single" selected={selectedDate} onSelect={(date) => setSelectedDate(date || new Date())} initialFocus />
+                            </PopoverContent>
+                          </Popover>
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label htmlFor="serviceStartTimeOption-other" className="opacity-0">시간</Label>
+                          <Select value={serviceStartTimeOption} onValueChange={(value) => setServiceStartTimeOption(value as '오전' | '오후')}>
+                            <SelectTrigger id="serviceStartTimeOption-other">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {timeOptions.map(opt => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 상담 및 담당자 정보 */}
+                    <div className="space-y-3">
+                      <div className="flex items-center">
+                        <h3 className="text-md font-medium">상품 상담자</h3>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                          <Label htmlFor="consultant-other">상품 상담자</Label>
+                          <Select value={consultant} onValueChange={setConsultant}>
+                            <SelectTrigger id="consultant-other">
+                              <SelectValue placeholder="상담 직원을 선택하세요" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {staffs.map(staff => <SelectItem key={staff} value={staff}>{staff}</SelectItem>)}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 결제 정보 */}
+                    <div className="space-y-3">
+                      <div className="flex items-center">
+                        <h3 className="text-md font-medium">결제 정보</h3>
+                        <Tooltip>
+                          <TooltipTrigger asChild><Button variant="ghost" size="icon" className="ml-1 w-5 h-5"><HelpCircle className="h-4 w-4 text-muted-foreground" /></Button></TooltipTrigger>
+                          <TooltipContent><p>결제 관련 정보를 입력합니다.</p></TooltipContent>
+                        </Tooltip>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                          <Label htmlFor="paymentDate-other">결제 일시</Label>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button id="paymentDate-other" variant={"outline"} className={cn("w-full justify-start text-left font-normal", !paymentDate && "text-muted-foreground")}>
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {paymentDate ? format(paymentDate, "yyyy. MM. dd") : <span>날짜 선택</span>}
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0">
+                              <Calendar mode="single" selected={paymentDate} onSelect={(date) => setPaymentDate(date || new Date())} initialFocus />
+                            </PopoverContent>
+                          </Popover>
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label htmlFor="paymentTime-other" className="opacity-0">시간</Label>
+                          <Input id="paymentTime-other" type="time" value={paymentTime} onChange={(e) => setPaymentTime(e.target.value)} />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                          <Label htmlFor="paymentMethod-other">결제 수단</Label>
+                          <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+                            <SelectTrigger id="paymentMethod-other"><SelectValue placeholder="결제 수단을 선택하세요" /></SelectTrigger>
+                            <SelectContent>{paymentMethods.map(method => <SelectItem key={method} value={method}>{method}</SelectItem>)}</SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label htmlFor="purchasePurpose-other">구매 목적</Label>
+                          <Select value={purchasePurpose} onValueChange={setPurchasePurpose}>
+                            <SelectTrigger id="purchasePurpose-other"><SelectValue placeholder="구매 목적을 선택하세요" /></SelectTrigger>
+                            <SelectContent>{purchasePurposes.map(purpose => <SelectItem key={purpose} value={purpose}>{purpose}</SelectItem>)}</SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* 금액 정보 */}
+                    <div className="space-y-3">
+                      <div className="flex items-center">
+                        <h3 className="text-md font-medium">금액 정보</h3>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                          <Label htmlFor="price-other">상품 금액</Label>
+                          <div className="relative"><Input id="price-other" value={price} onChange={(e) => setPrice(formatCurrency(e.target.value))} /><span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">원</span></div>
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label htmlFor="actualPrice-other">실제 결제 금액</Label>
+                          <div className="relative"><Input id="actualPrice-other" value={actualPrice} onChange={(e) => setActualPrice(formatCurrency(e.target.value))} /><span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">원</span></div>
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label htmlFor="consultantSalesPerformance-other">상품 상담자 매출 실적</Label>
+                          <div className="relative"><Input id="consultantSalesPerformance-other" value={consultantSalesPerformance} onChange={(e) => setConsultantSalesPerformance(formatCurrency(e.target.value))} /><span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">원</span></div>
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label htmlFor="unpaidOrPerformanceShare-other">미수금 / 실적 배분</Label>
+                          <div className="relative"><Input id="unpaidOrPerformanceShare-other" value={unpaidOrPerformanceShare} onChange={(e) => setUnpaidOrPerformanceShare(formatCurrency(e.target.value))} /><span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">원</span></div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 메모 */}
+                     <div className="space-y-1.5">
+                       <Label htmlFor="memo-other">메모</Label>
+                       <Textarea id="memo-other" value={memo} onChange={(e) => setMemo(e.target.value)} placeholder="특이사항을 입력하세요 (선택 사항)" />
+                     </div>
+                  </>
+                )}
+              </div> {/* Closing: p-6 space-y-6 overflow-y-auto flex-grow */}
+            </div> {/* Closing: w-3/4 flex flex-col */}
+          </div> {/* Closing: flex h-[600px] */}
+        </TooltipProvider>
+        <DialogFooter className="p-6 pt-4">
+          <div className="flex justify-end gap-3 w-full">
+            <Button 
+              variant="outline" 
+              onClick={() => { onOpenChange(false); resetForm(); }}
+            >
+              취소
+            </Button>
+            <Button 
+              onClick={handleSave}
+              disabled={isSubmitting}
+              className="bg-gym-primary hover:bg-gym-primary/90 text-white"
+            >
+              {isSubmitting ? "저장 중..." : "저장"}
+            </Button>
           </div>
-        </Tabs>
-
-        <DialogFooter>
-          <Button 
-            variant="outline" 
-            onClick={() => onOpenChange(false)}
-            disabled={isSubmitting}
-          >
-            취소
-          </Button>
-          <Button 
-            onClick={handleSave}
-            disabled={isSubmitting}
-            className="bg-gym-primary hover:bg-gym-primary/90"
-          >
-            {isSubmitting ? "처리 중..." : "등록"}
-          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 };
+

@@ -399,14 +399,14 @@ export const PassDetailModal = memo<PassDetailModalProps>(
                   {isEditing ? (
                     <>
                       <Button variant="outline" onClick={handleCancelEdit}><XCircle className="mr-2 h-4 w-4" /> 취소</Button>
-                      <Button variant="default" onClick={handleSave}><Save className="mr-2 h-4 w-4" /> 저장</Button>
+                      <Button onClick={handleSave} className="bg-gym-primary hover:bg-gym-primary/90 text-white"><Save className="mr-2 h-4 w-4" /> 저장</Button>
                     </>
                   ) : (
                     <>
-                      <Button variant="outline" onClick={handleDelete} className="flex items-center">
+                      <Button variant="destructive" onClick={handleDelete} className="flex items-center">
                         <Trash2 className="mr-2 h-4 w-4" /> 삭제
                       </Button>
-                      <Button variant="default" onClick={handleEditToggle}><Edit3 className="mr-2 h-4 w-4" /> 수정</Button>
+                      <Button onClick={handleEditToggle} className="bg-gym-primary hover:bg-gym-primary/90 text-white"><Edit3 className="mr-2 h-4 w-4" /> 수정</Button>
                     </>
                   )}
                 </DialogFooter>

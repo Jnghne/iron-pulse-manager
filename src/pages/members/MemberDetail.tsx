@@ -4,25 +4,12 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
   ChevronLeft, 
-  User, 
-  Phone, 
-  Mail, 
-  Calendar, 
-  CreditCard, 
   Edit, 
-  Plus,
-  Users,
-  Key,
   AlertTriangle,
-  Clock,
-  Dumbbell
 } from "lucide-react";
 import { mockMembers, Member } from "@/data/mockData";
-import { formatDate, formatPhoneNumber, calculateAge } from "@/lib/utils";
 import { MemberSummary } from "./components/MemberSummary";
 import { AttendanceTab } from "./components/AttendanceTab";
 import { PaymentHistoryTab } from "./components/PaymentHistoryTab";
@@ -263,33 +250,35 @@ const MemberDetail = ({ id: propId }: MemberDetailProps) => {
             const updatedMember = { ...member };
             
             // 결제 유형에 따라 회원 데이터 업데이트
-            switch (paymentData.type) {
-              case 'gym':
+            switch (paymentData.category) {
+              case 'gym': {
                 updatedMember.membershipActive = true;
-                updatedMember.membershipStartDate = paymentData.startDate;
+                updatedMember.membershipStartDate = paymentData.serviceStartDate;
                 // 임의로 1년 후로 설정 (실제로는 상품에 따라 다름)
-                const endDate = new Date(paymentData.startDate);
+                const endDate = new Date(paymentData.serviceStartDate || new Date());
                 endDate.setFullYear(endDate.getFullYear() + 1);
                 updatedMember.membershipEndDate = endDate.toISOString().split('T')[0];
                 updatedMember.gymMembershipDaysLeft = 365;
                 break;
-              case 'pt':
+              }
+              case 'pt': {
                 updatedMember.hasPT = true;
-                updatedMember.ptStartDate = paymentData.startDate;
+                updatedMember.ptStartDate = paymentData.serviceStartDate;
                 updatedMember.ptTotal = 10; // 임의 설정 (실제로는 상품에 따라 다름)
                 updatedMember.ptRemaining = 10;
                 // 임의로 6개월 후로 설정
-                const ptEndDate = new Date(paymentData.startDate);
+                const ptEndDate = new Date(paymentData.serviceStartDate || new Date());
                 ptEndDate.setMonth(ptEndDate.getMonth() + 6);
                 updatedMember.ptExpiryDate = ptEndDate.toISOString().split('T')[0];
-                updatedMember.trainerAssigned = paymentData.trainer;
+                updatedMember.trainerAssigned = paymentData.instructor;
                 break;
+              }
               case 'locker':
                 updatedMember.lockerInfo = {
                   name: paymentData.product,
                   daysLeft: 30, // 임의 설정
-                  startDate: paymentData.startDate,
-                  endDate: new Date(new Date(paymentData.startDate).setMonth(new Date(paymentData.startDate).getMonth() + 1)).toISOString().split('T')[0],
+                  startDate: paymentData.serviceStartDate,
+                  endDate: paymentData.serviceStartDate ? new Date(new Date(paymentData.serviceStartDate).setMonth(new Date(paymentData.serviceStartDate).getMonth() + 1)).toISOString().split('T')[0] : undefined,
                   lockerNumber: paymentData.lockerNumber,
                   notes: paymentData.memo
                 };
@@ -301,16 +290,16 @@ const MemberDetail = ({ id: propId }: MemberDetailProps) => {
                 
                 updatedMember.otherProducts.push({
                   name: paymentData.product,
-                  startDate: paymentData.startDate,
-                  endDate: new Date(new Date(paymentData.startDate).setMonth(new Date(paymentData.startDate).getMonth() + 1)).toISOString().split('T')[0],
+                  startDate: paymentData.serviceStartDate,
+                  endDate: paymentData.serviceStartDate ? new Date(new Date(paymentData.serviceStartDate).setMonth(new Date(paymentData.serviceStartDate).getMonth() + 1)).toISOString().split('T')[0] : undefined,
                   type: paymentData.product.split(' ')[0] // 임의 설정
                 });
                 break;
             }
             
             // 미수금 업데이트
-            if (paymentData.unpaidAmount > 0) {
-              updatedMember.unpaidAmount = (updatedMember.unpaidAmount || 0) + paymentData.unpaidAmount;
+            if (parseFloat(paymentData.unpaidAmount || "0") > 0) {
+              updatedMember.unpaidAmount = (updatedMember.unpaidAmount || 0) + parseFloat(paymentData.unpaidAmount || "0");
             }
             
             setMember(updatedMember);

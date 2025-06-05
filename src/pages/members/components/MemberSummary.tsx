@@ -96,7 +96,7 @@ export const MemberSummary = ({ member }: MemberSummaryProps) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
               {/* 기본 정보 섹션 */}
               <div className="space-y-4 flex flex-col">
-                <div className="space-y-6">
+                <div className="space-y-8">
                 {/* 생년월일 및 만나이 */}
                 <div className="flex items-start gap-2">
                   <Calendar className="h-5 w-5 text-muted-foreground mt-0.5" />
@@ -139,6 +139,19 @@ export const MemberSummary = ({ member }: MemberSummaryProps) => {
                   </div>
                 </div>
                 
+                {/* 특이사항 메모 */}
+                <div className="flex items-start gap-2">
+                  <FileText className="h-5 w-5 text-muted-foreground mt-0.5" />
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-2">특이사항 메모</p>
+                    {member.memberNotes ? (
+                      <p className="font-medium whitespace-pre-line">{member.memberNotes}</p>
+                    ) : (
+                      <p className="text-sm text-muted-foreground italic">등록된 특이사항 메모가 없습니다.</p>
+                    )}
+                  </div>
+                </div>
+                
                 {/* 잔여 미수금 */}
                 {member.unpaidAmount !== undefined && (
                   <div className="flex items-start gap-2">
@@ -169,7 +182,7 @@ export const MemberSummary = ({ member }: MemberSummaryProps) => {
             <div className="space-y-4 flex flex-col">
               {/* 연락처 정보 타이틀 제거 */}
               
-              <div className="space-y-6">
+              <div className="space-y-8">
                 {/* 핸드폰 번호 */}
                 <div className="flex items-start gap-2">
                   <Phone className="h-5 w-5 text-muted-foreground mt-0.5" />
@@ -180,54 +193,52 @@ export const MemberSummary = ({ member }: MemberSummaryProps) => {
                 </div>
                 
                 {/* 이메일 */}
-                {member.email && (
-                  <div className="flex items-start gap-2">
-                    <Mail className="h-5 w-5 text-muted-foreground mt-0.5" />
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-2">이메일</p>
+                <div className="flex items-start gap-2">
+                  <Mail className="h-5 w-5 text-muted-foreground mt-0.5" />
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-2">이메일</p>
+                    {member.email ? (
                       <p className="font-medium">{member.email}</p>
-                    </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground italic">등록된 이메일이 없습니다.</p>
+                    )}
                   </div>
-                )}
+                </div>
                 
                 {/* 주소 */}
-                {member.address && (
-                  <div className="flex items-start gap-2">
-                    <MapPin className="h-5 w-5 text-muted-foreground mt-0.5" />
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-2">주소</p>
+                <div className="flex items-start gap-2">
+                  <MapPin className="h-5 w-5 text-muted-foreground mt-0.5" />
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-2">주소</p>
+                    {member.address ? (
                       <p className="font-medium">{member.address}</p>
-                    </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground italic">등록된 주소가 없습니다.</p>
+                    )}
                   </div>
-                )}
+                </div>
                 
                 {/* 문자 수신 동의 여부 */}
                 <div className="flex items-start gap-2">
                   <MessageSquare className="h-5 w-5 text-muted-foreground mt-0.5" />
                   <div>
                     <p className="text-sm text-muted-foreground mb-2">문자 수신 동의</p>
-                    <Badge variant={member.smsConsent ? "default" : "outline"} className={member.smsConsent ? "bg-gym-primary" : ""}>
-                      {member.smsConsent ? "동의" : "미동의"}
-                    </Badge>
+                    <Badge
+  variant={member.smsConsent ? "default" : "outline"}
+  className={
+    member.smsConsent
+      ? "bg-gym-primary hover:bg-gym-primary/90"
+      : "text-slate-700 bg-slate-100 border-slate-300 hover:bg-slate-200"
+  }
+>
+  {member.smsConsent ? '동의' : '미동의'}
+</Badge>
                   </div>
                 </div>
               </div>
             </div>
-            
-            {/* 특이사항 메모 (전체 너비) */}
-            {member.memberNotes && (
-              <div className="col-span-1 md:col-span-2 space-y-2">
-                <h3 className="text-lg font-semibold flex items-center gap-2">
-                  <FileText className="h-5 w-5 text-gym-primary" />
-                  특이사항 메모
-                </h3>
-                <div className="p-3 bg-muted/50 rounded-md">
-                  <p className="text-sm whitespace-pre-line">{member.memberNotes}</p>
-                </div>
-              </div>
-            )}
+            </div> {/* ADDED: Closes "grid grid-cols-1 md:grid-cols-2" */}
           </div>
-        </div>
         </div>
       </CardContent>
     </Card>

@@ -1,342 +1,472 @@
-
-import { useState, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle 
+import { useForm, Controller } from "react-hook-form";
+import * as z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { format } from "date-fns";
+import { Search, Loader2 } from "lucide-react";
+import { useEffect, useRef, ChangeEvent } from 'react'; // Added ChangeEvent
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  CardFooter
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { 
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { generateMemberId, formatPhoneNumber, isValidPhoneNumber } from "@/lib/utils";
-import { DatePicker } from "@/components/DatePicker";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Textarea } from "@/components/ui/textarea";
+import { mockMembers, Member } from "@/data/mockData";
+
+// Daum Postcode types
+declare global {
+  interface Window {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    daum: any;
+  }
+}
+
+interface DaumPostcodeData {
+  zonecode: string;
+  address: string;
+  addressType: 'R' | 'J';
+  bname: string;
+  buildingName: string;
+  apartment: 'Y' | 'N';
+}
+
+const memberSchema = z.object({
+  name: z.string().min(2, { message: "이름은 2자 이상 입력해주세요." }),
+  gender: z.enum(["male", "female"], { required_error: "성별을 선택해주세요." }),
+  birthDate: z.date({ required_error: "생년월일을 선택해주세요." }),
+  phoneNumber: z.string().refine(isValidPhoneNumber, { message: "유효한 핸드폰 번호를 입력해주세요. (010-0000-0000)" }),
+  email: z.string().email({ message: "유효한 이메일 주소를 입력해주세요." }).optional().or(z.literal('')),
+  address: z.object({
+    postalCode: z.string().min(5, { message: "우편번호를 검색해주세요." }),
+    address1: z.string().min(1, { message: "주소를 검색해주세요." }),
+    address2: z.string().optional(),
+  }),
+  registrationPath: z.string().optional(),
+  smsConsent: z.boolean().default(false),
+  memberNotes: z.string().optional(),
+});
+
+type MemberFormValues = z.infer<typeof memberSchema>;
 
 const MemberCreate = () => {
   const navigate = useNavigate();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  // Form state
-  const [name, setName] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [postalCode, setPostalCode] = useState("");
-  const [address, setAddress] = useState("");
-  const [birthDate, setBirthDate] = useState<Date>(new Date());
-  const [memo, setMemo] = useState("");
-  const [hasMembership, setHasMembership] = useState(false);
-  const [membershipMonths, setMembershipMonths] = useState("1");
-  const [hasPT, setHasPT] = useState(false);
-  const [ptSessions, setPTSessions] = useState("10");
-  const [ptExpiryMonths, setPtExpiryMonths] = useState("3");
-  const [trainerAssigned, setTrainerAssigned] = useState("");
-  
-  // Handle phone number input with formatting
-  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Remove non-numeric characters and format
-    const cleaned = e.target.value.replace(/\D/g, "");
-    setPhoneNumber(formatPhoneNumber(cleaned));
-  };
-  
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    
-    // Basic validation
-    if (!name.trim()) {
-      toast.error("회원 이름을 입력해주세요.");
-      setIsSubmitting(false);
-      return;
+  const {
+    control,
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    setValue,
+    watch,
+  } = useForm<MemberFormValues>({
+    resolver: zodResolver(memberSchema),
+    defaultValues: {
+      name: "",
+      gender: undefined,
+      birthDate: undefined,
+      phoneNumber: "",
+      email: "",
+      address: {
+        postalCode: "",
+        address1: "",
+        address2: "",
+      },
+      registrationPath: "",
+      smsConsent: false,
+      memberNotes: "",
+    },
+  });
+
+  const addressDetailRef = useRef<HTMLInputElement>(null);
+  const watchedPhoneNumber = watch("phoneNumber");
+
+  useEffect(() => {
+    const scriptId = 'daum-postcode-script';
+    let script = document.getElementById(scriptId) as HTMLScriptElement | null;
+
+    if (!script) {
+      script = document.createElement('script');
+      script.id = scriptId;
+      script.src = '//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
+      script.async = true;
+      document.head.appendChild(script);
     }
     
-    if (!isValidPhoneNumber(phoneNumber)) {
-      toast.error("유효한 핸드폰 번호를 입력해주세요.");
-      setIsSubmitting(false);
-      return;
-    }
-    
-    // Mock form submission
-    setTimeout(() => {
-      try {
-        // Generate unique member ID
-        const memberId = generateMemberId();
-        
-        // Get current date
-        const now = new Date();
-        const registrationDate = now.toISOString().split("T")[0];
-        
-        // Calculate membership dates if applicable
-        let membershipStartDate = null;
-        let membershipEndDate = null;
-        
-        if (hasMembership) {
-          membershipStartDate = registrationDate;
-          const endDate = new Date(now);
-          endDate.setMonth(now.getMonth() + parseInt(membershipMonths));
-          membershipEndDate = endDate.toISOString().split("T")[0];
-        }
-        
-        // Calculate PT expiry date if applicable
-        let ptExpireDate = null;
-        if (hasPT) {
-          const expireDate = new Date(now);
-          expireDate.setMonth(now.getMonth() + parseInt(ptExpiryMonths));
-          ptExpireDate = expireDate.toISOString().split("T")[0];
-        }
-        
-        // In a real app, this would be an API call to create a member
-        toast.success(`${name} 회원이 성공적으로 등록되었습니다.`, {
-          description: `회원번호: ${memberId}`,
-        });
-        
-        // Redirect to member list
-        navigate("/members");
-      } catch (error) {
-        console.error("Error creating member:", error);
-        toast.error("회원 등록 중 오류가 발생했습니다. 다시 시도해주세요.");
-      } finally {
-        setIsSubmitting(false);
+    // 컴포넌트 언마운트 시 스크립트 제거 (선택 사항, 상황에 따라 필요 없을 수 있음)
+    return () => {
+      const existingScript = document.getElementById(scriptId);
+      if (existingScript && existingScript.parentElement === document.head) {
+        // document.head.removeChild(existingScript); // 주석 처리: 다른 페이지에서도 사용될 수 있으므로 제거하지 않음
       }
-    }, 1000);
+    };
+  }, []);
+
+  const handleOpenPostcode = () => {
+    if (window.daum && window.daum.Postcode) {
+      new window.daum.Postcode({
+        oncomplete: (data: DaumPostcodeData) => {
+          let fullAddress = data.address;
+          let extraAddress = '';
+
+          if (data.addressType === 'R') {
+            if (data.bname !== '' && /[동|로|가]$/g.test(data.bname)) {
+              extraAddress += data.bname;
+            }
+            if (data.buildingName !== '' && data.apartment === 'Y') {
+              extraAddress += (extraAddress !== '' ? ', ' : '') + data.buildingName;
+            }
+            fullAddress += extraAddress !== '' ? ` (${extraAddress})` : '';
+          }
+
+          setValue('address.postalCode', data.zonecode, { shouldValidate: true });
+          setValue('address.address1', fullAddress, { shouldValidate: true });
+          setValue('address.address2', '', { shouldValidate: false });
+          addressDetailRef.current?.focus();
+        },
+      }).open();
+    } else {
+      toast.error("주소 검색 서비스를 불러오는 중입니다. 잠시 후 다시 시도해주세요.");
+    }
   };
-  
+
+  const onSubmit = (data: MemberFormValues) => {
+    try {
+      const newMemberId = generateMemberId();
+      const registrationDate = new Date().toISOString().split("T")[0];
+
+      const newMember: Member = {
+        id: newMemberId,
+        name: data.name,
+        gender: data.gender,
+        birthDate: data.birthDate ? format(data.birthDate, "yyyy-MM-dd") : "",
+        phone: data.phoneNumber,
+        email: data.email || undefined,
+        address: `${data.address.address1} ${data.address.address2 || ''}`.trim(),
+        memberType: "일반",
+        registrationDate,
+        membershipStatus: "pending",
+        attendanceRate: 0,
+        smsConsent: data.smsConsent,
+        memberNotes: data.memberNotes || undefined,
+        // --- 나머지 Member 타입 필드들은 mockData에 따라 기본값 또는 undefined로 설정 ---
+        expiryDate: undefined,
+        ptRemaining: undefined,
+        ptExpiryDate: undefined,
+        ptStartDate: undefined,
+        ptTotal: undefined,
+        gymMembershipDaysLeft: undefined,
+        gymMembershipExpiryDate: undefined,
+        trainerAssigned: undefined,
+        photoUrl: undefined,
+        membershipActive: false,
+        hasPT: false,
+        membershipId: undefined,
+        ptId: undefined,
+        lockerId: undefined,
+        membershipStartDate: undefined,
+        membershipEndDate: undefined,
+        availableBranches: undefined,
+        unpaidAmount: undefined,
+        lockerInfo: undefined,
+        otherProducts: undefined,
+        suspensionRecords: undefined,
+        trainerNotes: data.memberNotes || undefined, // 이전 코드에서 memberNotes로 되어있던 것을 trainerNotes로 유지하거나, Member 타입 정의와 일치시킬 필요가 있습니다. 여기서는 일단 trainerNotes로 두겠습니다.
+      };
+
+      mockMembers.unshift(newMember);
+
+      toast.success(`${data.name} 회원이 성공적으로 등록되었습니다.`, {
+        description: `회원번호: ${newMemberId}`,
+      });
+      navigate(`/members/${newMemberId}`);
+    } catch (error) {
+      console.error("Error creating member:", error);
+      toast.error("회원 등록 중 오류가 발생했습니다. 다시 시도해주세요.");
+    }
+  };
+
   return (
-    <div className="space-y-6">
-      <div>
+    <div className="space-y-6 p-4 md:p-6">
+      <div className="mb-6">
         <h1 className="text-3xl font-bold tracking-tight">회원 등록</h1>
-        <p className="text-muted-foreground">새로운 회원 정보를 등록하세요.</p>
+        <p className="text-muted-foreground">새로운 회원 정보를 등록하고 관리하세요.</p>
       </div>
       
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+        {/* 기본 정보 카드 */}
         <Card>
           <CardHeader>
-            <CardTitle>회원 기본 정보</CardTitle>
-            <CardDescription>회원의 기본 정보를 입력하세요.</CardDescription>
+            <CardTitle>기본 정보</CardTitle>
+            <CardDescription>회원의 기본적인 개인 정보를 입력합니다.</CardDescription>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="name">이름 <span className="text-destructive">*</span></Label>
+              <Input 
+                id="name" 
+                placeholder="홍길동"
+                {...register("name")} 
+                disabled={isSubmitting}
+              />
+              {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="gender">성별 <span className="text-destructive">*</span></Label>
+              <Controller
+                name="gender"
+                control={control}
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange} value={field.value} disabled={isSubmitting}>
+                    <SelectTrigger id="gender">
+                      <SelectValue placeholder="성별을 선택하세요" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="male">남성</SelectItem>
+                      <SelectItem value="female">여성</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              {errors.gender && <p className="text-sm text-destructive">{errors.gender.message}</p>}
+            </div>
+
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="birthDate">생년월일 <span className="text-destructive">*</span></Label>
+              <Controller
+                name="birthDate"
+                control={control}
+                render={({ field }) => (
+                  <DatePicker 
+                    selected={field.value} 
+                    onSelect={field.onChange} 
+                    className="w-full"
+                    placeholder="생년월일을 선택하세요"
+                    disabled={isSubmitting}
+                  />
+                )}
+              />
+              {errors.birthDate && <p className="text-sm text-destructive">{errors.birthDate.message}</p>}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 연락처 정보 카드 */}
+        <Card>
+          <CardHeader>
+            <CardTitle>연락처 정보</CardTitle>
+            <CardDescription>회원의 연락처 정보를 입력합니다.</CardDescription>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="phoneNumber">핸드폰 번호 <span className="text-destructive">*</span></Label>
+              <Input 
+                id="phoneNumber" 
+                placeholder="010-0000-0000"
+                {...register("phoneNumber", {
+                  onChange: (e: ChangeEvent<HTMLInputElement>) => { // Added ChangeEvent type
+                    const formatted = formatPhoneNumber(e.target.value);
+                    setValue("phoneNumber", formatted, { shouldValidate: true });
+                  }
+                })}
+                value={watchedPhoneNumber} // This should work if watchedPhoneNumber is correctly updated
+                disabled={isSubmitting}
+              />
+              {errors.phoneNumber && <p className="text-sm text-destructive">{errors.phoneNumber.message}</p>}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="email">이메일</Label>
+              <Input 
+                id="email" 
+                type="email"
+                placeholder="example@email.com"
+                {...register("email")} 
+                disabled={isSubmitting}
+              />
+              {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 주소 정보 카드 */}
+        <Card>
+          <CardHeader>
+            <CardTitle>주소 정보</CardTitle>
+            <CardDescription>회원의 주소 정보를 입력합니다.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Basic Information */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Name - top row, full width */}
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="name">회원 이름</Label>
-                <Input
-                  id="name"
-                  placeholder="이름을 입력하세요"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  disabled={isSubmitting}
-                />
-              </div>
-              
-              {/* Phone and Birth Date - second row, side by side */}
-              <div className="space-y-2">
-                <Label htmlFor="phone">핸드폰 번호</Label>
-                <Input
-                  id="phone"
-                  placeholder="010-0000-0000"
-                  value={phoneNumber}
-                  onChange={handlePhoneChange}
-                  disabled={isSubmitting}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="birth-date">생년월일</Label>
-                <DatePicker
-                  selected={birthDate}
-                  onSelect={setBirthDate}
-                  className="w-full"
-                />
-              </div>
-              
-              {/* Postal Code and Address - third row, side by side */}
-              <div className="space-y-2">
-                <Label htmlFor="postal-code">우편번호</Label>
-                <Input
-                  id="postal-code"
-                  placeholder="00000"
-                  value={postalCode}
-                  onChange={(e) => setPostalCode(e.target.value)}
-                  disabled={isSubmitting}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="address">상세 주소</Label>
-                <Input
-                  id="address"
-                  placeholder="주소를 입력하세요"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  disabled={isSubmitting}
-                />
-              </div>
-
-              {/* Memo - bottom row, full width */}
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="memo">메모</Label>
-                <Textarea
-                  id="memo"
-                  placeholder="특이사항이나 메모를 입력하세요"
-                  value={memo}
-                  onChange={(e) => setMemo(e.target.value)}
-                  disabled={isSubmitting}
-                />
-              </div>
-            </div>
-            
-            {/* Membership Information */}
-            <Separator />
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label htmlFor="membership">헬스장 이용권</Label>
-                  <div className="text-sm text-muted-foreground">
-                    회원이 헬스장 이용권을 구매했는지 설정하세요.
-                  </div>
-                </div>
-                <Switch
-                  id="membership"
-                  checked={hasMembership}
-                  onCheckedChange={setHasMembership}
-                  disabled={isSubmitting}
-                />
-              </div>
-              
-              {hasMembership && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pl-0 md:pl-6 border-l-0 md:border-l border-border">
-                  <div className="space-y-2">
-                    <Label htmlFor="membership-months">이용 개월 수</Label>
-                    <Select
-                      defaultValue={membershipMonths}
-                      onValueChange={setMembershipMonths}
+            <div className="space-y-2">
+              <Label htmlFor="address.postalCode">우편번호 <span className="text-destructive">*</span></Label>
+              <div className="flex items-center gap-2">
+                <Controller
+                  name="address.postalCode"
+                  control={control}
+                  render={({ field }) => (
+                    <Input
+                      id="address.postalCode"
+                      {...field}
+                      readOnly
+                      placeholder="주소 검색 클릭"
+                      className="flex-grow bg-gray-100 dark:bg-gray-800"
                       disabled={isSubmitting}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="이용 기간 선택" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="1">1개월</SelectItem>
-                        <SelectItem value="3">3개월</SelectItem>
-                        <SelectItem value="6">6개월</SelectItem>
-                        <SelectItem value="12">12개월</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
+                    />
+                  )}
+                />
+                <Button type="button" variant="outline" onClick={handleOpenPostcode} disabled={isSubmitting}>
+                  <Search className="mr-2 h-4 w-4" /> 주소 검색
+                </Button>
+              </div>
+              {errors.address?.postalCode && (
+                <p className="text-sm text-destructive">{errors.address.postalCode.message}</p>
               )}
             </div>
-            
-            {/* PT Information */}
-            <Separator />
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label htmlFor="pt">PT 이용권</Label>
-                  <div className="text-sm text-muted-foreground">
-                    회원이 PT 이용권을 구매했는지 설정하세요.
-                  </div>
-                </div>
-                <Switch
-                  id="pt"
-                  checked={hasPT}
-                  onCheckedChange={setHasPT}
-                  disabled={isSubmitting}
-                />
-              </div>
-              
-              {hasPT && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pl-0 md:pl-6 border-l-0 md:border-l border-border">
-                  <div className="space-y-2">
-                    <Label htmlFor="pt-sessions">PT 횟수</Label>
-                    <Select
-                      defaultValue={ptSessions}
-                      onValueChange={setPTSessions}
-                      disabled={isSubmitting}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="PT 횟수 선택" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="10">10회</SelectItem>
-                        <SelectItem value="20">20회</SelectItem>
-                        <SelectItem value="30">30회</SelectItem>
-                        <SelectItem value="40">40회</SelectItem>
-                        <SelectItem value="50">50회</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="pt-expiry">만료 기간</Label>
-                    <Select
-                      defaultValue={ptExpiryMonths}
-                      onValueChange={setPtExpiryMonths}
-                      disabled={isSubmitting}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="만료 기간 선택" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="3">3개월</SelectItem>
-                        <SelectItem value="6">6개월</SelectItem>
-                        <SelectItem value="12">12개월</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="trainer">담당 트레이너</Label>
-                    <Select
-                      value={trainerAssigned}
-                      onValueChange={setTrainerAssigned}
-                      disabled={isSubmitting}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="트레이너 선택" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="박지훈">박지훈</SelectItem>
-                        <SelectItem value="최수진">최수진</SelectItem>
-                        <SelectItem value="김태양">김태양</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="address.address1">주소 <span className="text-destructive">*</span></Label>
+              <Controller
+                name="address.address1"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    id="address.address1"
+                    {...field}
+                    readOnly
+                    placeholder="검색된 주소가 표시됩니다"
+                    className="w-full bg-gray-100 dark:bg-gray-800"
+                    disabled={isSubmitting}
+                  />
+                )}
+              />
+              {errors.address?.address1 && (
+                <p className="text-sm text-destructive">{errors.address.address1.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="address.address2">상세주소</Label>
+              <Controller
+                name="address.address2"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    id="address.address2"
+                    {...field}
+                    placeholder="상세주소를 입력하세요 (예: 아파트 동/호수)"
+                    className="w-full"
+                    ref={addressDetailRef}
+                    disabled={isSubmitting}
+                  />
+                )}
+              />
+              {errors.address?.address2 && (
+                <p className="text-sm text-destructive">{errors.address.address2.message}</p>
               )}
             </div>
           </CardContent>
         </Card>
-        
-        <div className="flex justify-end mt-6 space-x-2">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => navigate("/members")}
-            disabled={isSubmitting}
-          >
+
+        {/* 기타 정보 카드 */}
+        <Card>
+          <CardHeader>
+            <CardTitle>기타 정보</CardTitle>
+            <CardDescription>추가적인 회원 정보를 입력합니다.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="registrationPath">가입 경로</Label>
+              <Controller
+                name="registrationPath"
+                control={control}
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange} value={field.value} disabled={isSubmitting}>
+                    <SelectTrigger id="registrationPath">
+                      <SelectValue placeholder="가입 경로를 선택하세요" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="지인 소개">지인 소개</SelectItem>
+                      <SelectItem value="온라인 검색">온라인 검색 (블로그, SNS 등)</SelectItem>
+                      <SelectItem value="간판/전단지">간판/전단지</SelectItem>
+                      <SelectItem value="이벤트/프로모션">이벤트/프로모션</SelectItem>
+                      <SelectItem value="재등록">재등록</SelectItem>
+                      <SelectItem value="기타">기타</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              {errors.registrationPath && <p className="text-sm text-destructive">{errors.registrationPath.message}</p>}
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <Controller
+                  name="smsConsent"
+                  control={control}
+                  render={({ field }) => (
+                    <Checkbox
+                      id="smsConsent"
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      disabled={isSubmitting}
+                    />
+                  )}
+                />
+                <Label htmlFor="smsConsent" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  SMS 수신 동의 (마케팅 정보 수신)
+                </Label>
+              </div>
+              {errors.smsConsent && <p className="text-sm text-destructive">{errors.smsConsent.message}</p>}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="memberNotes">회원 메모</Label>
+              <Controller
+                name="memberNotes"
+                control={control}
+                render={({ field }) => (
+                  <Textarea
+                    id="memberNotes"
+                    placeholder="회원에 대한 특이사항이나 메모를 입력하세요."
+                    {...field}
+                    className="min-h-[100px]"
+                    disabled={isSubmitting}
+                  />
+                )}
+              />
+              {errors.memberNotes && <p className="text-sm text-destructive">{errors.memberNotes.message}</p>}
+            </div>
+          </CardContent>
+        </Card>
+
+        <CardFooter className="flex justify-end gap-2">
+          <Button type="button" variant="outline" onClick={() => navigate(-1)} disabled={isSubmitting}>
             취소
           </Button>
-          <Button 
-            type="submit" 
-            className="bg-gym-primary hover:bg-gym-primary/90"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? "처리 중..." : "회원 등록"}
+          <Button type="submit" disabled={isSubmitting} className="bg-gym-primary hover:bg-gym-primary/90">
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                등록 중...
+              </>
+            ) : "등록하기"}
           </Button>
-        </div>
+        </CardFooter>
       </form>
     </div>
   );

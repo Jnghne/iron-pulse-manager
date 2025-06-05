@@ -19,6 +19,7 @@ import { MembershipTab } from "./components/MembershipTab";
 import { MemberSuspensionDialog } from "./components/MemberSuspensionDialog";
 import { PaymentRegistrationDialog } from "./components/PaymentRegistrationDialog";
 import { PaymentDetailDialog } from "./components/PaymentDetailDialog";
+import { toast } from "sonner"; // Added for success message
 
 interface MemberDetailProps {
   id?: string;
@@ -194,7 +195,13 @@ const MemberDetail = ({ id: propId }: MemberDetailProps) => {
         onOpenChange={setEditDialogOpen}
         onSave={(updatedMember) => {
           setMember(updatedMember);
+          // Update mockMembers to persist changes during the session
+          const memberIndex = mockMembers.findIndex(m => m.id === updatedMember.id);
+          if (memberIndex !== -1) {
+            mockMembers[memberIndex] = updatedMember;
+          }
           setEditDialogOpen(false);
+          toast.success("회원 정보가 성공적으로 수정되었습니다.");
         }}
       />
 

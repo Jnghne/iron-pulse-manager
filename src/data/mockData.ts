@@ -319,6 +319,7 @@ export const mockMembers: Member[] = [
     smsConsent: true,
     membershipActive: true,
     hasPT: false,
+    membershipId: 'prod_001', // 헬스 6개월 상품 ID
     membershipStartDate: '2023-06-15'
   },
   {
@@ -337,7 +338,7 @@ export const mockMembers: Member[] = [
     gymMembershipExpiryDate: '2024-07-09',
     attendanceRate: 60,
     smsConsent: true,
-    membershipActive: true,
+    membershipActive: false,
     hasPT: false,
     membershipStartDate: '2024-01-10'
   },
@@ -358,7 +359,7 @@ export const mockMembers: Member[] = [
     trainerAssigned: '김지원',
     smsConsent: true,
     membershipActive: false,
-    hasPT: true
+    hasPT: false
   },
   {
     id: 'M00009',
@@ -378,6 +379,7 @@ export const mockMembers: Member[] = [
     smsConsent: false,
     membershipActive: true,
     hasPT: false,
+    membershipId: 'prod_001', // 헬스 6개월 상품 ID
     membershipStartDate: '2024-04-01'
   },
   {
@@ -393,7 +395,7 @@ export const mockMembers: Member[] = [
     expiryDate: '2024-11-14',
     membershipStatus: 'active',
     ptRemaining: 25,
-    ptExpiryDate: '2024-12-31',
+    ptExpiryDate: '2026-12-31',
     gymMembershipDaysLeft: 170,
     gymMembershipExpiryDate: '2024-11-14',
     attendanceRate: 90,
@@ -403,6 +405,8 @@ export const mockMembers: Member[] = [
     membershipActive: true,
     hasPT: true,
     lockerId: 'B05',
+    membershipId: 'prod_001', // 헬스 6개월 상품 ID
+    ptId: 'prod_002', // PT 10회 상품 ID
     membershipStartDate: '2023-11-15'
   },
   {
@@ -426,6 +430,8 @@ export const mockMembers: Member[] = [
     smsConsent: true,
     membershipActive: true,
     hasPT: true,
+    membershipId: 'prod_001', // 헬스 6개월 상품 ID
+    ptId: 'prod_002', // PT 10회 상품 ID
     membershipStartDate: '2023-08-01'
   },
   {

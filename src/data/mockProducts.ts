@@ -1,17 +1,6 @@
-// src/data/mockProducts.ts
-import { ProductType } from '@/types/product';
 
-export interface Product {
-  id: string;
-  name: string;
-  type: ProductType;
-  price: number;
-  durationDays?: number;
-  totalSessions?: number;
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
+// src/data/mockProducts.ts
+import { Product, ProductType } from '@/types/product';
 
 export const mockProducts: Product[] = [
   {

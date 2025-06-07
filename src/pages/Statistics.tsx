@@ -1,7 +1,7 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 // Mock data for demonstration
@@ -20,10 +20,10 @@ const revenueData = [
 ];
 
 const trainerData = [
-  { name: '김트레이너', pt: 45, revenue: 4500000 },
-  { name: '이트레이너', pt: 38, revenue: 3800000 },
-  { name: '박트레이너', pt: 30, revenue: 3000000 },
-  { name: '최트레이너', pt: 25, revenue: 2500000 },
+  { name: '김트레이너', pt: 45, revenue: 4500000, rating: 4.8, newMembers: 12, retentionRate: 85 },
+  { name: '이트레이너', pt: 38, revenue: 3800000, rating: 4.6, newMembers: 9, retentionRate: 78 },
+  { name: '박트레이너', pt: 30, revenue: 3000000, rating: 4.7, newMembers: 8, retentionRate: 82 },
+  { name: '최트레이너', pt: 25, revenue: 2500000, rating: 4.5, newMembers: 6, retentionRate: 75 },
 ];
 
 const membershipTypeData = [
@@ -239,18 +239,44 @@ const Statistics = () => {
               <CardDescription>트레이너별 PT 수업 및 매출 현황</CardDescription>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={trainerData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis yAxisId="left" orientation="left" stroke="#6366F1" />
-                  <YAxis yAxisId="right" orientation="right" stroke="#22C55E" />
-                  <Tooltip />
-                  <Legend />
-                  <Bar yAxisId="left" dataKey="pt" name="PT 수업 수" fill="#6366F1" />
-                  <Bar yAxisId="right" dataKey="revenue" name="매출 (원)" fill="#22C55E" />
-                </BarChart>
-              </ResponsiveContainer>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>트레이너명</TableHead>
+                    <TableHead className="text-center">PT 수업 수</TableHead>
+                    <TableHead className="text-center">매출</TableHead>
+                    <TableHead className="text-center">평점</TableHead>
+                    <TableHead className="text-center">신규 회원</TableHead>
+                    <TableHead className="text-center">회원 유지율</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {trainerData.map((trainer) => (
+                    <TableRow key={trainer.name}>
+                      <TableCell className="font-medium">{trainer.name}</TableCell>
+                      <TableCell className="text-center">{trainer.pt}회</TableCell>
+                      <TableCell className="text-center font-semibold text-green-600">
+                        {trainer.revenue.toLocaleString()}원
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-yellow-100 text-yellow-800">
+                          ⭐ {trainer.rating}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-center">{trainer.newMembers}명</TableCell>
+                      <TableCell className="text-center">
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs ${
+                          trainer.retentionRate >= 80 ? 'bg-green-100 text-green-800' : 
+                          trainer.retentionRate >= 75 ? 'bg-yellow-100 text-yellow-800' : 
+                          'bg-red-100 text-red-800'
+                        }`}>
+                          {trainer.retentionRate}%
+                        </span>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </CardContent>
           </Card>
         </TabsContent>

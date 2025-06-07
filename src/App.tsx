@@ -27,6 +27,7 @@ import TrainerManagement from "./pages/TrainerManagement";
 import ProductListPage from "./pages/products/ProductListPage";
 import Community from "./pages/Community";
 import CommunityBoard from "./pages/community/CommunityBoard";
+import PostDetail from "./pages/community/PostDetail";
 import CommunityMarket from "./pages/community/CommunityMarket";
 import NotFound from "./pages/NotFound";
 
@@ -60,6 +61,7 @@ const App = () => (
             <Route path="trainers" element={<TrainerManagement />} />
             <Route path="community" element={<Community />} />
             <Route path="community/board" element={<CommunityBoard />} />
+            <Route path="community/board/:id" element={<PostDetail />} />
             <Route path="community/market" element={<CommunityMarket />} />
           </Route>
           

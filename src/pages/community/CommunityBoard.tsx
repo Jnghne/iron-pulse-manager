@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,7 +12,7 @@ import {
   Filter,
   ArrowLeft 
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Select,
   SelectContent,
@@ -21,12 +20,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import PostWriteDialog from "@/components/features/community/PostWriteDialog";
 
 const CommunityBoard = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [isWriteDialogOpen, setIsWriteDialogOpen] = useState(false);
 
-  const posts = [
+  const [posts, setPosts] = useState([
     {
       id: 1,
       title: "회원 관리 시스템 추천 부탁드립니다",
@@ -92,7 +94,7 @@ const CommunityBoard = () => {
       likes: 42,
       comments: 33
     }
-  ];
+  ]);
 
   const categories = {
     all: "전체",
@@ -121,6 +123,18 @@ const CommunityBoard = () => {
     return matchesSearch && matchesCategory;
   });
 
+  const handlePostSubmit = (postData: any) => {
+    const newPost = {
+      id: posts.length + 1,
+      ...postData
+    };
+    setPosts([newPost, ...posts]);
+  };
+
+  const handlePostClick = (postId: number) => {
+    navigate(`/community/board/${postId}`);
+  };
+
   return (
     <div className="space-y-6">
       {/* 헤더 */}
@@ -139,7 +153,7 @@ const CommunityBoard = () => {
             </p>
           </div>
         </div>
-        <Button>
+        <Button onClick={() => setIsWriteDialogOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
           글쓰기
         </Button>
@@ -180,7 +194,11 @@ const CommunityBoard = () => {
       {/* 게시글 목록 */}
       <div className="space-y-4">
         {filteredPosts.map((post) => (
-          <Card key={post.id} className="hover:shadow-md transition-shadow cursor-pointer">
+          <Card 
+            key={post.id} 
+            className="hover:shadow-md transition-shadow cursor-pointer"
+            onClick={() => handlePostClick(post.id)}
+          >
             <CardContent className="pt-6">
               <div className="flex justify-between items-start mb-3">
                 <div className="flex items-center gap-2">
@@ -231,6 +249,13 @@ const CommunityBoard = () => {
           총 {filteredPosts.length}개의 게시글
         </div>
       </div>
+
+      {/* 글쓰기 팝업 */}
+      <PostWriteDialog 
+        open={isWriteDialogOpen}
+        onOpenChange={setIsWriteDialogOpen}
+        onSubmit={handlePostSubmit}
+      />
     </div>
   );
 };

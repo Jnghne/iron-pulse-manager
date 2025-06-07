@@ -24,7 +24,7 @@ import Calendar from "./pages/Calendar";
 import Statistics from "./pages/Statistics";
 import TrainerManagement from "./pages/TrainerManagement";
 import ProductListPage from "./pages/products/ProductListPage"; // 상품 관리 페이지 임포트
-import ProductFormPage from "./pages/products/ProductFormPage"; // 상품 폼 페이지 임포트
+// import ProductFormPage from "./pages/products/ProductFormPage"; // 상품 폼 페이지 임포트 (더 이상 사용하지 않음)
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -50,8 +50,8 @@ const App = () => (
             <Route path="daily-tickets" element={<DailyTickets />} />
             {/* <Route path="payments" element={<PaymentRegistration />} /> */}
             <Route path="products" element={<ProductListPage />} /> {/* 상품 관리 페이지 라우트 추가 */}
-            <Route path="products/new" element={<ProductFormPage />} /> {/* 새 상품 추가 라우트 */}
-            <Route path="products/edit/:productId" element={<ProductFormPage />} /> {/* 상품 수정 라우트 */}
+            {/* <Route path="products/new" element={<ProductFormPage />} /> */}
+            {/* <Route path="products/edit/:productId" element={<ProductFormPage />} /> */}
             <Route path="locker-room" element={<LockerRoom />} />
             <Route path="attendance" element={<Attendance />} />
             <Route path="messages" element={<MessageSystem />} />

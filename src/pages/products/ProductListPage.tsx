@@ -1,10 +1,13 @@
 // src/pages/products/ProductListPage.tsx
-import React, { useState } from 'react'; // useState 임포트
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, Edit, Trash2 } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
-import { ProductType } from '@/types/product'; // Product 타입은 mockProducts에서 함께 가져옴
+// Link와 useNavigate는 더 이상 직접 사용하지 않으므로 주석 처리 또는 삭제 가능
+// import { Link, useNavigate } from 'react-router-dom'; 
+import { Product, ProductType } from '@/types/product'; 
 import { mockProducts } from '@/data/mockProducts';
+import { ProductAddModal } from '@/components/features/product/ProductAddModal';
+import { ProductEditModal } from '@/components/features/product/ProductEditModal';
 import {
   Table,
   TableBody,
@@ -38,11 +41,43 @@ const productTabs = [
 ];
 
 const ProductListPage: React.FC = () => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate(); // 더 이상 직접 사용하지 않음
   const [activeTab, setActiveTab] = useState<string>('all');
+  const [products, setProducts] = useState<Product[]>(mockProducts); // 상품 목록 상태로 관리
 
-  const handleEditProduct = (productId: string) => {
-    navigate(`/products/edit/${productId}`);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedProductForEdit, setSelectedProductForEdit] = useState<Product | null>(null);
+
+  const handleOpenAddModal = () => setIsAddModalOpen(true);
+  const handleCloseAddModal = () => setIsAddModalOpen(false);
+
+  const handleOpenEditModal = (product: Product) => {
+    setSelectedProductForEdit(product);
+    setIsEditModalOpen(true);
+  };
+  const handleCloseEditModal = () => {
+    setSelectedProductForEdit(null);
+    setIsEditModalOpen(false);
+  };
+
+  const handleProductAdd = (newProduct: Product) => {
+    // 실제 앱에서는 API 호출 후 응답으로 상태를 업데이트합니다.
+    setProducts(prevProducts => [newProduct, ...prevProducts]);
+    // mockProducts 배열도 직접 업데이트 (임시)
+    mockProducts.unshift(newProduct);
+  };
+
+  const handleProductUpdate = (updatedProduct: Product) => {
+    // 실제 앱에서는 API 호출 후 응답으로 상태를 업데이트합니다.
+    setProducts(prevProducts => 
+      prevProducts.map(p => p.id === updatedProduct.id ? updatedProduct : p)
+    );
+    // mockProducts 배열도 직접 업데이트 (임시)
+    const index = mockProducts.findIndex(p => p.id === updatedProduct.id);
+    if (index !== -1) {
+      mockProducts[index] = updatedProduct;
+    }
   };
 
   const handleDeleteProduct = (productId: string) => {
@@ -55,19 +90,17 @@ const ProductListPage: React.FC = () => {
     });
   };
 
-  // 선택된 탭에 따라 상품 필터링
+  // 선택된 탭에 따라 상품 필터링 (상태로 관리되는 products 사용)
   const filteredProducts = activeTab === 'all'
-    ? mockProducts
-    : mockProducts.filter(product => product.type === activeTab);
+    ? products
+    : products.filter(product => product.type === activeTab);
 
   return (
     <div className="container mx-auto py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">상품 관리</h1>
-        <Button asChild className="bg-gym-primary hover:bg-gym-primary/90 text-white">
-          <Link to="/products/new">
-            <PlusCircle className="mr-2 h-5 w-5" /> 상품 추가
-          </Link>
+        <Button onClick={handleOpenAddModal} className="bg-gym-primary hover:bg-gym-primary/90 text-white">
+          <PlusCircle className="mr-2 h-5 w-5" /> 상품 추가
         </Button>
       </div>
 
@@ -130,7 +163,7 @@ const ProductListPage: React.FC = () => {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleEditProduct(product.id)}
+                          onClick={() => handleOpenEditModal(product)}
                           className="hover:border-gym-primary hover:text-gym-primary"
                           aria-label="상품 수정"
                         >
@@ -159,6 +192,20 @@ const ProductListPage: React.FC = () => {
               </TableBody>
             </Table>
           </div>
+
+      <ProductAddModal 
+        isOpen={isAddModalOpen} 
+        onClose={handleCloseAddModal} 
+        onProductAdd={handleProductAdd} 
+      />
+      {selectedProductForEdit && (
+        <ProductEditModal 
+          isOpen={isEditModalOpen} 
+          onClose={handleCloseEditModal} 
+          product={selectedProductForEdit} 
+          onProductUpdate={handleProductUpdate} 
+        />
+      )}
     </div>
   );
 };

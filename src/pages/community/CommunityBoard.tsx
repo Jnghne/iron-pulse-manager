@@ -20,15 +20,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import PostWriteDialog from "@/components/features/community/PostWriteDialog";
 
 const CommunityBoard = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [isWriteDialogOpen, setIsWriteDialogOpen] = useState(false);
 
-  const [posts, setPosts] = useState([
+  const [posts] = useState([
     {
       id: 1,
       title: "회원 관리 시스템 추천 부탁드립니다",
@@ -123,14 +121,6 @@ const CommunityBoard = () => {
     return matchesSearch && matchesCategory;
   });
 
-  const handlePostSubmit = (postData: any) => {
-    const newPost = {
-      id: posts.length + 1,
-      ...postData
-    };
-    setPosts([newPost, ...posts]);
-  };
-
   const handlePostClick = (postId: number) => {
     navigate(`/community/board/${postId}`);
   };
@@ -153,10 +143,12 @@ const CommunityBoard = () => {
             </p>
           </div>
         </div>
-        <Button onClick={() => setIsWriteDialogOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          글쓰기
-        </Button>
+        <Link to="/community/board/write">
+          <Button>
+            <Plus className="h-4 w-4 mr-2" />
+            글쓰기
+          </Button>
+        </Link>
       </div>
 
       {/* 검색 및 필터 */}
@@ -243,19 +235,12 @@ const CommunityBoard = () => {
         ))}
       </div>
 
-      {/* 페이지네이션 (추후 구현) */}
+      {/* 페이지네이션 */}
       <div className="flex justify-center">
         <div className="text-sm text-muted-foreground">
           총 {filteredPosts.length}개의 게시글
         </div>
       </div>
-
-      {/* 글쓰기 팝업 */}
-      <PostWriteDialog 
-        open={isWriteDialogOpen}
-        onOpenChange={setIsWriteDialogOpen}
-        onSubmit={handlePostSubmit}
-      />
     </div>
   );
 };

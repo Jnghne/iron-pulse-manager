@@ -4,7 +4,6 @@ import { useParams, Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
 import { 
   ArrowLeft, 
   Eye, 
@@ -13,14 +12,14 @@ import {
   Share2,
   MoreHorizontal
 } from "lucide-react";
+import CommentSection from "@/components/features/community/CommentSection";
 
 const PostDetail = () => {
   const { id } = useParams();
-  const [newComment, setNewComment] = useState("");
   const [isLiked, setIsLiked] = useState(false);
 
   // 실제로는 API에서 게시글 데이터를 가져와야 함
-  const post = {
+  const [post] = useState({
     id: 1,
     title: "회원 관리 시스템 추천 부탁드립니다",
     content: `새로 헬스장을 오픈하는데 회원 관리 시스템을 도입하려고 합니다. 
@@ -43,7 +42,43 @@ const PostDetail = () => {
     views: 156,
     likes: 23,
     comments: 18
-  };
+  });
+
+  const [comments, setComments] = useState([
+    {
+      id: 1,
+      author: "이관장",
+      gymName: "스트롱짐",
+      location: "부산 해운대구",
+      content: "저는 헬스케어 솔루션을 사용하고 있는데 꽤 만족스럽습니다. 특히 회원 출입 관리가 편리해요!",
+      createdAt: "2024-06-07 15:20",
+      likes: 5,
+      isLiked: false,
+      replies: [
+        {
+          id: 11,
+          author: "김관장",
+          gymName: "파워짐",
+          location: "서울 강남구",
+          content: "답변 감사합니다! 혹시 월 이용료는 어느 정도인가요?",
+          createdAt: "2024-06-07 15:25",
+          likes: 1,
+          isLiked: false
+        }
+      ]
+    },
+    {
+      id: 2,
+      author: "박관장",
+      gymName: "휘트니스클럽",
+      location: "대구 수성구",
+      content: "짐매니저 추천드려요. 가격도 합리적이고 고객센터 응대도 좋습니다.",
+      createdAt: "2024-06-07 16:45",
+      likes: 3,
+      isLiked: false,
+      replies: []
+    }
+  ]);
 
   const categories = {
     general: "일반",
@@ -64,42 +99,69 @@ const PostDetail = () => {
     return colors[category] || "bg-gray-100 text-gray-800";
   };
 
-  // 가상의 댓글 데이터
-  const comments = [
-    {
-      id: 1,
-      author: "이관장",
-      gymName: "스트롱짐",
-      location: "부산 해운대구",
-      content: "저는 헬스케어 솔루션을 사용하고 있는데 꽤 만족스럽습니다. 특히 회원 출입 관리가 편리해요!",
-      createdAt: "2024-06-07 15:20",
-      likes: 5
-    },
-    {
-      id: 2,
-      author: "박관장",
-      gymName: "휘트니스클럽",
-      location: "대구 수성구",
-      content: "짐매니저 추천드려요. 가격도 합리적이고 고객센터 응대도 좋습니다.",
-      createdAt: "2024-06-07 16:45",
-      likes: 3
-    }
-  ];
-
-  const handleCommentSubmit = () => {
-    if (!newComment.trim()) {
-      alert("댓글을 입력해주세요.");
-      return;
-    }
-    
-    // 실제로는 API 호출
-    console.log("새 댓글:", newComment);
-    setNewComment("");
-  };
-
   const handleLike = () => {
     setIsLiked(!isLiked);
     // 실제로는 API 호출
+  };
+
+  const handleAddComment = (content: string) => {
+    const newComment = {
+      id: comments.length + 100,
+      author: "현재사용자",
+      gymName: "내 헬스장",
+      location: "서울 강남구",
+      content,
+      createdAt: new Date().toLocaleString("ko-KR"),
+      likes: 0,
+      isLiked: false,
+      replies: []
+    };
+    setComments([...comments, newComment]);
+  };
+
+  const handleAddReply = (commentId: number, content: string) => {
+    const newReply = {
+      id: Date.now(),
+      author: "현재사용자",
+      gymName: "내 헬스장",
+      location: "서울 강남구",
+      content,
+      createdAt: new Date().toLocaleString("ko-KR"),
+      likes: 0,
+      isLiked: false
+    };
+
+    setComments(comments.map(comment => 
+      comment.id === commentId 
+        ? { ...comment, replies: [...(comment.replies || []), newReply] }
+        : comment
+    ));
+  };
+
+  const handleLikeComment = (commentId: number) => {
+    setComments(comments.map(comment => {
+      if (comment.id === commentId) {
+        return {
+          ...comment,
+          isLiked: !comment.isLiked,
+          likes: comment.isLiked ? comment.likes - 1 : comment.likes + 1
+        };
+      }
+      // 대댓글에서도 좋아요 처리
+      if (comment.replies) {
+        const updatedReplies = comment.replies.map(reply => 
+          reply.id === commentId 
+            ? {
+                ...reply,
+                isLiked: !reply.isLiked,
+                likes: reply.isLiked ? reply.likes - 1 : reply.likes + 1
+              }
+            : reply
+        );
+        return { ...comment, replies: updatedReplies };
+      }
+      return comment;
+    }));
   };
 
   return (
@@ -174,67 +236,13 @@ const PostDetail = () => {
         </CardContent>
       </Card>
 
-      {/* 댓글 작성 */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">댓글 작성</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <Textarea
-              placeholder="댓글을 입력하세요..."
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              className="min-h-[100px]"
-            />
-            <div className="flex justify-end">
-              <Button onClick={handleCommentSubmit}>
-                댓글 등록
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* 댓글 목록 */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">댓글 {comments.length}개</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {comments.map((comment) => (
-              <div key={comment.id} className="border-b border-gray-100 pb-4 last:border-0">
-                <div className="flex justify-between items-start mb-2">
-                  <div className="flex items-center gap-2 text-sm">
-                    <span className="font-medium">{comment.author}</span>
-                    <span className="text-muted-foreground">
-                      {comment.gymName} · {comment.location}
-                    </span>
-                  </div>
-                  <span className="text-xs text-muted-foreground">
-                    {comment.createdAt}
-                  </span>
-                </div>
-                
-                <p className="text-sm mb-2 leading-relaxed">
-                  {comment.content}
-                </p>
-                
-                <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="sm">
-                    <ThumbsUp className="h-3 w-3 mr-1" />
-                    {comment.likes}
-                  </Button>
-                  <Button variant="ghost" size="sm">
-                    답글
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      {/* 댓글 섹션 */}
+      <CommentSection
+        comments={comments}
+        onAddComment={handleAddComment}
+        onAddReply={handleAddReply}
+        onLikeComment={handleLikeComment}
+      />
     </div>
   );
 };

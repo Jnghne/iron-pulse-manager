@@ -190,10 +190,12 @@ const CommunityMarket = () => {
             </p>
           </div>
         </div>
-        <Button>
-          <Plus className="h-4 w-4 mr-2" />
-          판매하기
-        </Button>
+        <Link to="/community/market/write">
+          <Button>
+            <Plus className="h-4 w-4 mr-2" />
+            판매하기
+          </Button>
+        </Link>
       </div>
 
       {/* 검색 및 필터 */}
@@ -231,66 +233,68 @@ const CommunityMarket = () => {
       {/* 상품 목록 */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredItems.map((item) => (
-          <Card key={item.id} className="hover:shadow-lg transition-shadow cursor-pointer">
-            <div className="aspect-video bg-gray-100 rounded-t-lg relative overflow-hidden">
-              <img 
-                src={item.images[0]} 
-                alt={item.title}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute top-3 left-3">
-                <Badge className={getCategoryColor(item.category)}>
-                  {categories[item.category as keyof typeof categories]}
-                </Badge>
-              </div>
-              <div className="absolute top-3 right-3">
-                <Badge className={getStatusColor(item.status)}>
-                  {item.status === "available" && "판매중"}
-                  {item.status === "reserved" && "예약중"}
-                  {item.status === "sold" && "판매완료"}
-                </Badge>
-              </div>
-            </div>
-            
-            <CardContent className="pt-4">
-              <h3 className="font-semibold mb-2 line-clamp-1">{item.title}</h3>
-              <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
-                {item.description}
-              </p>
-              
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center text-lg font-bold text-red-600">
-                  <DollarSign className="h-4 w-4 mr-1" />
-                  {item.price.toLocaleString()}원
+          <Link key={item.id} to={`/community/market/${item.id}`}>
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+              <div className="aspect-video bg-gray-100 rounded-t-lg relative overflow-hidden">
+                <img 
+                  src={item.images[0]} 
+                  alt={item.title}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute top-3 left-3">
+                  <Badge className={getCategoryColor(item.category)}>
+                    {categories[item.category as keyof typeof categories]}
+                  </Badge>
                 </div>
-                <Badge variant="outline">
-                  {conditions[item.condition as keyof typeof conditions]}
-                </Badge>
-              </div>
-              
-              <div className="flex items-center justify-between text-sm text-muted-foreground mb-3">
-                <div className="flex items-center gap-1">
-                  <MapPin className="h-3 w-3" />
-                  <span>{item.location}</span>
+                <div className="absolute top-3 right-3">
+                  <Badge className={getStatusColor(item.status)}>
+                    {item.status === "available" && "판매중"}
+                    {item.status === "reserved" && "예약중"}
+                    {item.status === "sold" && "판매완료"}
+                  </Badge>
                 </div>
-                <span>{item.createdAt.split(' ')[0]}</span>
               </div>
               
-              <div className="flex items-center justify-between text-sm text-muted-foreground">
-                <span>{item.seller} · {item.gymName}</span>
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-1">
-                    <Eye className="h-3 w-3" />
-                    <span>{item.views}</span>
+              <CardContent className="pt-4">
+                <h3 className="font-semibold mb-2 line-clamp-1">{item.title}</h3>
+                <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
+                  {item.description}
+                </p>
+                
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center text-lg font-bold text-red-600">
+                    <DollarSign className="h-4 w-4 mr-1" />
+                    {item.price.toLocaleString()}원
                   </div>
+                  <Badge variant="outline">
+                    {conditions[item.condition as keyof typeof conditions]}
+                  </Badge>
+                </div>
+                
+                <div className="flex items-center justify-between text-sm text-muted-foreground mb-3">
                   <div className="flex items-center gap-1">
-                    <Heart className="h-3 w-3" />
-                    <span>{item.likes}</span>
+                    <MapPin className="h-3 w-3" />
+                    <span>{item.location}</span>
+                  </div>
+                  <span>{item.createdAt.split(' ')[0]}</span>
+                </div>
+                
+                <div className="flex items-center justify-between text-sm text-muted-foreground">
+                  <span>{item.seller} · {item.gymName}</span>
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1">
+                      <Eye className="h-3 w-3" />
+                      <span>{item.views}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Heart className="h-3 w-3" />
+                      <span>{item.likes}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </Link>
         ))}
       </div>
 

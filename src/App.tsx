@@ -30,6 +30,8 @@ import CommunityBoard from "./pages/community/CommunityBoard";
 import PostDetail from "./pages/community/PostDetail";
 import PostWrite from "./pages/community/PostWrite";
 import CommunityMarket from "./pages/community/CommunityMarket";
+import MarketItemDetail from "./pages/community/MarketItemDetail";
+import MarketItemWrite from "./pages/community/MarketItemWrite";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -65,6 +67,8 @@ const App = () => (
             <Route path="community/board/write" element={<PostWrite />} />
             <Route path="community/board/:id" element={<PostDetail />} />
             <Route path="community/market" element={<CommunityMarket />} />
+            <Route path="community/market/write" element={<MarketItemWrite />} />
+            <Route path="community/market/:id" element={<MarketItemDetail />} />
           </Route>
           
           {/* Catch-all route for 404 */}

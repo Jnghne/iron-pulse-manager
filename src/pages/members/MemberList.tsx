@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -30,8 +31,8 @@ import {
   User
 } from "lucide-react";
 import { mockMembers, Member } from "@/data/mockData";
-import { mockProducts, Product } from "@/data/mockProducts";
-import { ProductType } from "@/types/product";
+import { mockProducts } from "@/data/mockProducts";
+import { Product, ProductType } from "@/types/product";
 import { formatDate, formatPhoneNumber } from "@/lib/utils";
 import { differenceInDays, parseISO, isValid } from "date-fns";
 import { 

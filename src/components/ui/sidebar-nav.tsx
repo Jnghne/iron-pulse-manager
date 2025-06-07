@@ -1,3 +1,4 @@
+
 import { Link, useLocation } from "react-router-dom"
 import {
   LayoutDashboard,
@@ -11,7 +12,8 @@ import {
   Settings,
   BarChart3,
   UserPlus,
-  Package, // 상품 관리 아이콘 추가
+  Package,
+  Users2, // 커뮤니티 아이콘 추가
 } from "lucide-react"
 import { SidebarItem } from "./sidebar"
 import { cn } from "@/lib/utils"
@@ -73,6 +75,11 @@ export function SidebarNav({ className, ...props }: SidebarNavProps) {
   ]
 
   const ownerOnlyItems = [
+    {
+      title: "커뮤니티",
+      href: "/community",
+      icon: <Users2 className="h-5 w-5" />,
+    },
     {
       title: "통계",
       href: "/statistics",

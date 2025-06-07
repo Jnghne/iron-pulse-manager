@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -23,8 +24,10 @@ import MessageSystem from "./pages/MessageSystem";
 import Calendar from "./pages/Calendar";
 import Statistics from "./pages/Statistics";
 import TrainerManagement from "./pages/TrainerManagement";
-import ProductListPage from "./pages/products/ProductListPage"; // 상품 관리 페이지 임포트
-// import ProductFormPage from "./pages/products/ProductFormPage"; // 상품 폼 페이지 임포트 (더 이상 사용하지 않음)
+import ProductListPage from "./pages/products/ProductListPage";
+import Community from "./pages/Community";
+import CommunityBoard from "./pages/community/CommunityBoard";
+import CommunityMarket from "./pages/community/CommunityMarket";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -48,16 +51,16 @@ const App = () => (
             <Route path="members/:id" element={<MemberDetail />} />
             <Route path="members/new" element={<MemberCreate />} />
             <Route path="daily-tickets" element={<DailyTickets />} />
-            {/* <Route path="payments" element={<PaymentRegistration />} /> */}
-            <Route path="products" element={<ProductListPage />} /> {/* 상품 관리 페이지 라우트 추가 */}
-            {/* <Route path="products/new" element={<ProductFormPage />} /> */}
-            {/* <Route path="products/edit/:productId" element={<ProductFormPage />} /> */}
+            <Route path="products" element={<ProductListPage />} />
             <Route path="locker-room" element={<LockerRoom />} />
             <Route path="attendance" element={<Attendance />} />
             <Route path="messages" element={<MessageSystem />} />
             <Route path="calendar" element={<Calendar />} />
             <Route path="statistics" element={<Statistics />} />
             <Route path="trainers" element={<TrainerManagement />} />
+            <Route path="community" element={<Community />} />
+            <Route path="community/board" element={<CommunityBoard />} />
+            <Route path="community/market" element={<CommunityMarket />} />
           </Route>
           
           {/* Catch-all route for 404 */}

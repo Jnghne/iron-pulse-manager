@@ -129,7 +129,6 @@ export const MembershipTab = ({
     }
   };
 
-  // 이용권 삭제 핸들러
   // PassDetails 객체로 변환하는 헬퍼 함수
   const mapToPassDetails = (
     type: 'gym' | 'pt' | 'locker',
@@ -315,9 +314,9 @@ export const MembershipTab = ({
     id: 'locker-1', // 임시 ID
     price: 30000 // 임시 가격
   } : null;
+  
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {/* 헬스장 이용권 정보 */}
       <Card
         className={getCardStyle(!!member.membershipActive)}
@@ -676,6 +675,7 @@ export const MembershipTab = ({
     isOpen={isPassDetailModalOpen && selectedPassDetails !== null}
     onClose={closePassDetailModalHandler}
     passDetails={selectedPassDetails}
+    member={member}
     isOwner={isOwner}
     onUpdatePass={handleUpdatePass}
     onDeletePass={handleDeletePass}

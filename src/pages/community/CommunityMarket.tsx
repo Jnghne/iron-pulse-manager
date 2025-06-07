@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,7 +11,7 @@ import {
   Heart, 
   Filter,
   ArrowLeft,
-  Won
+  DollarSign
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
@@ -261,7 +260,7 @@ const CommunityMarket = () => {
               
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center text-lg font-bold text-red-600">
-                  <Won className="h-4 w-4 mr-1" />
+                  <DollarSign className="h-4 w-4 mr-1" />
                   {item.price.toLocaleString()}원
                 </div>
                 <Badge variant="outline">

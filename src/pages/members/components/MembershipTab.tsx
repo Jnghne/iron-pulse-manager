@@ -317,369 +317,370 @@ export const MembershipTab = ({
   
   return (
     <>
-      {/* 헬스장 이용권 정보 */}
-      <Card
-        className={getCardStyle(!!member.membershipActive)}
-        onClick={() => {
-          if (member.membershipActive) {
-            const passDetailsData = mapToPassDetails('gym', member, {
-              id: member.id,
-              productId: member.membershipId,
-              name: `헬스 이용권 ${member.memberType}`,
-              startDate: new Date(member.membershipStartDate || ''),
-              endDate: new Date(member.membershipEndDate || ''),
-              price: member.membershipPrice,
-            });
-            openPassDetailModalHandler(passDetailsData);
-          }
-        }}
-      >
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Dumbbell className="h-5 w-5 text-gym-primary" />
-              헬스장 이용권
-            </CardTitle>
-            <CardDescription>
-              헬스장 이용권 상태 및 정보
-            </CardDescription>
-          </div>
-          {/* 헬스장 이용권이 없을 때만 신규 등록 버튼 표시 */}
-          {!member.membershipActive && (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              data-button="true"
-              onClick={(e) => {
-                e.stopPropagation();
-                onPaymentRegister('gym');
-              }}
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              신규 등록
-            </Button>
-          )}
-        </CardHeader>
-        <CardContent>
-          {member.membershipActive ? (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">상품명</span>
-                <span className="font-medium">
-                  {(() => {
-                    // 회원권 상품 ID가 있으면 해당 상품 이름 찾기
-                    if (member.membershipId) {
-                      const product = mockProducts.find(p => p.id === member.membershipId && p.type === ProductType.MEMBERSHIP);
-                      if (product) return product.name;
-                    }
-                    return `헬스 이용권 ${member.memberType || ''}`;
-                  })()} 
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">남은 기간</span>
-                <div className="flex items-center gap-2">
-                  <Badge className="bg-blue-100 text-blue-800">
-                    {member.gymMembershipDaysLeft}일
-                  </Badge>
-                  <span className="text-sm text-muted-foreground">
-                    ({formatDate(member.membershipStartDate || '')} ~ {formatDate(member.membershipEndDate || '')})
-                  </span>
-                </div>
-              </div>
-              {member.availableBranches && member.availableBranches.length > 0 && (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* 헬스장 이용권 정보 */}
+        <Card
+          className={getCardStyle(!!member.membershipActive)}
+          onClick={() => {
+            if (member.membershipActive) {
+              const passDetailsData = mapToPassDetails('gym', member, {
+                id: member.id,
+                productId: member.membershipId,
+                name: `헬스 이용권 ${member.memberType}`,
+                startDate: new Date(member.membershipStartDate || ''),
+                endDate: new Date(member.membershipEndDate || ''),
+                price: member.membershipPrice,
+              });
+              openPassDetailModalHandler(passDetailsData);
+            }
+          }}
+        >
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Dumbbell className="h-5 w-5 text-gym-primary" />
+                헬스장 이용권
+              </CardTitle>
+              <CardDescription>
+                헬스장 이용권 상태 및 정보
+              </CardDescription>
+            </div>
+            {/* 헬스장 이용권이 없을 때만 신규 등록 버튼 표시 */}
+            {!member.membershipActive && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                data-button="true"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onPaymentRegister('gym');
+                }}
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                신규 등록
+              </Button>
+            )}
+          </CardHeader>
+          <CardContent>
+            {member.membershipActive ? (
+              <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">이용 가능 지점</span>
-                  <div className="flex flex-wrap gap-1 justify-end">
-                    {member.availableBranches.map((branch, index) => (
-                      <Badge key={index} variant="outline" className="bg-gray-100">
-                        {branch}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="text-center py-6">
-              <Badge variant="destructive">이용권 없음</Badge>
-              <p className="mt-2 text-sm text-muted-foreground">
-                현재 등록된 헬스장 이용권이 없습니다.
-              </p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* PT 레슨권 정보 */}
-      <Card
-        className={getCardStyle(!!member.hasPT)}
-        onClick={() => {
-          if (member.hasPT) {
-            const passDetailsData = mapToPassDetails('pt', member, {
-              id: member.id,
-              productId: member.ptId,
-              name: `PT ${member.ptTotal}회권`,
-              startDate: new Date(member.ptStartDate || ''),
-              endDate: new Date(member.ptExpiryDate || ''),
-              price: member.ptPrice,
-              remainingSessions: member.ptRemaining,
-              totalSessions: member.ptTotal,
-              notes: `담당 트레이너: ${member.trainerAssigned || '미지정'}`
-            });
-            openPassDetailModalHandler(passDetailsData);
-          }
-        }}
-      >
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <User className="h-5 w-5 text-gym-primary" />
-              PT 레슨권
-            </CardTitle>
-            <CardDescription>
-              퍼스널 트레이닝 이용권 상태 및 정보
-            </CardDescription>
-          </div>
-          {/* PT 이용권이 없을 때만 신규 등록 버튼 표시 */}
-          {!member.hasPT && (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              data-button="true"
-              onClick={(e) => {
-                e.stopPropagation();
-                onPaymentRegister('pt');
-              }}
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              신규 등록
-            </Button>
-          )}
-        </CardHeader>
-        <CardContent>
-          {member.hasPT ? (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">상품명</span>
-                <span className="font-medium">
-                  {(() => {
-                    // PT 상품 ID가 있으면 해당 상품 이름 찾기
-                    if (member.ptId) {
-                      const product = mockProducts.find(p => p.id === member.ptId && p.type === ProductType.PT);
-                      if (product) return product.name;
-                    }
-                    return `PT ${member.ptTotal || 0}회권`;
-                  })()}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">담당 트레이너</span>
-                <span className="font-medium">{member.trainerAssigned || '미지정'}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">남은 횟수</span>
-                <div className="flex items-center gap-2">
-                  <Badge className="bg-blue-100 text-blue-800">
-                    {member.ptRemaining}회
-                  </Badge>
-                  <span className="text-sm text-muted-foreground">
-                    ({formatDate(member.ptStartDate || '')} ~ {formatDate(member.ptExpiryDate || '')})
+                  <span className="text-sm text-muted-foreground">상품명</span>
+                  <span className="font-medium">
+                    {(() => {
+                      // 회원권 상품 ID가 있으면 해당 상품 이름 찾기
+                      if (member.membershipId) {
+                        const product = mockProducts.find(p => p.id === member.membershipId && p.type === ProductType.MEMBERSHIP);
+                        if (product) return product.name;
+                      }
+                      return `헬스 이용권 ${member.memberType || ''}`;
+                    })()} 
                   </span>
                 </div>
-              </div>
-            </div>
-          ) : (
-            <div className="text-center py-6">
-              <Badge variant="destructive">이용권 없음</Badge>
-              <p className="mt-2 text-sm text-muted-foreground">
-                현재 등록된 PT 이용권이 없습니다.
-              </p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* 락커 이용권 정보 */}
-      <Card
-        className={getCardStyle(!!member.lockerInfo)}
-        onClick={() => member.lockerInfo && handleMembershipCardClick('locker', {
-          id: member.id,
-          productId: lockerInfoWithId?.id,
-          name: member.lockerInfo?.name,
-          startDate: new Date(member.lockerInfo?.startDate || ''),
-          endDate: new Date(member.lockerInfo?.endDate || ''),
-          price: lockerInfoWithId?.price,
-          lockerNumber: member.lockerInfo?.lockerNumber,
-          notes: member.lockerInfo?.notes
-        })}
-      >
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Key className="h-5 w-5 text-gym-primary" />
-              락커 이용권
-            </CardTitle>
-            <CardDescription>
-              락커 이용권 상태 및 정보
-            </CardDescription>
-          </div>
-          {/* 락커 이용권이 없을 때만 신규 등록 버튼 표시 */}
-          {!member.lockerId && (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              data-button="true"
-              onClick={(e) => {
-                e.stopPropagation();
-                onPaymentRegister('locker');
-              }}
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              신규 등록
-            </Button>
-          )}
-        </CardHeader>
-        <CardContent>
-          {member.lockerInfo ? (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">상품명</span>
-                <span className="font-medium">
-                  {(() => {
-                    // 락커 상품 ID가 있으면 해당 상품 이름 찾기
-                    if (member.lockerId) {
-                      const product = mockProducts.find(p => p.id === member.lockerId && p.type === ProductType.LOCKER);
-                      if (product) return product.name;
-                    }
-                    return member.lockerInfo?.name || '락커 이용권';
-                  })()} 
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">남은 기간</span>
-                <div className="flex items-center gap-2">
-                  <Badge className="bg-blue-100 text-blue-800">
-                    {member.lockerInfo.daysLeft}일
-                  </Badge>
-                  <span className="text-sm text-muted-foreground">
-                    ({formatDate(member.lockerInfo.startDate)} ~ {formatDate(member.lockerInfo.endDate)})
-                  </span>
-                </div>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">락커 정보</span>
-                <Badge variant="outline" className="bg-gray-100">
-                  {member.lockerInfo.lockerNumber}
-                </Badge>
-              </div>
-              {member.lockerInfo.notes && (
-                <div>
-                  <span className="text-sm text-muted-foreground">특이사항</span>
-                  <div className="mt-1 p-2 bg-muted/50 rounded-md">
-                    <p className="text-sm">{member.lockerInfo.notes}</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">남은 기간</span>
+                  <div className="flex items-center gap-2">
+                    <Badge className="bg-blue-100 text-blue-800">
+                      {member.gymMembershipDaysLeft}일
+                    </Badge>
+                    <span className="text-sm text-muted-foreground">
+                      ({formatDate(member.membershipStartDate || '')} ~ {formatDate(member.membershipEndDate || '')})
+                    </span>
                   </div>
                 </div>
-              )}
+                {member.availableBranches && member.availableBranches.length > 0 && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">이용 가능 지점</span>
+                    <div className="flex flex-wrap gap-1 justify-end">
+                      {member.availableBranches.map((branch, index) => (
+                        <Badge key={index} variant="outline" className="bg-gray-100">
+                          {branch}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="text-center py-6">
+                <Badge variant="destructive">이용권 없음</Badge>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  현재 등록된 헬스장 이용권이 없습니다.
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* PT 레슨권 정보 */}
+        <Card
+          className={getCardStyle(!!member.hasPT)}
+          onClick={() => {
+            if (member.hasPT) {
+              const passDetailsData = mapToPassDetails('pt', member, {
+                id: member.id,
+                productId: member.ptId,
+                name: `PT ${member.ptTotal}회권`,
+                startDate: new Date(member.ptStartDate || ''),
+                endDate: new Date(member.ptExpiryDate || ''),
+                price: member.ptPrice,
+                remainingSessions: member.ptRemaining,
+                totalSessions: member.ptTotal,
+                notes: `담당 트레이너: ${member.trainerAssigned || '미지정'}`
+              });
+              openPassDetailModalHandler(passDetailsData);
+            }
+          }}
+        >
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <User className="h-5 w-5 text-gym-primary" />
+                PT 레슨권
+              </CardTitle>
+              <CardDescription>
+                퍼스널 트레이닝 이용권 상태 및 정보
+              </CardDescription>
             </div>
-          ) : (
+            {/* PT 이용권이 없을 때만 신규 등록 버튼 표시 */}
+            {!member.hasPT && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                data-button="true"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onPaymentRegister('pt');
+                }}
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                신규 등록
+              </Button>
+            )}
+          </CardHeader>
+          <CardContent>
+            {member.hasPT ? (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">상품명</span>
+                  <span className="font-medium">
+                    {(() => {
+                      // PT 상품 ID가 있으면 해당 상품 이름 찾기
+                      if (member.ptId) {
+                        const product = mockProducts.find(p => p.id === member.ptId && p.type === ProductType.PT);
+                        if (product) return product.name;
+                      }
+                      return `PT ${member.ptTotal || 0}회권`;
+                    })()}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">담당 트레이너</span>
+                  <span className="font-medium">{member.trainerAssigned || '미지정'}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">남은 횟수</span>
+                  <div className="flex items-center gap-2">
+                    <Badge className="bg-blue-100 text-blue-800">
+                      {member.ptRemaining}회
+                    </Badge>
+                    <span className="text-sm text-muted-foreground">
+                      ({formatDate(member.ptStartDate || '')} ~ {formatDate(member.ptExpiryDate || '')})
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-6">
+                <Badge variant="destructive">이용권 없음</Badge>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  현재 등록된 PT 이용권이 없습니다.
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* 락커 이용권 정보 */}
+        <Card
+          className={getCardStyle(!!member.lockerInfo)}
+          onClick={() => member.lockerInfo && handleMembershipCardClick('locker', {
+            id: member.id,
+            productId: lockerInfoWithId?.id,
+            name: member.lockerInfo?.name,
+            startDate: new Date(member.lockerInfo?.startDate || ''),
+            endDate: new Date(member.lockerInfo?.endDate || ''),
+            price: lockerInfoWithId?.price,
+            lockerNumber: member.lockerInfo?.lockerNumber,
+            notes: member.lockerInfo?.notes
+          })}
+        >
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Key className="h-5 w-5 text-gym-primary" />
+                락커 이용권
+              </CardTitle>
+              <CardDescription>
+                락커 이용권 상태 및 정보
+              </CardDescription>
+            </div>
+            {/* 락커 이용권이 없을 때만 신규 등록 버튼 표시 */}
+            {!member.lockerId && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                data-button="true"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onPaymentRegister('locker');
+                }}
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                신규 등록
+              </Button>
+            )}
+          </CardHeader>
+          <CardContent>
+            {member.lockerInfo ? (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">상품명</span>
+                  <span className="font-medium">
+                    {(() => {
+                      // 락커 상품 ID가 있으면 해당 상품 이름 찾기
+                      if (member.lockerId) {
+                        const product = mockProducts.find(p => p.id === member.lockerId && p.type === ProductType.LOCKER);
+                        if (product) return product.name;
+                      }
+                      return member.lockerInfo?.name || '락커 이용권';
+                    })()} 
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">남은 기간</span>
+                  <div className="flex items-center gap-2">
+                    <Badge className="bg-blue-100 text-blue-800">
+                      {member.lockerInfo.daysLeft}일
+                    </Badge>
+                    <span className="text-sm text-muted-foreground">
+                      ({formatDate(member.lockerInfo.startDate)} ~ {formatDate(member.lockerInfo.endDate)})
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">락커 정보</span>
+                  <Badge variant="outline" className="bg-gray-100">
+                    {member.lockerInfo.lockerNumber}
+                  </Badge>
+                </div>
+                {member.lockerInfo.notes && (
+                  <div>
+                    <span className="text-sm text-muted-foreground">특이사항</span>
+                    <div className="mt-1 p-2 bg-muted/50 rounded-md">
+                      <p className="text-sm">{member.lockerInfo.notes}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="text-center py-6">
+                <Badge variant="destructive">이용권 없음</Badge>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  현재 등록된 락커 이용권이 없습니다.
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* 기타 결제 정보 */}
+        <Card
+          className={getCardStyle(!!member.otherProducts)}
+          onClick={(e) => {
+            // 버튼 클릭 이벤트가 발생한 경우 이벤트 처리하지 않음
+            const target = e.target as HTMLElement;
+            if (target.closest('button') || target.tagName === 'BUTTON' || 
+                target.closest('[data-button="true"]') || 
+                target.getAttribute('data-button') === 'true') {
+              return;
+            }
+            
+            // 기타 이용권 데이터가 있을 때만 상세 모달 열기
+            if (member.otherProducts) {
+              handleMembershipCardClick('other', {
+                // 기타 이용권 데이터가 있다면 여기에 추가
+              });
+            }
+          }}
+        >
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <ShoppingBag className="h-5 w-5 text-gym-primary" />
+                기타 이용권
+              </CardTitle>
+              <CardDescription>
+                기타 이용권 결제 내역
+              </CardDescription>
+            </div>
+            {/* 이용권이 등록되어 있지 않을 때만 신규 등록 버튼 표시 */}
+            {!member.otherProducts && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                data-button="true"
+                onClick={(e) => { 
+                  // 이벤트 전파 완전 차단
+                  e.stopPropagation();
+                  e.preventDefault(); 
+                  
+                  // 모든 모달 상태 초기화
+                  setIsPassDetailModalOpen(false);
+                  setSelectedPassDetails(null);
+                  setDialogOpen(false);
+                  
+                  // 상품등록 팝업만 열기
+                  onPaymentRegister('merchandise');
+                }}
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                신규 등록
+              </Button>
+            )}
+          </CardHeader>
+          <CardContent>
             <div className="text-center py-6">
               <Badge variant="destructive">이용권 없음</Badge>
               <p className="mt-2 text-sm text-muted-foreground">
-                현재 등록된 락커 이용권이 없습니다.
+                등록된 기타 이용권 결제 내역이 없습니다.
               </p>
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
+      
+      {/* 이용권 관리 다이얼로그 */}
+      <MembershipDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        type={dialogType}
+        mode={dialogMode}
+        currentData={currentDialogData}
+        onSave={handleSaveMembership}
+        onDelete={handleDeleteMembership}
+      />
 
-      {/* 기타 결제 정보 */}
-      <Card
-        className={getCardStyle(!!member.otherProducts)} // 기타 이용권 데이터 여부에 따라 스타일 변경
-        onClick={(e) => {
-          // 버튼 클릭 이벤트가 발생한 경우 이벤트 처리하지 않음
-          const target = e.target as HTMLElement;
-          if (target.closest('button') || target.tagName === 'BUTTON' || 
-              target.closest('[data-button="true"]') || 
-              target.getAttribute('data-button') === 'true') {
-            return;
-          }
-          
-          // 기타 이용권 데이터가 있을 때만 상세 모달 열기
-          if (member.otherProducts) {
-            handleMembershipCardClick('other', {
-              // 기타 이용권 데이터가 있다면 여기에 추가
-            });
-          }
-        }}
-      >
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <ShoppingBag className="h-5 w-5 text-gym-primary" />
-              기타 이용권
-            </CardTitle>
-            <CardDescription>
-              기타 이용권 결제 내역
-            </CardDescription>
-          </div>
-          {/* 이용권이 등록되어 있지 않을 때만 신규 등록 버튼 표시 */}
-          {!member.otherProducts && (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              data-button="true"
-              onClick={(e) => { 
-                // 이벤트 전파 완전 차단
-                e.stopPropagation();
-                e.preventDefault(); 
-                
-                // 모든 모달 상태 초기화
-                setIsPassDetailModalOpen(false);
-                setSelectedPassDetails(null);
-                setDialogOpen(false);
-                
-                // 상품등록 팝업만 열기
-                onPaymentRegister('merchandise');
-              }}
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              신규 등록
-            </Button>
-          )}
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-6">
-            <Badge variant="destructive">이용권 없음</Badge>
-            <p className="mt-2 text-sm text-muted-foreground">
-              등록된 기타 이용권 결제 내역이 없습니다.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-    
-    {/* 이용권 관리 다이얼로그 */ }
-  <MembershipDialog
-    open={dialogOpen}
-    onOpenChange={setDialogOpen}
-    type={dialogType}
-    mode={dialogMode}
-    currentData={currentDialogData}
-    onSave={handleSaveMembership}
-    onDelete={handleDeleteMembership}
-  />
-
-  {/* PassDetailModal 렌더링 */}
-  <PassDetailModal
-    isOpen={isPassDetailModalOpen && selectedPassDetails !== null}
-    onClose={closePassDetailModalHandler}
-    passDetails={selectedPassDetails}
-    member={member}
-    isOwner={isOwner}
-    onUpdatePass={handleUpdatePass}
-    onDeletePass={handleDeletePass}
-  />
-</>
-);
+      {/* PassDetailModal 렌더링 */}
+      <PassDetailModal
+        isOpen={isPassDetailModalOpen && selectedPassDetails !== null}
+        onClose={closePassDetailModalHandler}
+        passDetails={selectedPassDetails}
+        member={member}
+        isOwner={isOwner}
+        onUpdatePass={handleUpdatePass}
+        onDeletePass={handleDeletePass}
+      />
+    </>
+  );
 };

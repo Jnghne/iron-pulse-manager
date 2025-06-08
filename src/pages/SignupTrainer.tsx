@@ -1,4 +1,3 @@
-
 import { useState, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -7,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/components/ui/use-toast";
+import GymSelectionDialog from "@/components/GymSelectionDialog";
 
 const SignupTrainer = () => {
   const navigate = useNavigate();
@@ -17,7 +17,8 @@ const SignupTrainer = () => {
     password: "",
     passwordConfirm: "",
     email: "",
-    businessLocation: ""
+    businessLocation: "",
+    businessLocationName: ""
   });
   const [isLoading, setIsLoading] = useState(false);
   const [verificationCode, setVerificationCode] = useState("");
@@ -25,6 +26,14 @@ const SignupTrainer = () => {
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleGymSelect = (gymId: string, gymName: string) => {
+    setFormData(prev => ({ 
+      ...prev, 
+      businessLocation: gymId,
+      businessLocationName: gymName 
+    }));
   };
 
   const handlePhoneVerification = () => {
@@ -208,21 +217,11 @@ const SignupTrainer = () => {
                 />
               </div>
 
-              {/* 소속 사업장 선택 */}
-              <div className="space-y-2">
-                <Label>소속된 사업장 *</Label>
-                <Select onValueChange={(value) => handleInputChange("businessLocation", value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="소속 사업장을 선택하세요" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="seoul-gangnam">서울 강남점</SelectItem>
-                    <SelectItem value="seoul-hongdae">서울 홍대점</SelectItem>
-                    <SelectItem value="busan-haeundae">부산 해운대점</SelectItem>
-                    <SelectItem value="daegu-dongseong">대구 동성로점</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              {/* 소속 사업장 선택 - Dialog로 변경 */}
+              <GymSelectionDialog
+                selectedGym={formData.businessLocation}
+                onGymSelect={handleGymSelect}
+              />
 
               <div className="flex gap-4 pt-4">
                 <Button 

@@ -1,21 +1,29 @@
+
 import { useState } from "react";
-import { Outlet, useLocation, Navigate } from "react-router-dom";
+import { Outlet, useLocation, Navigate, useNavigate } from "react-router-dom";
 import { SidebarProvider, SidebarHeader, SidebarMain, SidebarFooter, useSidebar } from "@/components/ui/sidebar";
 import { SidebarNav } from "@/components/ui/sidebar-nav";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import Logo from "@/components/ui/logo";
+import { User, Settings, LogOut } from "lucide-react";
 
 // Mock authentication - replace with actual auth implementation
 const useAuth = () => {
   // In a real app, check if user is logged in
   const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
   const userRole = localStorage.getItem("userRole") || "trainer"; // 'owner' or 'trainer'
+  const selectedGymName = localStorage.getItem("selectedGymName") || "";
   
   return {
     isAuthenticated,
     userRole,
+    selectedGymName,
     logout: () => {
       localStorage.removeItem("isAuthenticated");
       localStorage.removeItem("userRole");
+      localStorage.removeItem("selectedGym");
+      localStorage.removeItem("selectedGymName");
+      localStorage.removeItem("userEmail");
       window.location.href = "/login";
     }
   };
@@ -23,8 +31,9 @@ const useAuth = () => {
 
 // 사이드바 컨텐츠 래퍼 컴포넌트
 const SidebarContent = () => {
-  const { userRole, logout } = useAuth();
+  const { userRole, selectedGymName, logout } = useAuth();
   const { collapsed } = useSidebar();
+  const navigate = useNavigate();
   
   return (
     <>
@@ -36,30 +45,32 @@ const SidebarContent = () => {
       </SidebarMain>
       <SidebarFooter>
         <div className="w-full">
-          <div className="flex items-center p-4">
-            <div className="w-10 h-10 rounded-full bg-gym-primary flex items-center justify-center text-white">
-              {userRole === "owner" ? "관" : "트"}
-            </div>
-            {!collapsed && (
-              <div className="ml-3">
-                <p className="text-sm font-medium">{userRole === "owner" ? "관장님" : "트레이너"}</p>
-                <p className="text-xs text-muted-foreground">{userRole === "owner" ? "관리자" : "일반 직원"}</p>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <div className="flex items-center p-4 cursor-pointer hover:bg-gray-50 transition-colors rounded-md">
+                <div className="w-10 h-10 rounded-full bg-gym-primary flex items-center justify-center text-white">
+                  {userRole === "owner" ? "관" : "트"}
+                </div>
+                {!collapsed && (
+                  <div className="ml-3 flex-1">
+                    <p className="text-sm font-medium">{userRole === "owner" ? "관장님" : "트레이너"}</p>
+                    <p className="text-xs text-muted-foreground truncate">{selectedGymName}</p>
+                  </div>
+                )}
               </div>
-            )}
-            <div className="ml-auto">
-              <button 
-                onClick={logout}
-                className="text-muted-foreground hover:text-foreground transition-colors"
-                title="로그아웃"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                  <polyline points="16 17 21 12 16 7"></polyline>
-                  <line x1="21" y1="12" x2="9" y2="12"></line>
-                </svg>
-              </button>
-            </div>
-          </div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuItem onClick={() => navigate("/my-page")} className="cursor-pointer">
+                <User className="mr-2 h-4 w-4" />
+                <span>마이페이지</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={logout} className="cursor-pointer text-red-600">
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>로그아웃</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </SidebarFooter>
     </>

@@ -20,6 +20,7 @@ import MemberList from "./pages/members/MemberList";
 import MemberDetail from "./pages/members/MemberDetail";
 import MemberCreate from "./pages/members/MemberCreate";
 import DailyTickets from "./pages/DailyTickets";
+import MyPage from "./pages/MyPage";
 
 import LockerRoom from "./pages/LockerRoom";
 import Attendance from "./pages/Attendance";
@@ -68,6 +69,7 @@ const App = () => (
             <Route path="calendar" element={<Calendar />} />
             <Route path="statistics" element={<Statistics />} />
             <Route path="trainers" element={<TrainerManagement />} />
+            <Route path="my-page" element={<MyPage />} />
             <Route path="community" element={<Community />} />
             <Route path="community/board" element={<CommunityBoard />} />
             <Route path="community/board/write" element={<PostWrite />} />

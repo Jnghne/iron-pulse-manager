@@ -6,51 +6,124 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { InfoIcon } from "lucide-react";
+import { InfoIcon, ArrowLeft } from "lucide-react";
+import GymSelectionDialog from "@/components/GymSelectionDialog";
 
 const Login = () => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("test@test.com");
-  const [password, setPassword] = useState("1234");
+  const [step, setStep] = useState<'credentials' | 'gym-selection'>('credentials');
+  const [credentials, setCredentials] = useState({
+    email: "test@test.com",
+    password: "1234"
+  });
+  const [selectedGym, setSelectedGym] = useState("");
+  const [selectedGymName, setSelectedGymName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleCredentialsSubmit = (e: FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
-    // Mock login logic - replace with actual API call
+    // Mock authentication
     setTimeout(() => {
-      try {
-        // In a real app, this would be a server-side authentication
-        if (email && password) {
-          // Store authentication state in localStorage (use a proper auth system in production)
-          localStorage.setItem("isAuthenticated", "true");
-          localStorage.setItem("userRole", "owner"); // Default to owner for demo
-          
-          toast({
-            title: "로그인 성공!",
-            description: "환영합니다.",
-          });
-          navigate("/");
-        } else {
-          toast({
-            title: "로그인 실패",
-            description: "이메일과 비밀번호를 입력해주세요.",
-            variant: "destructive"
-          });
-        }
-      } catch (error) {
+      if (credentials.email && credentials.password) {
+        // Mock: user has access to multiple gyms
+        setStep('gym-selection');
         toast({
-          title: "오류 발생",
-          description: "로그인 중 오류가 발생했습니다. 다시 시도해주세요.",
+          title: "인증 완료",
+          description: "사업장을 선택해주세요.",
+        });
+      } else {
+        toast({
+          title: "로그인 실패",
+          description: "이메일과 비밀번호를 입력해주세요.",
           variant: "destructive"
         });
-        console.error("Login error:", error);
-      } finally {
-        setIsLoading(false);
       }
+      setIsLoading(false);
     }, 1000);
   };
+
+  const handleGymSelection = () => {
+    if (!selectedGym) {
+      toast({
+        title: "사업장 선택 필요",
+        description: "로그인할 사업장을 선택해주세요.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    
+    setTimeout(() => {
+      // Store authentication state
+      localStorage.setItem("isAuthenticated", "true");
+      localStorage.setItem("userRole", "owner"); // Default to owner for demo
+      localStorage.setItem("selectedGym", selectedGym);
+      localStorage.setItem("selectedGymName", selectedGymName);
+      localStorage.setItem("userEmail", credentials.email);
+      
+      toast({
+        title: "로그인 성공!",
+        description: `${selectedGymName}에 로그인되었습니다.`,
+      });
+      navigate("/");
+      setIsLoading(false);
+    }, 1000);
+  };
+
+  const handleGymSelect = (gymId: string, gymName: string) => {
+    setSelectedGym(gymId);
+    setSelectedGymName(gymName);
+  };
+
+  const goBackToCredentials = () => {
+    setStep('credentials');
+    setSelectedGym("");
+    setSelectedGymName("");
+  };
+
+  if (step === 'gym-selection') {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gym-light">
+        <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-2xl shadow-lg">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-gym-primary">사업장 선택</h1>
+            <p className="mt-2 text-sm text-muted-foreground">로그인할 사업장을 선택해주세요</p>
+          </div>
+
+          <div className="space-y-6">
+            <GymSelectionDialog
+              selectedGym={selectedGym}
+              onGymSelect={handleGymSelect}
+            />
+
+            <div className="flex gap-4">
+              <Button 
+                type="button"
+                variant="outline" 
+                className="flex-1"
+                onClick={goBackToCredentials}
+                disabled={isLoading}
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                이전
+              </Button>
+              <Button 
+                type="button"
+                className="flex-1 bg-gym-primary hover:bg-gym-secondary"
+                onClick={handleGymSelection}
+                disabled={isLoading || !selectedGym}
+              >
+                {isLoading ? "로그인 중..." : "로그인"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gym-light">
@@ -69,15 +142,15 @@ const Login = () => {
           </AlertDescription>
         </Alert>
         
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleCredentialsSubmit} className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="email">이메일</Label>
             <Input
               id="email"
               type="email"
               placeholder="이메일 주소"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={credentials.email}
+              onChange={(e) => setCredentials(prev => ({ ...prev, email: e.target.value }))}
               disabled={isLoading}
             />
           </div>
@@ -88,8 +161,8 @@ const Login = () => {
               id="password"
               type="password"
               placeholder="비밀번호"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              value={credentials.password}
+              onChange={(e) => setCredentials(prev => ({ ...prev, password: e.target.value }))}
               disabled={isLoading}
             />
           </div>
@@ -101,7 +174,7 @@ const Login = () => {
           </div>
           
           <Button type="submit" className="w-full bg-gym-primary hover:bg-gym-secondary" disabled={isLoading}>
-            {isLoading ? "로그인 중..." : "로그인"}
+            {isLoading ? "인증 중..." : "다음"}
           </Button>
         </form>
         

@@ -1,18 +1,18 @@
+
 import { useState, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/components/ui/use-toast";
 import GymSelectionDialog from "@/components/GymSelectionDialog";
+import PassVerification from "@/components/PassVerification";
 
 const SignupTrainer = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    phone: "",
-    phoneVerified: false,
+    passVerified: false,
     userId: "",
     password: "",
     passwordConfirm: "",
@@ -21,8 +21,6 @@ const SignupTrainer = () => {
     businessLocationName: ""
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [verificationCode, setVerificationCode] = useState("");
-  const [showVerification, setShowVerification] = useState(false);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -36,48 +34,17 @@ const SignupTrainer = () => {
     }));
   };
 
-  const handlePhoneVerification = () => {
-    if (!formData.phone) {
-      toast({
-        title: "핸드폰 번호 입력",
-        description: "핸드폰 번호를 입력해주세요.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    setShowVerification(true);
-    toast({
-      title: "인증번호 발송",
-      description: "입력하신 번호로 인증번호를 발송했습니다."
-    });
-  };
-
-  const handleVerifyCode = () => {
-    // Mock verification
-    if (verificationCode === "1234") {
-      setFormData(prev => ({ ...prev, phoneVerified: true }));
-      setShowVerification(false);
-      toast({
-        title: "본인인증 완료",
-        description: "휴대폰 인증이 완료되었습니다."
-      });
-    } else {
-      toast({
-        title: "인증 실패",
-        description: "인증번호가 올바르지 않습니다.",
-        variant: "destructive"
-      });
-    }
+  const handlePassVerification = (isVerified: boolean) => {
+    setFormData(prev => ({ ...prev, passVerified: isVerified }));
   };
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     
-    if (!formData.phoneVerified) {
+    if (!formData.passVerified) {
       toast({
         title: "본인인증 필요",
-        description: "휴대폰 본인인증을 완료해주세요.",
+        description: "PASS 본인인증을 완료해주세요.",
         variant: "destructive"
       });
       return;
@@ -128,47 +95,11 @@ const SignupTrainer = () => {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* 휴대폰 번호 */}
-              <div className="space-y-2">
-                <Label htmlFor="phone">휴대폰 번호 *</Label>
-                <div className="flex gap-2">
-                  <Input
-                    id="phone"
-                    type="tel"
-                    placeholder="010-0000-0000"
-                    value={formData.phone}
-                    onChange={(e) => handleInputChange("phone", e.target.value)}
-                    disabled={formData.phoneVerified}
-                  />
-                  <Button 
-                    type="button"
-                    variant="outline"
-                    onClick={handlePhoneVerification}
-                    disabled={formData.phoneVerified}
-                  >
-                    {formData.phoneVerified ? "인증완료" : "인증"}
-                  </Button>
-                </div>
-              </div>
-
-              {/* 인증번호 입력 */}
-              {showVerification && (
-                <div className="space-y-2">
-                  <Label htmlFor="verification">인증번호</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      id="verification"
-                      placeholder="인증번호 6자리"
-                      value={verificationCode}
-                      onChange={(e) => setVerificationCode(e.target.value)}
-                    />
-                    <Button type="button" onClick={handleVerifyCode}>
-                      확인
-                    </Button>
-                  </div>
-                  <p className="text-xs text-muted-foreground">테스트용 인증번호: 1234</p>
-                </div>
-              )}
+              {/* PASS 본인인증 */}
+              <PassVerification
+                onVerificationComplete={handlePassVerification}
+                isVerified={formData.passVerified}
+              />
 
               {/* 아이디 */}
               <div className="space-y-2">
@@ -217,7 +148,7 @@ const SignupTrainer = () => {
                 />
               </div>
 
-              {/* 소속 사업장 선택 - Dialog로 변경 */}
+              {/* 소속 사업장 선택 */}
               <GymSelectionDialog
                 selectedGym={formData.businessLocation}
                 onGymSelect={handleGymSelect}

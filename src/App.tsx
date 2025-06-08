@@ -11,6 +11,9 @@ import DashboardLayout from "./layouts/DashboardLayout";
 
 // Pages
 import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import SignupOwner from "./pages/SignupOwner";
+import SignupTrainer from "./pages/SignupTrainer";
 import Dashboard from "./pages/Dashboard";
 import TrainerDashboard from "./pages/TrainerDashboard";
 import MemberList from "./pages/members/MemberList";
@@ -45,6 +48,9 @@ const App = () => (
         <Routes>
           {/* Public Routes */}
           <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/signup/owner" element={<SignupOwner />} />
+          <Route path="/signup/trainer" element={<SignupTrainer />} />
           
           {/* Protected Routes */}
           <Route path="/" element={<DashboardLayout />}>

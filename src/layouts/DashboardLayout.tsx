@@ -5,7 +5,9 @@ import { SidebarProvider, SidebarHeader, SidebarMain, SidebarFooter, useSidebar 
 import { SidebarNav } from "@/components/ui/sidebar-nav";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import Logo from "@/components/ui/logo";
-import { User, Settings, LogOut } from "lucide-react";
+import { User, Settings, LogOut, Building, RefreshCw } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import GymSwitchDialog from "@/components/GymSwitchDialog";
 
 // Mock authentication - replace with actual auth implementation
 const useAuth = () => {
@@ -34,11 +36,42 @@ const SidebarContent = () => {
   const { userRole, selectedGymName, logout } = useAuth();
   const { collapsed } = useSidebar();
   const navigate = useNavigate();
+  const [showGymSwitchDialog, setShowGymSwitchDialog] = useState(false);
+  
+  // Mock affiliated gyms data - in real app, this would come from API
+  const affiliatedGyms = [
+    { id: "seoul-gangnam", name: "강남 피트니스 센터", role: "owner" as const, status: "active" as const },
+    { id: "seoul-hongdae", name: "홍대 스포츠 클럽", role: "trainer" as const, status: "active" as const },
+    { id: "busan-haeundae", name: "해운대 헬스 파크", role: "trainer" as const, status: "pending" as const }
+  ];
+
+  const currentGymId = localStorage.getItem("selectedGym") || "seoul-gangnam";
+
+  const handleGymSwitch = (gymId: string, gymName: string) => {
+    // The dialog handles the localStorage update and page refresh
+  };
   
   return (
     <>
       <SidebarHeader>
-        <Logo />
+        <div className="flex flex-col gap-2">
+          <Logo />
+          {/* 현재 사업장 표시 */}
+          {!collapsed && (
+            <div className="px-2">
+              <div className="flex items-center gap-2 p-2 bg-gym-primary/5 rounded-md">
+                <Building className="h-4 w-4 text-gym-primary flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-muted-foreground">현재 사업장</p>
+                  <p className="text-sm font-medium truncate">{selectedGymName}</p>
+                </div>
+                <Badge className="bg-gym-primary/10 text-gym-primary text-xs">
+                  {userRole === "owner" ? "관장" : "트레이너"}
+                </Badge>
+              </div>
+            </div>
+          )}
+        </div>
       </SidebarHeader>
       <SidebarMain>
         <SidebarNav />
@@ -65,6 +98,14 @@ const SidebarContent = () => {
                 <span>마이페이지</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
+              <DropdownMenuItem 
+                onClick={() => setShowGymSwitchDialog(true)} 
+                className="cursor-pointer"
+              >
+                <RefreshCw className="mr-2 h-4 w-4" />
+                <span>사업장 변경</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
               <DropdownMenuItem onClick={logout} className="cursor-pointer text-red-600">
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>로그아웃</span>
@@ -73,6 +114,15 @@ const SidebarContent = () => {
           </DropdownMenu>
         </div>
       </SidebarFooter>
+
+      {/* 사업장 변경 다이얼로그 */}
+      <GymSwitchDialog
+        open={showGymSwitchDialog}
+        onClose={() => setShowGymSwitchDialog(false)}
+        currentGymId={currentGymId}
+        affiliatedGyms={affiliatedGyms}
+        onGymSwitch={handleGymSwitch}
+      />
     </>
   );
 };

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { User, Mail, Phone, Building, Plus, Trash2, Edit } from "lucide-react";
 import GymSelectionDialog from "@/components/GymSelectionDialog";
+import OwnerGymAddDialog from "@/components/OwnerGymAddDialog";
 
 const MyPage = () => {
   const userRole = localStorage.getItem("userRole") || "trainer";
@@ -34,6 +34,7 @@ const MyPage = () => {
 
   const [isEditing, setIsEditing] = useState(false);
   const [showGymAddDialog, setShowGymAddDialog] = useState(false);
+  const [showOwnerGymAddDialog, setShowOwnerGymAddDialog] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleProfileUpdate = () => {
@@ -61,6 +62,17 @@ const MyPage = () => {
       title: "사업장 추가 요청",
       description: `${gymName}에 소속 요청이 전송되었습니다. 승인을 기다려주세요.`
     });
+  };
+
+  const handleOwnerGymAdd = (gymId: string, gymName: string) => {
+    const newGym = {
+      id: gymId,
+      name: gymName,
+      role: "owner" as const,
+      status: "active" as const
+    };
+    
+    setAffiliatedGyms(prev => [...prev, newGym]);
   };
 
   const handleGymRemove = (gymId: string) => {
@@ -207,10 +219,17 @@ const MyPage = () => {
                   <Building className="h-5 w-5" />
                   소속 사업장
                 </CardTitle>
-                <Button onClick={() => setShowGymAddDialog(true)} className="flex items-center gap-2">
-                  <Plus className="h-4 w-4" />
-                  사업장 추가
-                </Button>
+                {userRole === "owner" ? (
+                  <Button onClick={() => setShowOwnerGymAddDialog(true)} className="flex items-center gap-2">
+                    <Plus className="h-4 w-4" />
+                    사업장 추가 (사업자번호)
+                  </Button>
+                ) : (
+                  <Button onClick={() => setShowGymAddDialog(true)} className="flex items-center gap-2">
+                    <Plus className="h-4 w-4" />
+                    사업장 추가
+                  </Button>
+                )}
               </div>
             </CardHeader>
             <CardContent>
@@ -239,7 +258,8 @@ const MyPage = () => {
                 ))}
               </div>
 
-              {showGymAddDialog && (
+              {/* 트레이너용 기존 사업장 추가 인터페이스 */}
+              {showGymAddDialog && userRole === "trainer" && (
                 <div className="mt-6">
                   <Separator className="mb-4" />
                   <h3 className="text-lg font-semibold mb-4">새 사업장 추가</h3>
@@ -263,6 +283,13 @@ const MyPage = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* 사장님용 사업장 추가 다이얼로그 */}
+      <OwnerGymAddDialog
+        open={showOwnerGymAddDialog}
+        onClose={() => setShowOwnerGymAddDialog(false)}
+        onGymAdd={handleOwnerGymAdd}
+      />
     </div>
   );
 };

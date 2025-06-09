@@ -33,21 +33,14 @@ const staffData = [
 ];
 
 const membershipTypeData = [
-  { name: '1개월', value: 45, fill: '#0088FE' },
-  { name: '3개월', value: 30, fill: '#00C49F' },
-  { name: '6개월', value: 15, fill: '#FFBB28' },
-  { name: '12개월', value: 10, fill: '#FF8042' },
+  { name: '1개월', value: 45, fill: '#FFE5E5' },
+  { name: '3개월', value: 30, fill: '#E5F5FF' },
+  { name: '6개월', value: 15, fill: '#E5FFE5' },
+  { name: '12개월', value: 10, fill: '#FFF5E5' },
 ];
 
-const growthData = [
-  { month: '1월', members: 120, revenue: 5650000 },
-  { month: '2월', members: 135, revenue: 6330000 },
-  { month: '3월', members: 150, revenue: 6810000 },
-  { month: '4월', members: 142, revenue: 5940000 },
-  { month: '5월', members: 165, revenue: 7170000 },
-];
-
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
+// Pastel colors for charts
+const PASTEL_COLORS = ['#FFE5E5', '#E5F5FF', '#E5FFE5', '#FFF5E5', '#F5E5FF'];
 
 const Statistics = () => {
   // 현재 월 데이터
@@ -75,20 +68,20 @@ const Statistics = () => {
 
       {/* 핵심 지표 카드 */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="border-l-4 border-l-blue-500">
+        <Card className="border-l-4 border-l-pink-200 bg-pink-50/50">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">총 회원 수</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <Users className="h-4 w-4 text-pink-400" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{currentMonthData.total}명</div>
             <div className="flex items-center text-xs text-muted-foreground">
               {Number(memberGrowth) >= 0 ? (
-                <TrendingUp className="h-3 w-3 text-green-500 mr-1" />
+                <TrendingUp className="h-3 w-3 text-green-400 mr-1" />
               ) : (
-                <TrendingDown className="h-3 w-3 text-red-500 mr-1" />
+                <TrendingDown className="h-3 w-3 text-red-400 mr-1" />
               )}
-              <span className={Number(memberGrowth) >= 0 ? "text-green-500" : "text-red-500"}>
+              <span className={Number(memberGrowth) >= 0 ? "text-green-400" : "text-red-400"}>
                 {memberGrowth}%
               </span>
               <span className="ml-1">전월 대비</span>
@@ -96,20 +89,20 @@ const Statistics = () => {
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-green-500">
+        <Card className="border-l-4 border-l-green-200 bg-green-50/50">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">이번 달 매출</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <DollarSign className="h-4 w-4 text-green-400" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalCurrentRevenue.toLocaleString()}원</div>
             <div className="flex items-center text-xs text-muted-foreground">
               {Number(revenueGrowth) >= 0 ? (
-                <TrendingUp className="h-3 w-3 text-green-500 mr-1" />
+                <TrendingUp className="h-3 w-3 text-green-400 mr-1" />
               ) : (
-                <TrendingDown className="h-3 w-3 text-red-500 mr-1" />
+                <TrendingDown className="h-3 w-3 text-red-400 mr-1" />
               )}
-              <span className={Number(revenueGrowth) >= 0 ? "text-green-500" : "text-red-500"}>
+              <span className={Number(revenueGrowth) >= 0 ? "text-green-400" : "text-red-400"}>
                 {revenueGrowth}%
               </span>
               <span className="ml-1">전월 대비</span>
@@ -117,10 +110,10 @@ const Statistics = () => {
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-yellow-500">
+        <Card className="border-l-4 border-l-blue-200 bg-blue-50/50">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">활성 회원</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <Calendar className="h-4 w-4 text-blue-400" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{currentMonthData.active}명</div>
@@ -130,10 +123,10 @@ const Statistics = () => {
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-purple-500">
+        <Card className="border-l-4 border-l-purple-200 bg-purple-50/50">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">PT 회원</CardTitle>
-            <Award className="h-4 w-4 text-muted-foreground" />
+            <Award className="h-4 w-4 text-purple-400" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{currentMonthData.pt}명</div>
@@ -144,65 +137,12 @@ const Statistics = () => {
         </Card>
       </div>
       
-      <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="overview">종합 현황</TabsTrigger>
-          <TabsTrigger value="members">회원 분석</TabsTrigger>
-          <TabsTrigger value="revenue">매출 분석</TabsTrigger>
+      <Tabs defaultValue="members" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="members">회원 통계</TabsTrigger>
+          <TabsTrigger value="revenue">매출 통계</TabsTrigger>
           <TabsTrigger value="staff">직원 실적</TabsTrigger>
         </TabsList>
-
-        <TabsContent value="overview" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>성장 추이</CardTitle>
-                <CardDescription>월별 회원 수 및 매출 변화</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <AreaChart data={growthData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <Tooltip />
-                    <Area type="monotone" dataKey="members" stackId="1" stroke="#8884d8" fill="#8884d8" name="회원 수" />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>매출 구성</CardTitle>
-                <CardDescription>이번 달 매출 분석</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={[
-                        { name: '회원권', value: currentRevenue.membership, fill: '#0088FE' },
-                        { name: 'PT', value: currentRevenue.pt, fill: '#00C49F' },
-                        { name: '일일권', value: currentRevenue.daily, fill: '#FFBB28' },
-                        { name: '기타', value: currentRevenue.other, fill: '#FF8042' },
-                      ]}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
-                    >
-                    </Pie>
-                    <Tooltip formatter={(value) => `${Number(value).toLocaleString()}원`} />
-                  </PieChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
         
         <TabsContent value="members" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -219,10 +159,10 @@ const Statistics = () => {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="total" name="총 회원수" fill="#6366F1" />
-                    <Bar dataKey="active" name="활성 회원" fill="#22C55E" />
-                    <Bar dataKey="pt" name="PT 회원" fill="#EAB308" />
-                    <Bar dataKey="inactive" name="휴면 회원" fill="#EF4444" />
+                    <Bar dataKey="total" name="총 회원수" fill="#FFE5E5" />
+                    <Bar dataKey="active" name="활성 회원" fill="#E5FFE5" />
+                    <Bar dataKey="pt" name="PT 회원" fill="#FFF5E5" />
+                    <Bar dataKey="inactive" name="휴면 회원" fill="#F5E5FF" />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -264,24 +204,24 @@ const Statistics = () => {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                <div className="text-center p-4 border rounded-lg">
+                <div className="text-center p-4 border rounded-lg bg-pink-50/50">
                   <div className="text-2xl font-bold">{currentMonthData.total}</div>
                   <div className="text-sm text-muted-foreground">총 회원 수</div>
                 </div>
-                <div className="text-center p-4 border rounded-lg">
-                  <div className="text-2xl font-bold text-green-600">{currentMonthData.active}</div>
+                <div className="text-center p-4 border rounded-lg bg-green-50/50">
+                  <div className="text-2xl font-bold text-green-500">{currentMonthData.active}</div>
                   <div className="text-sm text-muted-foreground">활성 회원</div>
                 </div>
-                <div className="text-center p-4 border rounded-lg">
-                  <div className="text-2xl font-bold text-yellow-600">{currentMonthData.pt}</div>
+                <div className="text-center p-4 border rounded-lg bg-yellow-50/50">
+                  <div className="text-2xl font-bold text-yellow-500">{currentMonthData.pt}</div>
                   <div className="text-sm text-muted-foreground">PT 회원</div>
                 </div>
-                <div className="text-center p-4 border rounded-lg">
-                  <div className="text-2xl font-bold text-red-600">{currentMonthData.inactive}</div>
+                <div className="text-center p-4 border rounded-lg bg-red-50/50">
+                  <div className="text-2xl font-bold text-red-400">{currentMonthData.inactive}</div>
                   <div className="text-sm text-muted-foreground">휴면 회원</div>
                 </div>
-                <div className="text-center p-4 border rounded-lg">
-                  <div className="text-2xl font-bold text-blue-600">32</div>
+                <div className="text-center p-4 border rounded-lg bg-blue-50/50">
+                  <div className="text-2xl font-bold text-blue-500">32</div>
                   <div className="text-sm text-muted-foreground">신규 회원</div>
                 </div>
               </div>
@@ -303,10 +243,10 @@ const Statistics = () => {
                   <YAxis />
                   <Tooltip formatter={(value) => `${Number(value).toLocaleString()}원`} />
                   <Legend />
-                  <Bar dataKey="membership" name="회원권" fill="#6366F1" />
-                  <Bar dataKey="pt" name="PT 이용권" fill="#22C55E" />
-                  <Bar dataKey="daily" name="일일권" fill="#EAB308" />
-                  <Bar dataKey="other" name="기타" fill="#8884d8" />
+                  <Bar dataKey="membership" name="회원권" fill="#FFE5E5" />
+                  <Bar dataKey="pt" name="PT 이용권" fill="#E5FFE5" />
+                  <Bar dataKey="daily" name="일일권" fill="#FFF5E5" />
+                  <Bar dataKey="other" name="기타" fill="#F5E5FF" />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
@@ -351,7 +291,7 @@ const Statistics = () => {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="text-sm font-medium">총 지출</div>
-                    <div className="font-bold text-red-600">4,850,000원</div>
+                    <div className="font-bold text-red-400">4,850,000원</div>
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="text-sm font-medium">인건비</div>
@@ -399,20 +339,20 @@ const Statistics = () => {
                     <TableRow key={staff.name}>
                       <TableCell className="font-medium">{staff.name}</TableCell>
                       <TableCell className="text-center">{staff.pt}회</TableCell>
-                      <TableCell className="text-center font-semibold text-green-600">
+                      <TableCell className="text-center font-semibold text-green-500">
                         {staff.revenue.toLocaleString()}원
                       </TableCell>
                       <TableCell className="text-center">
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-yellow-100 text-yellow-800">
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-yellow-100 text-yellow-600">
                           ⭐ {staff.rating}
                         </span>
                       </TableCell>
                       <TableCell className="text-center">{staff.newMembers}명</TableCell>
                       <TableCell className="text-center">
                         <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs ${
-                          staff.retentionRate >= 80 ? 'bg-green-100 text-green-800' : 
-                          staff.retentionRate >= 75 ? 'bg-yellow-100 text-yellow-800' : 
-                          'bg-red-100 text-red-800'
+                          staff.retentionRate >= 80 ? 'bg-green-100 text-green-600' : 
+                          staff.retentionRate >= 75 ? 'bg-yellow-100 text-yellow-600' : 
+                          'bg-red-100 text-red-600'
                         }`}>
                           {staff.retentionRate}%
                         </span>

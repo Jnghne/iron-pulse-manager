@@ -121,6 +121,27 @@ const StaffManagement = () => {
   };
 
   const handleApproveStaff = (requestId: string) => {
+    const request = joinRequests.find(req => req.id === requestId);
+    if (request) {
+      // 승인된 직원을 직원 목록에 추가
+      const newStaff = {
+        id: `ST${String(staff.length + 1).padStart(3, '0')}`,
+        name: request.name,
+        phone: request.phone,
+        email: request.email,
+        address: request.address,
+        account: request.account,
+        workHours: request.workHours,
+        memberCount: 0,
+        revenue: 0,
+        status: "정상",
+        approvalDate: new Date().toISOString().split('T')[0],
+        joinDate: request.joinDate
+      };
+      setStaff(prev => [...prev, newStaff]);
+    }
+    
+    // 가입 요청 상태를 승인으로 변경
     setJoinRequests(prev => 
       prev.map(req => 
         req.id === requestId 

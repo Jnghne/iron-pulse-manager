@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -116,173 +117,235 @@ const MyPage = () => {
         </div>
       </div>
 
-      <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="profile">내 정보</TabsTrigger>
-          <TabsTrigger value="gyms">사업장 관리</TabsTrigger>
-        </TabsList>
+      {/* 트레이너는 내 정보 탭만, 사장님은 두 탭 모두 표시 */}
+      {userRole === "owner" ? (
+        <Tabs defaultValue="profile" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="profile">내 정보</TabsTrigger>
+            <TabsTrigger value="gyms">사업장 관리</TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="profile" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5" />
-                개인정보
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex items-center space-x-4">
-                <Avatar className="h-20 w-20">
-                  <AvatarImage src="" alt={userInfo.name} />
-                  <AvatarFallback className="bg-gym-primary text-white text-xl">
-                    {userInfo.name.charAt(0)}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <h3 className="text-xl font-semibold">{userInfo.name}</h3>
-                  <p className="text-muted-foreground">{userInfo.position}</p>
-                  {getRoleBadge(userRole)}
-                </div>
-              </div>
-
-              <Separator />
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">이름</Label>
-                  <Input
-                    id="name"
-                    value={userInfo.name}
-                    onChange={(e) => setUserInfo(prev => ({ ...prev, name: e.target.value }))}
-                    disabled={!isEditing}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="email">이메일</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={userInfo.email}
-                    onChange={(e) => setUserInfo(prev => ({ ...prev, email: e.target.value }))}
-                    disabled={!isEditing}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="phone">연락처</Label>
-                  <Input
-                    id="phone"
-                    value={userInfo.phone}
-                    onChange={(e) => setUserInfo(prev => ({ ...prev, phone: e.target.value }))}
-                    disabled={!isEditing}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="position">직책</Label>
-                  <Input
-                    id="position"
-                    value={userInfo.position}
-                    onChange={(e) => setUserInfo(prev => ({ ...prev, position: e.target.value }))}
-                    disabled={!isEditing}
-                  />
-                </div>
-              </div>
-
-              <div className="flex gap-4">
-                {!isEditing ? (
-                  <Button onClick={() => setIsEditing(true)} className="flex items-center gap-2">
-                    <Edit className="h-4 w-4" />
-                    수정하기
-                  </Button>
-                ) : (
-                  <>
-                    <Button onClick={handleProfileUpdate} disabled={isLoading}>
-                      {isLoading ? "저장 중..." : "저장"}
-                    </Button>
-                    <Button variant="outline" onClick={() => setIsEditing(false)} disabled={isLoading}>
-                      취소
-                    </Button>
-                  </>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="gyms" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
+          <TabsContent value="profile" className="space-y-6">
+            <Card>
+              <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Building className="h-5 w-5" />
-                  소속 사업장
+                  <User className="h-5 w-5" />
+                  개인정보
                 </CardTitle>
-                {userRole === "owner" ? (
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex items-center space-x-4">
+                  <Avatar className="h-20 w-20">
+                    <AvatarImage src="" alt={userInfo.name} />
+                    <AvatarFallback className="bg-gym-primary text-white text-xl">
+                      {userInfo.name.charAt(0)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <h3 className="text-xl font-semibold">{userInfo.name}</h3>
+                    <p className="text-muted-foreground">{userInfo.position}</p>
+                    {getRoleBadge(userRole)}
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">이름</Label>
+                    <Input
+                      id="name"
+                      value={userInfo.name}
+                      onChange={(e) => setUserInfo(prev => ({ ...prev, name: e.target.value }))}
+                      disabled={!isEditing}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="email">이메일</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={userInfo.email}
+                      onChange={(e) => setUserInfo(prev => ({ ...prev, email: e.target.value }))}
+                      disabled={!isEditing}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">연락처</Label>
+                    <Input
+                      id="phone"
+                      value={userInfo.phone}
+                      onChange={(e) => setUserInfo(prev => ({ ...prev, phone: e.target.value }))}
+                      disabled={!isEditing}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="position">직책</Label>
+                    <Input
+                      id="position"
+                      value={userInfo.position}
+                      onChange={(e) => setUserInfo(prev => ({ ...prev, position: e.target.value }))}
+                      disabled={!isEditing}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex gap-4">
+                  {!isEditing ? (
+                    <Button onClick={() => setIsEditing(true)} className="flex items-center gap-2">
+                      <Edit className="h-4 w-4" />
+                      수정하기
+                    </Button>
+                  ) : (
+                    <>
+                      <Button onClick={handleProfileUpdate} disabled={isLoading}>
+                        {isLoading ? "저장 중..." : "저장"}
+                      </Button>
+                      <Button variant="outline" onClick={() => setIsEditing(false)} disabled={isLoading}>
+                        취소
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="gyms" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Building className="h-5 w-5" />
+                    소속 사업장
+                  </CardTitle>
                   <Button onClick={() => setShowOwnerGymAddDialog(true)} className="flex items-center gap-2">
                     <Plus className="h-4 w-4" />
                     사업장 추가 (사업자번호)
                   </Button>
-                ) : (
-                  <Button onClick={() => setShowGymAddDialog(true)} className="flex items-center gap-2">
-                    <Plus className="h-4 w-4" />
-                    사업장 추가
-                  </Button>
-                )}
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {affiliatedGyms.map((gym) => (
-                  <div key={gym.id} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center gap-4">
-                      <Building className="h-8 w-8 text-gym-primary" />
-                      <div>
-                        <h3 className="font-semibold">{gym.name}</h3>
-                        <div className="flex items-center gap-2 mt-1">
-                          {getRoleBadge(gym.role)}
-                          {getStatusBadge(gym.status)}
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {affiliatedGyms.map((gym) => (
+                    <div key={gym.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex items-center gap-4">
+                        <Building className="h-8 w-8 text-gym-primary" />
+                        <div>
+                          <h3 className="font-semibold">{gym.name}</h3>
+                          <div className="flex items-center gap-2 mt-1">
+                            {getRoleBadge(gym.role)}
+                            {getStatusBadge(gym.status)}
+                          </div>
                         </div>
                       </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleGymRemove(gym.id)}
+                        className="text-red-600 hover:text-red-700"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleGymRemove(gym.id)}
-                      className="text-red-600 hover:text-red-700"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      ) : (
+        // 트레이너는 내 정보만 표시
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <User className="h-5 w-5" />
+              개인정보
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="flex items-center space-x-4">
+              <Avatar className="h-20 w-20">
+                <AvatarImage src="" alt={userInfo.name} />
+                <AvatarFallback className="bg-gym-primary text-white text-xl">
+                  {userInfo.name.charAt(0)}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <h3 className="text-xl font-semibold">{userInfo.name}</h3>
+                <p className="text-muted-foreground">{userInfo.position}</p>
+                {getRoleBadge(userRole)}
+              </div>
+            </div>
+
+            <Separator />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">이름</Label>
+                <Input
+                  id="name"
+                  value={userInfo.name}
+                  onChange={(e) => setUserInfo(prev => ({ ...prev, name: e.target.value }))}
+                  disabled={!isEditing}
+                />
               </div>
 
-              {/* 트레이너용 기존 사업장 추가 인터페이스 */}
-              {showGymAddDialog && userRole === "trainer" && (
-                <div className="mt-6">
-                  <Separator className="mb-4" />
-                  <h3 className="text-lg font-semibold mb-4">새 사업장 추가</h3>
-                  <GymSelectionDialog
-                    selectedGym=""
-                    onGymSelect={(gymId, gymName) => {
-                      handleGymAdd(gymId, gymName);
-                      setShowGymAddDialog(false);
-                    }}
-                  />
-                  <Button 
-                    variant="outline" 
-                    onClick={() => setShowGymAddDialog(false)}
-                    className="mt-4"
-                  >
+              <div className="space-y-2">
+                <Label htmlFor="email">이메일</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={userInfo.email}
+                  onChange={(e) => setUserInfo(prev => ({ ...prev, email: e.target.value }))}
+                  disabled={!isEditing}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="phone">연락처</Label>
+                <Input
+                  id="phone"
+                  value={userInfo.phone}
+                  onChange={(e) => setUserInfo(prev => ({ ...prev, phone: e.target.value }))}
+                  disabled={!isEditing}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="position">직책</Label>
+                <Input
+                  id="position"
+                  value={userInfo.position}
+                  onChange={(e) => setUserInfo(prev => ({ ...prev, position: e.target.value }))}
+                  disabled={!isEditing}
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-4">
+              {!isEditing ? (
+                <Button onClick={() => setIsEditing(true)} className="flex items-center gap-2">
+                  <Edit className="h-4 w-4" />
+                  수정하기
+                </Button>
+              ) : (
+                <>
+                  <Button onClick={handleProfileUpdate} disabled={isLoading}>
+                    {isLoading ? "저장 중..." : "저장"}
+                  </Button>
+                  <Button variant="outline" onClick={() => setIsEditing(false)} disabled={isLoading}>
                     취소
                   </Button>
-                </div>
+                </>
               )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* 사장님용 사업장 추가 다이얼로그 */}
       <OwnerGymAddDialog

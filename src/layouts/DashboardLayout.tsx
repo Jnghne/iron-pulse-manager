@@ -5,8 +5,7 @@ import { SidebarProvider, SidebarHeader, SidebarMain, SidebarFooter, useSidebar 
 import { SidebarNav } from "@/components/ui/sidebar-nav";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import Logo from "@/components/ui/logo";
-import { User, Settings, LogOut, Building, RefreshCw } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { User, Settings, LogOut, RefreshCw } from "lucide-react";
 import GymSwitchDialog from "@/components/GymSwitchDialog";
 
 // Mock authentication - replace with actual auth implementation
@@ -54,24 +53,7 @@ const SidebarContent = () => {
   return (
     <>
       <SidebarHeader>
-        <div className="flex flex-col gap-2">
-          <Logo />
-          {/* 현재 사업장 표시 */}
-          {!collapsed && (
-            <div className="px-2">
-              <div className="flex items-center gap-2 p-2 bg-gym-primary/5 rounded-md">
-                <Building className="h-4 w-4 text-gym-primary flex-shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs text-muted-foreground">현재 사업장</p>
-                  <p className="text-sm font-medium truncate">{selectedGymName}</p>
-                </div>
-                <Badge className="bg-gym-primary/10 text-gym-primary text-xs">
-                  {userRole === "owner" ? "관장" : "트레이너"}
-                </Badge>
-              </div>
-            </div>
-          )}
-        </div>
+        <Logo />
       </SidebarHeader>
       <SidebarMain>
         <SidebarNav />
@@ -98,14 +80,19 @@ const SidebarContent = () => {
                 <span>마이페이지</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem 
-                onClick={() => setShowGymSwitchDialog(true)} 
-                className="cursor-pointer"
-              >
-                <RefreshCw className="mr-2 h-4 w-4" />
-                <span>사업장 변경</span>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
+              {/* 사장님만 사업장 변경 기능 표시 */}
+              {userRole === "owner" && (
+                <>
+                  <DropdownMenuItem 
+                    onClick={() => setShowGymSwitchDialog(true)} 
+                    className="cursor-pointer"
+                  >
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                    <span>사업장 변경</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                </>
+              )}
               <DropdownMenuItem onClick={logout} className="cursor-pointer text-red-600">
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>로그아웃</span>
@@ -115,14 +102,16 @@ const SidebarContent = () => {
         </div>
       </SidebarFooter>
 
-      {/* 사업장 변경 다이얼로그 */}
-      <GymSwitchDialog
-        open={showGymSwitchDialog}
-        onClose={() => setShowGymSwitchDialog(false)}
-        currentGymId={currentGymId}
-        affiliatedGyms={affiliatedGyms}
-        onGymSwitch={handleGymSwitch}
-      />
+      {/* 사업장 변경 다이얼로그 - 사장님만 */}
+      {userRole === "owner" && (
+        <GymSwitchDialog
+          open={showGymSwitchDialog}
+          onClose={() => setShowGymSwitchDialog(false)}
+          currentGymId={currentGymId}
+          affiliatedGyms={affiliatedGyms}
+          onGymSwitch={handleGymSwitch}
+        />
+      )}
     </>
   );
 };

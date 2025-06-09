@@ -1,42 +1,54 @@
 
-import { useState, FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { toast } from "@/components/ui/use-toast";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { InfoIcon, ArrowLeft } from "lucide-react";
-import GymSelectionDialog from "@/components/GymSelectionDialog";
+import { Eye, EyeOff, Building2, User } from "lucide-react";
+import Logo from "@/components/ui/logo";
+import { Link, useNavigate } from "react-router-dom";
 
 const Login = () => {
-  const navigate = useNavigate();
-  const [step, setStep] = useState<'credentials' | 'gym-selection'>('credentials');
-  const [credentials, setCredentials] = useState({
-    email: "test@test.com",
-    password: "1234"
-  });
-  const [selectedGym, setSelectedGym] = useState("");
-  const [selectedGymName, setSelectedGymName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
-  const handleCredentialsSubmit = (e: FormEvent) => {
+  const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
-    // Mock authentication
+
+    // Simple authentication logic
     setTimeout(() => {
-      if (credentials.email && credentials.password) {
-        // Mock: user has access to multiple gyms
-        setStep('gym-selection');
+      if (email === "owner@test.com" && password === "owner123") {
+        localStorage.setItem("isAuthenticated", "true");
+        localStorage.setItem("userRole", "owner");
+        localStorage.setItem("userEmail", email);
+        localStorage.setItem("selectedGym", "seoul-gangnam");
+        localStorage.setItem("selectedGymName", "강남 피트니스 센터");
         toast({
-          title: "인증 완료",
-          description: "사업장을 선택해주세요.",
+          title: "로그인 성공",
+          description: "사장님 계정으로 로그인되었습니다."
         });
+        navigate("/");
+      } else if (email === "trainer@test.com" && password === "trainer123") {
+        localStorage.setItem("isAuthenticated", "true");
+        localStorage.setItem("userRole", "trainer");
+        localStorage.setItem("userEmail", email);
+        localStorage.setItem("selectedGym", "seoul-gangnam");
+        localStorage.setItem("selectedGymName", "강남 피트니스 센터");
+        toast({
+          title: "로그인 성공",
+          description: "트레이너 계정으로 로그인되었습니다."
+        });
+        navigate("/");
       } else {
         toast({
           title: "로그인 실패",
-          description: "이메일과 비밀번호를 입력해주세요.",
+          description: "이메일 또는 비밀번호가 올바르지 않습니다.",
           variant: "destructive"
         });
       }
@@ -44,148 +56,127 @@ const Login = () => {
     }, 1000);
   };
 
-  const handleGymSelection = () => {
-    if (!selectedGym) {
-      toast({
-        title: "사업장 선택 필요",
-        description: "로그인할 사업장을 선택해주세요.",
-        variant: "destructive"
-      });
-      return;
-    }
-
+  const handleTestLogin = (role: 'owner' | 'trainer') => {
     setIsLoading(true);
     
     setTimeout(() => {
-      // Store authentication state
       localStorage.setItem("isAuthenticated", "true");
-      localStorage.setItem("userRole", "owner"); // Default to owner for demo
-      localStorage.setItem("selectedGym", selectedGym);
-      localStorage.setItem("selectedGymName", selectedGymName);
-      localStorage.setItem("userEmail", credentials.email);
+      localStorage.setItem("userRole", role);
+      localStorage.setItem("userEmail", role === 'owner' ? "owner@test.com" : "trainer@test.com");
+      localStorage.setItem("selectedGym", "seoul-gangnam");
+      localStorage.setItem("selectedGymName", "강남 피트니스 센터");
       
       toast({
-        title: "로그인 성공!",
-        description: `${selectedGymName}에 로그인되었습니다.`,
+        title: "테스트 로그인 성공",
+        description: `${role === 'owner' ? '사장님' : '트레이너'} 계정으로 로그인되었습니다.`
       });
       navigate("/");
       setIsLoading(false);
-    }, 1000);
+    }, 500);
   };
 
-  const handleGymSelect = (gymId: string, gymName: string) => {
-    setSelectedGym(gymId);
-    setSelectedGymName(gymName);
-  };
-
-  const goBackToCredentials = () => {
-    setStep('credentials');
-    setSelectedGym("");
-    setSelectedGymName("");
-  };
-
-  if (step === 'gym-selection') {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gym-light">
-        <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-2xl shadow-lg">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-gym-primary">사업장 선택</h1>
-            <p className="mt-2 text-sm text-muted-foreground">로그인할 사업장을 선택해주세요</p>
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gym-primary/10 to-gym-secondary/10 flex items-center justify-center p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="space-y-4 text-center">
+          <Logo />
+          <div>
+            <CardTitle className="text-2xl">로그인</CardTitle>
+            <CardDescription>
+              계정에 로그인하여 피트니스 센터를 관리하세요
+            </CardDescription>
           </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">이메일</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="example@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">비밀번호</Label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="비밀번호를 입력하세요"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+            </div>
+            <Button type="submit" className="w-full bg-gym-primary hover:bg-gym-primary/90" disabled={isLoading}>
+              {isLoading ? "로그인 중..." : "로그인"}
+            </Button>
+          </form>
 
-          <div className="space-y-6">
-            <GymSelectionDialog
-              selectedGym={selectedGym}
-              onGymSelect={handleGymSelect}
-            />
+          <div className="space-y-4">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <Separator className="w-full" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">
+                  테스트 계정으로 빠른 로그인
+                </span>
+              </div>
+            </div>
 
-            <div className="flex gap-4">
-              <Button 
+            <div className="grid grid-cols-2 gap-3">
+              <Button
                 type="button"
-                variant="outline" 
-                className="flex-1"
-                onClick={goBackToCredentials}
+                variant="outline"
+                onClick={() => handleTestLogin('owner')}
                 disabled={isLoading}
+                className="flex items-center gap-2"
               >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                이전
+                <Building2 className="h-4 w-4" />
+                사장님
               </Button>
-              <Button 
+              <Button
                 type="button"
-                className="flex-1 bg-gym-primary hover:bg-gym-secondary"
-                onClick={handleGymSelection}
-                disabled={isLoading || !selectedGym}
+                variant="outline"
+                onClick={() => handleTestLogin('trainer')}
+                disabled={isLoading}
+                className="flex items-center gap-2"
               >
-                {isLoading ? "로그인 중..." : "로그인"}
+                <User className="h-4 w-4" />
+                트레이너
               </Button>
             </div>
           </div>
-        </div>
-      </div>
-    );
-  }
 
-  return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gym-light">
-      <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-2xl shadow-lg">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold text-gym-primary">
-            Gym<span className="text-gym-accent">Manager</span>
-          </h1>
-          <p className="mt-2 text-sm text-muted-foreground">헬스장 관리 시스템에 로그인하세요</p>
-        </div>
-        
-        <Alert className="bg-blue-50 border-blue-200">
-          <InfoIcon className="h-4 w-4 text-blue-500" />
-          <AlertDescription className="text-sm">
-            프로토타입 버전입니다. 테스트 계정 정보가 이미 입력되어 있으니 로그인 버튼을 클릭하세요.
-          </AlertDescription>
-        </Alert>
-        
-        <form onSubmit={handleCredentialsSubmit} className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="email">이메일</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="이메일 주소"
-              value={credentials.email}
-              onChange={(e) => setCredentials(prev => ({ ...prev, email: e.target.value }))}
-              disabled={isLoading}
-            />
+          <div className="text-center space-y-2">
+            <p className="text-sm text-muted-foreground">
+              계정이 없으신가요?{" "}
+              <Link to="/signup" className="text-gym-primary hover:underline">
+                회원가입
+              </Link>
+            </p>
           </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="password">비밀번호</Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="비밀번호"
-              value={credentials.password}
-              onChange={(e) => setCredentials(prev => ({ ...prev, password: e.target.value }))}
-              disabled={isLoading}
-            />
-          </div>
-          
-          <div className="flex justify-end">
-            <a href="#" className="text-sm text-gym-primary hover:text-gym-secondary">
-              비밀번호 찾기
-            </a>
-          </div>
-          
-          <Button type="submit" className="w-full bg-gym-primary hover:bg-gym-secondary" disabled={isLoading}>
-            {isLoading ? "인증 중..." : "다음"}
-          </Button>
-        </form>
-        
-        <div className="text-center text-sm text-muted-foreground">
-          <p>아직 계정이 없으신가요? <button onClick={() => navigate("/signup")} className="text-gym-primary hover:text-gym-secondary">회원가입</button></p>
-        </div>
-      </div>
-      
-      <div className="mt-8 text-center text-xs text-muted-foreground">
-        <p>© 2023 GymManager. All rights reserved.</p>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

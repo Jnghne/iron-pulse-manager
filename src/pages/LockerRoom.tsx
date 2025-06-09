@@ -11,7 +11,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -22,9 +21,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Plus, Trash2, Settings } from "lucide-react";
 import { mockLockers, mockMembers, Locker } from "@/data/mockData";
 import { formatDate } from "@/lib/utils";
 import { toast } from "sonner";
@@ -107,7 +109,6 @@ const LockerAssign = ({ locker, onClose }: LockerAssignProps) => {
       return;
     }
     
-    // In a real app, this would be an API call
     const member = mockMembers.find(m => m.id === selectedMember);
     
     if (member) {
@@ -179,7 +180,140 @@ const LockerAssign = ({ locker, onClose }: LockerAssignProps) => {
   );
 };
 
+// 락커 설정 컴포넌트
+const LockerSettings = () => {
+  const [zones, setZones] = useState(["A", "B", "C"]);
+  const [newZoneName, setNewZoneName] = useState("");
+  const [selectedZone, setSelectedZone] = useState("");
+  const [lockerCount, setLockerCount] = useState("");
+
+  const handleAddZone = () => {
+    if (!newZoneName.trim()) {
+      toast.error("구역명을 입력해주세요.");
+      return;
+    }
+    if (zones.includes(newZoneName)) {
+      toast.error("이미 존재하는 구역명입니다.");
+      return;
+    }
+    setZones([...zones, newZoneName]);
+    setNewZoneName("");
+    toast.success(`${newZoneName} 구역이 추가되었습니다.`);
+  };
+
+  const handleRemoveZone = (zoneName: string) => {
+    if (window.confirm(`${zoneName} 구역을 삭제하시겠습니까?`)) {
+      setZones(zones.filter(z => z !== zoneName));
+      toast.success(`${zoneName} 구역이 삭제되었습니다.`);
+    }
+  };
+
+  const handleAddLockers = () => {
+    if (!selectedZone || !lockerCount) {
+      toast.error("구역과 락커 개수를 모두 선택해주세요.");
+      return;
+    }
+    toast.success(`${selectedZone} 구역에 ${lockerCount}개의 락커가 추가되었습니다.`);
+    setSelectedZone("");
+    setLockerCount("");
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* 구역 관리 */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Settings className="h-5 w-5" />
+            락커 구역 관리
+          </CardTitle>
+          <CardDescription>
+            락커 구역을 추가하거나 삭제할 수 있습니다.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex gap-2">
+            <Input
+              placeholder="새 구역명 입력 (예: D)"
+              value={newZoneName}
+              onChange={(e) => setNewZoneName(e.target.value)}
+              className="flex-1"
+            />
+            <Button onClick={handleAddZone} className="bg-gym-primary hover:bg-gym-primary/90">
+              <Plus className="h-4 w-4 mr-2" />
+              구역 추가
+            </Button>
+          </div>
+          
+          <div className="space-y-2">
+            <Label>현재 구역 목록</Label>
+            <div className="flex flex-wrap gap-2">
+              {zones.map((zone) => (
+                <div key={zone} className="flex items-center gap-2 bg-gray-100 rounded-md px-3 py-2">
+                  <Badge variant="outline">{zone} 구역</Badge>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleRemoveZone(zone)}
+                    className="h-4 w-4 p-0 text-red-500 hover:text-red-700"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* 락커 추가 */}
+      <Card>
+        <CardHeader>
+          <CardTitle>락커 추가</CardTitle>
+          <CardDescription>
+            특정 구역에 락커를 추가할 수 있습니다.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>구역 선택</Label>
+              <Select value={selectedZone} onValueChange={setSelectedZone}>
+                <SelectTrigger>
+                  <SelectValue placeholder="구역 선택" />
+                </SelectTrigger>
+                <SelectContent>
+                  {zones.map(zone => (
+                    <SelectItem key={zone} value={zone}>
+                      {zone} 구역
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>추가할 락커 개수</Label>
+              <Input
+                type="number"
+                placeholder="개수 입력"
+                value={lockerCount}
+                onChange={(e) => setLockerCount(e.target.value)}
+                min="1"
+                max="50"
+              />
+            </div>
+          </div>
+          <Button onClick={handleAddLockers} className="bg-gym-primary hover:bg-gym-primary/90">
+            락커 추가
+          </Button>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
 const LockerRoom = () => {
+  const userRole = localStorage.getItem("userRole") || "trainer";
   const [selectedZone, setSelectedZone] = useState("all");
   const [selectedLocker, setSelectedLocker] = useState<Locker | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
@@ -205,7 +339,6 @@ const LockerRoom = () => {
     if (locker.isOccupied) {
       setIsDetailOpen(true);
     } else {
-      // Confirm before opening assign dialog
       if (window.confirm(`${locker.zone}${locker.number} 락커를 배정하시겠습니까?`)) {
         setIsAssignOpen(true);
       }
@@ -219,69 +352,86 @@ const LockerRoom = () => {
         <p className="text-muted-foreground">락커 사용 현황을 확인하고 관리하세요.</p>
       </div>
       
-      <Card>
-        <CardHeader>
-          <div className="flex flex-col sm:flex-row justify-between sm:items-center space-y-2 sm:space-y-0">
-            <CardTitle>락커 현황</CardTitle>
-            <Select value={selectedZone} onValueChange={setSelectedZone}>
-              <SelectTrigger className="w-40">
-                <SelectValue placeholder="구역 선택" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">전체 구역</SelectItem>
-                <SelectItem value="A">A 구역</SelectItem>
-                <SelectItem value="B">B 구역</SelectItem>
-                <SelectItem value="C">C 구역</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <CardDescription>
-            락커를 클릭하여 상세 정보를 확인하거나 배정할 수 있습니다.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-8">
-            {Object.entries(lockersByZone).map(([zone, lockers]) => (
-              <div key={zone} className="space-y-3">
-                <h3 className="font-semibold text-lg">{zone} 구역</h3>
-                <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-10 gap-3">
-                  {lockers.map(locker => (
-                    <button
-                      key={locker.id}
-                      className={`p-4 rounded-md border shadow-sm text-center transition hover:shadow-md ${
-                        locker.isOccupied
-                          ? "bg-gym-primary text-white"
-                          : "bg-white hover:bg-gray-50"
-                      }`}
-                      onClick={() => handleLockerClick(locker)}
-                    >
-                      <div className="font-semibold">{locker.zone}{locker.number}</div>
-                      <div className="text-xs mt-1">
-                        {locker.isOccupied ? (
-                          <span>{locker.memberName?.substring(0, 3)}</span>
-                        ) : (
-                          <span>비어있음</span>
-                        )}
-                      </div>
-                    </button>
-                  ))}
+      <Tabs defaultValue="status" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="status">락커 현황</TabsTrigger>
+          {userRole === "owner" && (
+            <TabsTrigger value="settings">락커 설정</TabsTrigger>
+          )}
+        </TabsList>
+
+        <TabsContent value="status" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <div className="flex flex-col sm:flex-row justify-between sm:items-center space-y-2 sm:space-y-0">
+                <CardTitle>락커 현황</CardTitle>
+                <Select value={selectedZone} onValueChange={setSelectedZone}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue placeholder="구역 선택" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">전체 구역</SelectItem>
+                    <SelectItem value="A">A 구역</SelectItem>
+                    <SelectItem value="B">B 구역</SelectItem>
+                    <SelectItem value="C">C 구역</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <CardDescription>
+                락커를 클릭하여 상세 정보를 확인하거나 배정할 수 있습니다.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-8">
+                {Object.entries(lockersByZone).map(([zone, lockers]) => (
+                  <div key={zone} className="space-y-3">
+                    <h3 className="font-semibold text-lg">{zone} 구역</h3>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-10 gap-3">
+                      {lockers.map(locker => (
+                        <button
+                          key={locker.id}
+                          className={`p-4 rounded-md border shadow-sm text-center transition hover:shadow-md ${
+                            locker.isOccupied
+                              ? "bg-gym-primary text-white"
+                              : "bg-white hover:bg-gray-50"
+                          }`}
+                          onClick={() => handleLockerClick(locker)}
+                        >
+                          <div className="font-semibold">{locker.zone}{locker.number}</div>
+                          <div className="text-xs mt-1">
+                            {locker.isOccupied ? (
+                              <span>{locker.memberName?.substring(0, 3)}</span>
+                            ) : (
+                              <span>비어있음</span>
+                            )}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              <div className="flex items-center justify-center space-x-4 mt-6 text-sm">
+                <div className="flex items-center">
+                  <div className="w-4 h-4 bg-gym-primary rounded mr-2"></div>
+                  <span>사용중</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-4 h-4 bg-white border rounded mr-2"></div>
+                  <span>비어있음</span>
                 </div>
               </div>
-            ))}
-          </div>
-          
-          <div className="flex items-center justify-center space-x-4 mt-6 text-sm">
-            <div className="flex items-center">
-              <div className="w-4 h-4 bg-gym-primary rounded mr-2"></div>
-              <span>사용중</span>
-            </div>
-            <div className="flex items-center">
-              <div className="w-4 h-4 bg-white border rounded mr-2"></div>
-              <span>비어있음</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {userRole === "owner" && (
+          <TabsContent value="settings">
+            <LockerSettings />
+          </TabsContent>
+        )}
+      </Tabs>
       
       {/* Locker Details Dialog */}
       <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>

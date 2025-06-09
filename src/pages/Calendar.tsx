@@ -2,84 +2,332 @@
 import { useState } from "react";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
+import { 
+  ChevronLeft, 
+  ChevronRight, 
+  Plus, 
+  Calendar as CalendarIcon,
+  Clock,
+  Users,
+  MapPin
+} from "lucide-react";
+
+// Mock 이벤트 데이터
+const mockEvents = [
+  {
+    id: "1",
+    title: "김영희 PT 세션",
+    date: new Date(),
+    time: "09:00",
+    duration: "1시간",
+    type: "pt",
+    trainer: "이트레이너",
+    color: "bg-blue-500"
+  },
+  {
+    id: "2", 
+    title: "그룹 필라테스",
+    date: new Date(),
+    time: "19:00",
+    duration: "1시간",
+    type: "group",
+    trainer: "박트레이너",
+    color: "bg-purple-500"
+  },
+  {
+    id: "3",
+    title: "헬스장 정기 점검",
+    date: new Date(Date.now() + 86400000), // tomorrow
+    time: "14:00", 
+    duration: "2시간",
+    type: "maintenance",
+    color: "bg-orange-500"
+  }
+];
 
 const Calendar = () => {
-  const [date, setDate] = useState<Date | undefined>(new Date());
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [viewMode, setViewMode] = useState<"month" | "week" | "day">("month");
   const [branch, setBranch] = useState("main");
-  const [viewType, setViewType] = useState("schedule");
+
+  // 현재 월의 이름 가져오기
+  const getMonthName = (date: Date) => {
+    return date.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long' });
+  };
+
+  // 월 변경 함수
+  const changeMonth = (direction: 'prev' | 'next') => {
+    const newDate = new Date(currentDate);
+    if (direction === 'prev') {
+      newDate.setMonth(newDate.getMonth() - 1);
+    } else {
+      newDate.setMonth(newDate.getMonth() + 1);
+    }
+    setCurrentDate(newDate);
+  };
+
+  // 선택된 날짜의 이벤트 필터링
+  const getEventsForDate = (date: Date) => {
+    return mockEvents.filter(event => 
+      event.date.toDateString() === date.toDateString()
+    );
+  };
+
+  // 이벤트 타입별 라벨
+  const getEventTypeLabel = (type: string) => {
+    switch (type) {
+      case 'pt': return 'PT';
+      case 'group': return '그룹수업';
+      case 'maintenance': return '시설관리';
+      default: return '기타';
+    }
+  };
+
+  const selectedDateEvents = selectedDate ? getEventsForDate(selectedDate) : [];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 h-full">
+      {/* 헤더 */}
       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">캘린더 관리</h1>
-          <p className="text-muted-foreground">헬스장 일정 및 트레이너 스케줄을 관리합니다.</p>
+          <h1 className="text-3xl font-bold tracking-tight">캘린더</h1>
+          <p className="text-muted-foreground">일정 및 트레이너 스케줄을 관리합니다.</p>
         </div>
         
-        <Select value={branch} onValueChange={setBranch}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="지점 선택" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="main">본점</SelectItem>
-            <SelectItem value="gangnam">강남점</SelectItem>
-            <SelectItem value="hongdae">홍대점</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex items-center gap-3">
+          <Select value={branch} onValueChange={setBranch}>
+            <SelectTrigger className="w-[140px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="main">본점</SelectItem>
+              <SelectItem value="gangnam">강남점</SelectItem>
+              <SelectItem value="hongdae">홍대점</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          <Button className="bg-gym-primary hover:bg-gym-primary/90">
+            <Plus className="h-4 w-4 mr-2" />
+            일정 추가
+          </Button>
+        </div>
       </div>
-      
-      <Card>
-        <CardHeader>
-          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
-            <CardTitle>캘린더</CardTitle>
-            <Tabs value={viewType} onValueChange={setViewType} className="w-full sm:w-auto">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="schedule">일정 보기</TabsTrigger>
-                <TabsTrigger value="trainer">트레이너 시간</TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <Tabs value={viewType}>
-            <TabsContent value="schedule" className="mt-0">
-              <div className="flex justify-center border rounded-lg p-4 bg-white">
-                <CalendarComponent
-                  mode="single"
-                  selected={date}
-                  onSelect={setDate}
-                  className="rounded-md"
-                />
-              </div>
-              <div className="mt-6 border-t pt-4">
-                <h3 className="text-lg font-medium mb-3">일정 목록</h3>
-                <div className="text-center text-muted-foreground py-12">
-                  아직 등록된 일정이 없습니다.
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-200px)]">
+        {/* 왼쪽: 캘린더 */}
+        <div className="lg:col-span-2">
+          <Card className="h-full">
+            <CardHeader className="pb-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => changeMonth('prev')}
+                      className="h-8 w-8 p-0"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <h2 className="text-xl font-semibold min-w-[150px] text-center">
+                      {getMonthName(currentDate)}
+                    </h2>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => changeMonth('next')}
+                      className="h-8 w-8 p-0"
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setCurrentDate(new Date());
+                      setSelectedDate(new Date());
+                    }}
+                  >
+                    오늘
+                  </Button>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant={viewMode === "month" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setViewMode("month")}
+                  >
+                    월
+                  </Button>
+                  <Button
+                    variant={viewMode === "week" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setViewMode("week")}
+                  >
+                    주
+                  </Button>
+                  <Button
+                    variant={viewMode === "day" ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setViewMode("day")}
+                  >
+                    일
+                  </Button>
                 </div>
               </div>
-            </TabsContent>
-            
-            <TabsContent value="trainer" className="mt-0">
-              <div className="flex justify-center border rounded-lg p-4 bg-white">
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="p-4">
                 <CalendarComponent
                   mode="single"
-                  selected={date}
-                  onSelect={setDate}
-                  className="rounded-md"
+                  selected={selectedDate}
+                  onSelect={setSelectedDate}
+                  month={currentDate}
+                  onMonthChange={setCurrentDate}
+                  className="w-full"
+                  classNames={{
+                    months: "w-full",
+                    month: "w-full space-y-4",
+                    caption: "hidden", // 헤더는 위에서 커스텀으로 만듦
+                    table: "w-full border-collapse",
+                    head_row: "flex w-full",
+                    head_cell: "text-muted-foreground rounded-md w-full font-normal text-sm p-2 text-center",
+                    row: "flex w-full mt-2",
+                    cell: "relative p-0 text-center text-sm focus-within:relative focus-within:z-20 w-full h-20 border border-gray-100",
+                    day: "h-full w-full p-2 font-normal aria-selected:opacity-100 hover:bg-accent hover:text-accent-foreground rounded-none flex flex-col items-start justify-start",
+                    day_selected: "bg-gym-primary text-primary-foreground hover:bg-gym-primary hover:text-primary-foreground focus:bg-gym-primary focus:text-primary-foreground",
+                    day_today: "bg-accent text-accent-foreground font-semibold",
+                    day_outside: "text-muted-foreground opacity-50",
+                    day_disabled: "text-muted-foreground opacity-50",
+                  }}
+                  components={{
+                    Day: ({ date }) => {
+                      const dayEvents = getEventsForDate(date);
+                      const isToday = date.toDateString() === new Date().toDateString();
+                      const isSelected = selectedDate?.toDateString() === date.toDateString();
+                      
+                      return (
+                        <div 
+                          className={`h-full w-full p-2 flex flex-col cursor-pointer hover:bg-gray-50 ${
+                            isSelected ? 'bg-gym-primary text-white' : ''
+                          } ${isToday && !isSelected ? 'bg-blue-50 border-blue-200' : ''}`}
+                          onClick={() => setSelectedDate(date)}
+                        >
+                          <span className={`text-sm ${isToday && !isSelected ? 'font-bold text-blue-600' : ''}`}>
+                            {date.getDate()}
+                          </span>
+                          <div className="flex-1 w-full mt-1 space-y-0.5">
+                            {dayEvents.slice(0, 2).map((event, index) => (
+                              <div
+                                key={event.id}
+                                className={`text-xs px-1 py-0.5 rounded truncate ${event.color} text-white`}
+                              >
+                                {event.title}
+                              </div>
+                            ))}
+                            {dayEvents.length > 2 && (
+                              <div className="text-xs text-gray-500">
+                                +{dayEvents.length - 2}개 더
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    }
+                  }}
                 />
               </div>
-              <div className="mt-6 border-t pt-4">
-                <h3 className="text-lg font-medium mb-3">트레이너 스케줄</h3>
-                <div className="text-center text-muted-foreground py-12">
-                  아직 등록된 트레이너 스케줄이 없습니다.
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* 오른쪽: 선택된 날짜의 일정 */}
+        <div className="space-y-4">
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <CalendarIcon className="h-5 w-5" />
+                {selectedDate ? selectedDate.toLocaleDateString('ko-KR', { 
+                  month: 'long', 
+                  day: 'numeric',
+                  weekday: 'long'
+                }) : '날짜를 선택하세요'}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {selectedDateEvents.length > 0 ? (
+                selectedDateEvents.map((event) => (
+                  <div key={event.id} className="p-3 border rounded-lg hover:bg-gray-50 transition-colors">
+                    <div className="flex items-start justify-between mb-2">
+                      <h4 className="font-medium">{event.title}</h4>
+                      <Badge variant="outline" className="text-xs">
+                        {getEventTypeLabel(event.type)}
+                      </Badge>
+                    </div>
+                    
+                    <div className="space-y-1 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-3 w-3" />
+                        <span>{event.time} ({event.duration})</span>
+                      </div>
+                      
+                      {event.trainer && (
+                        <div className="flex items-center gap-2">
+                          <Users className="h-3 w-3" />
+                          <span>{event.trainer}</span>
+                        </div>
+                      )}
+                      
+                      <div className="flex items-center gap-2">
+                        <MapPin className="h-3 w-3" />
+                        <span>본점</span>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <CalendarIcon className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                  <p>이 날에는 예정된 일정이 없습니다.</p>
                 </div>
-              </div>
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* 빠른 일정 추가 */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg">빠른 일정 추가</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Button variant="outline" className="w-full justify-start">
+                <Plus className="h-4 w-4 mr-2" />
+                PT 세션 예약
+              </Button>
+              <Button variant="outline" className="w-full justify-start">
+                <Plus className="h-4 w-4 mr-2" />
+                그룹 수업 등록
+              </Button>
+              <Button variant="outline" className="w-full justify-start">
+                <Plus className="h-4 w-4 mr-2" />
+                시설 점검 일정
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 };

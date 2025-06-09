@@ -4,6 +4,7 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { 
   Select, 
   SelectContent, 
@@ -11,6 +12,11 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { 
   ChevronLeft, 
   ChevronRight, 
@@ -18,7 +24,8 @@ import {
   Calendar as CalendarIcon,
   Clock,
   Users,
-  MapPin
+  MapPin,
+  Filter
 } from "lucide-react";
 
 // Mock 이벤트 데이터
@@ -31,6 +38,7 @@ const mockEvents = [
     duration: "1시간",
     type: "pt",
     trainer: "이트레이너",
+    assignedTo: "이트레이너",
     color: "bg-blue-500"
   },
   {
@@ -41,6 +49,7 @@ const mockEvents = [
     duration: "1시간",
     type: "group",
     trainer: "박트레이너",
+    assignedTo: "박트레이너",
     color: "bg-purple-500"
   },
   {
@@ -50,8 +59,17 @@ const mockEvents = [
     time: "14:00", 
     duration: "2시간",
     type: "maintenance",
+    assignedTo: "사장님",
     color: "bg-orange-500"
   }
+];
+
+// Mock 직원 데이터
+const mockStaff = [
+  { id: "owner", name: "사장님", role: "owner" },
+  { id: "trainer1", name: "이트레이너", role: "trainer" },
+  { id: "trainer2", name: "박트레이너", role: "trainer" },
+  { id: "trainer3", name: "김트레이너", role: "trainer" }
 ];
 
 const Calendar = () => {
@@ -59,6 +77,7 @@ const Calendar = () => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [viewMode, setViewMode] = useState<"month" | "week" | "day">("month");
   const [branch, setBranch] = useState("main");
+  const [selectedStaff, setSelectedStaff] = useState<string[]>(mockStaff.map(s => s.id));
 
   // 현재 월의 이름 가져오기
   const getMonthName = (date: Date) => {
@@ -76,10 +95,11 @@ const Calendar = () => {
     setCurrentDate(newDate);
   };
 
-  // 선택된 날짜의 이벤트 필터링
+  // 선택된 날짜의 이벤트 필터링 (직원 필터 적용)
   const getEventsForDate = (date: Date) => {
     return mockEvents.filter(event => 
-      event.date.toDateString() === date.toDateString()
+      event.date.toDateString() === date.toDateString() &&
+      selectedStaff.includes(event.assignedTo)
     );
   };
 
@@ -93,6 +113,22 @@ const Calendar = () => {
     }
   };
 
+  // 직원 필터 토글
+  const toggleStaff = (staffId: string) => {
+    setSelectedStaff(prev => 
+      prev.includes(staffId) 
+        ? prev.filter(id => id !== staffId)
+        : [...prev, staffId]
+    );
+  };
+
+  // 모든 직원 선택/해제
+  const toggleAllStaff = () => {
+    setSelectedStaff(prev => 
+      prev.length === mockStaff.length ? [] : mockStaff.map(s => s.id)
+    );
+  };
+
   const selectedDateEvents = selectedDate ? getEventsForDate(selectedDate) : [];
 
   return (
@@ -101,10 +137,54 @@ const Calendar = () => {
       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">캘린더</h1>
-          <p className="text-muted-foreground">일정 및 트레이너 스케줄을 관리합니다.</p>
+          <p className="text-muted-foreground">일정 및 직원 스케줄을 관리합니다.</p>
         </div>
         
         <div className="flex items-center gap-3">
+          {/* 직원 필터 */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="gap-2">
+                <Filter className="h-4 w-4" />
+                직원 필터 ({selectedStaff.length})
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-64" align="end">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-medium">직원 선택</h4>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={toggleAllStaff}
+                  >
+                    {selectedStaff.length === mockStaff.length ? '전체 해제' : '전체 선택'}
+                  </Button>
+                </div>
+                <div className="space-y-3">
+                  {mockStaff.map((staff) => (
+                    <div key={staff.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={staff.id}
+                        checked={selectedStaff.includes(staff.id)}
+                        onCheckedChange={() => toggleStaff(staff.id)}
+                      />
+                      <label 
+                        htmlFor={staff.id}
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                      >
+                        {staff.name} 
+                        <span className="text-xs text-muted-foreground ml-1">
+                          ({staff.role === 'owner' ? '사장' : '직원'})
+                        </span>
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+
           <Select value={branch} onValueChange={setBranch}>
             <SelectTrigger className="w-[140px]">
               <SelectValue />
@@ -301,6 +381,9 @@ const Calendar = () => {
                 <div className="text-center py-8 text-muted-foreground">
                   <CalendarIcon className="h-12 w-12 mx-auto mb-3 opacity-50" />
                   <p>이 날에는 예정된 일정이 없습니다.</p>
+                  {selectedStaff.length === 0 && (
+                    <p className="text-sm mt-2">직원 필터를 확인해보세요.</p>
+                  )}
                 </div>
               )}
             </CardContent>

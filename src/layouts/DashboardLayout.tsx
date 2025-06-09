@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Outlet, useLocation, Navigate, useNavigate } from "react-router-dom";
 import { SidebarProvider, SidebarHeader, SidebarMain, SidebarFooter, useSidebar } from "@/components/ui/sidebar";
@@ -7,6 +6,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import Logo from "@/components/ui/logo";
 import { User, Settings, LogOut, RefreshCw } from "lucide-react";
 import GymSwitchDialog from "@/components/GymSwitchDialog";
+import StaffManagement from "@/pages/StaffManagement";
 
 // Mock authentication - replace with actual auth implementation
 const useAuth = () => {

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { 
   Card, 
@@ -26,7 +25,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Trash2, Settings } from "lucide-react";
+import { Plus, Trash2, Settings, User, Calendar } from "lucide-react";
 import { mockLockers, mockMembers, Locker } from "@/data/mockData";
 import { formatDate } from "@/lib/utils";
 import { toast } from "sonner";
@@ -46,25 +45,31 @@ const LockerDetails = ({ locker, onClose }: LockerDetailsProps) => {
       </div>
       
       {locker.isOccupied ? (
-        <div className="space-y-3">
-          <div className="grid grid-cols-2 gap-2">
-            <div className="text-sm font-medium">회원 이름</div>
-            <div className="text-sm">{locker.memberName}</div>
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 gap-4">
+            <div className="flex items-center space-x-3 p-3 bg-muted/50 rounded-lg">
+              <User className="h-5 w-5 text-muted-foreground" />
+              <div>
+                <div className="text-sm font-medium">회원 정보</div>
+                <div className="text-sm text-muted-foreground">{locker.memberName} ({locker.memberId})</div>
+              </div>
+            </div>
             
-            <div className="text-sm font-medium">회원 번호</div>
-            <div className="text-sm">{locker.memberId}</div>
-            
-            <div className="text-sm font-medium">사용 시작일</div>
-            <div className="text-sm">{formatDate(locker.startDate || "")}</div>
-            
-            <div className="text-sm font-medium">사용 종료일</div>
-            <div className="text-sm">{formatDate(locker.endDate || "")}</div>
+            <div className="flex items-center space-x-3 p-3 bg-muted/50 rounded-lg">
+              <Calendar className="h-5 w-5 text-muted-foreground" />
+              <div>
+                <div className="text-sm font-medium">사용 기간</div>
+                <div className="text-sm text-muted-foreground">
+                  {formatDate(locker.startDate || "")} ~ {formatDate(locker.endDate || "")}
+                </div>
+              </div>
+            </div>
             
             {locker.notes && (
-              <>
+              <div className="p-3 bg-muted/50 rounded-lg">
                 <div className="text-sm font-medium">메모</div>
-                <div className="text-sm">{locker.notes}</div>
-              </>
+                <div className="text-sm text-muted-foreground mt-1">{locker.notes}</div>
+              </div>
             )}
           </div>
           
@@ -333,6 +338,14 @@ const LockerRoom = () => {
     return acc;
   }, {});
   
+  // 구역별 통계 계산
+  const getZoneStats = (lockers: Locker[]) => {
+    const occupied = lockers.filter(l => l.isOccupied).length;
+    const total = lockers.length;
+    const occupancyRate = total > 0 ? Math.round((occupied / total) * 100) : 0;
+    return { occupied, total, occupancyRate };
+  };
+  
   const handleLockerClick = (locker: Locker) => {
     setSelectedLocker(locker);
     
@@ -361,10 +374,49 @@ const LockerRoom = () => {
         </TabsList>
 
         <TabsContent value="status" className="space-y-6">
+          {/* 전체 현황 요약 */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Card>
+              <CardContent className="p-4">
+                <div className="text-sm font-medium text-muted-foreground">전체 락커</div>
+                <div className="text-2xl font-bold">{mockLockers.length}</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="text-sm font-medium text-muted-foreground">사용중</div>
+                <div className="text-2xl font-bold text-primary">
+                  {mockLockers.filter(l => l.isOccupied).length}
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="text-sm font-medium text-muted-foreground">이용 가능</div>
+                <div className="text-2xl font-bold text-green-600">
+                  {mockLockers.filter(l => !l.isOccupied).length}
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="text-sm font-medium text-muted-foreground">사용률</div>
+                <div className="text-2xl font-bold">
+                  {Math.round((mockLockers.filter(l => l.isOccupied).length / mockLockers.length) * 100)}%
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
           <Card>
             <CardHeader>
-              <div className="flex flex-col sm:flex-row justify-between sm:items-center space-y-2 sm:space-y-0">
-                <CardTitle>락커 현황</CardTitle>
+              <div className="flex flex-col sm:flex-row justify-between sm:items-center space-y-4 sm:space-y-0">
+                <div>
+                  <CardTitle>락커 현황</CardTitle>
+                  <CardDescription>
+                    락커를 클릭하여 상세 정보를 확인하거나 배정할 수 있습니다.
+                  </CardDescription>
+                </div>
                 <Select value={selectedZone} onValueChange={setSelectedZone}>
                   <SelectTrigger className="w-40">
                     <SelectValue placeholder="구역 선택" />
@@ -377,49 +429,75 @@ const LockerRoom = () => {
                   </SelectContent>
                 </Select>
               </div>
-              <CardDescription>
-                락커를 클릭하여 상세 정보를 확인하거나 배정할 수 있습니다.
-              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-8">
-                {Object.entries(lockersByZone).map(([zone, lockers]) => (
-                  <div key={zone} className="space-y-3">
-                    <h3 className="font-semibold text-lg">{zone} 구역</h3>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-10 gap-3">
-                      {lockers.map(locker => (
-                        <button
-                          key={locker.id}
-                          className={`p-4 rounded-md border shadow-sm text-center transition hover:shadow-md ${
-                            locker.isOccupied
-                              ? "bg-gym-primary text-white"
-                              : "bg-white hover:bg-gray-50"
-                          }`}
-                          onClick={() => handleLockerClick(locker)}
-                        >
-                          <div className="font-semibold">{locker.zone}{locker.number}</div>
-                          <div className="text-xs mt-1">
-                            {locker.isOccupied ? (
-                              <span>{locker.memberName?.substring(0, 3)}</span>
-                            ) : (
-                              <span>비어있음</span>
+                {Object.entries(lockersByZone).map(([zone, lockers]) => {
+                  const stats = getZoneStats(lockers);
+                  return (
+                    <div key={zone} className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <h3 className="font-semibold text-lg">{zone} 구역</h3>
+                          <Badge variant="outline" className="text-xs">
+                            {stats.occupied}/{stats.total} 사용중
+                          </Badge>
+                          <Badge 
+                            variant={stats.occupancyRate > 80 ? "destructive" : stats.occupancyRate > 50 ? "default" : "secondary"}
+                            className="text-xs"
+                          >
+                            {stats.occupancyRate}% 사용률
+                          </Badge>
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-12 xl:grid-cols-15 gap-3">
+                        {lockers.map(locker => (
+                          <button
+                            key={locker.id}
+                            className={`
+                              relative p-3 rounded-lg border-2 text-center transition-all duration-200 hover:shadow-lg hover:scale-105
+                              ${locker.isOccupied
+                                ? "bg-primary border-primary text-primary-foreground shadow-md"
+                                : "bg-background border-border hover:border-primary/50 hover:bg-muted/50"
+                              }
+                            `}
+                            onClick={() => handleLockerClick(locker)}
+                          >
+                            <div className="font-bold text-sm">{locker.zone}{locker.number}</div>
+                            <div className="text-xs mt-1 truncate">
+                              {locker.isOccupied ? (
+                                <span className="block">
+                                  <User className="h-3 w-3 mx-auto mb-1" />
+                                  {locker.memberName?.split(' ').map(n => n.charAt(0)).join('')}
+                                </span>
+                              ) : (
+                                <span className="text-muted-foreground">비어있음</span>
+                              )}
+                            </div>
+                            {locker.isOccupied && (
+                              <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 border-2 border-background rounded-full"></div>
                             )}
-                          </div>
-                        </button>
-                      ))}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
               
-              <div className="flex items-center justify-center space-x-4 mt-6 text-sm">
-                <div className="flex items-center">
-                  <div className="w-4 h-4 bg-gym-primary rounded mr-2"></div>
-                  <span>사용중</span>
+              <div className="flex items-center justify-center space-x-6 mt-8 p-4 bg-muted/30 rounded-lg">
+                <div className="flex items-center space-x-2">
+                  <div className="w-4 h-4 bg-primary rounded border-2 border-primary"></div>
+                  <span className="text-sm font-medium">사용중</span>
                 </div>
-                <div className="flex items-center">
-                  <div className="w-4 h-4 bg-white border rounded mr-2"></div>
-                  <span>비어있음</span>
+                <div className="flex items-center space-x-2">
+                  <div className="w-4 h-4 bg-background border-2 border-border rounded"></div>
+                  <span className="text-sm font-medium">이용 가능</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <User className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium">회원 정보</span>
                 </div>
               </div>
             </CardContent>

@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -33,50 +32,50 @@ const staffData = [
   { name: '최직원', pt: 25, revenue: 2500000, rating: 4.5, newMembers: 6, retentionRate: 75, status: '휴직' },
 ];
 
-// Chart configuration with modern colors and better accessibility
+// Chart configuration with beautiful modern colors
 const memberChartConfig = {
   total: {
     label: "총 회원수",
-    color: "hsl(var(--primary))",
+    color: "#3B82F6", // Beautiful blue
   },
   active: {
     label: "활성 회원",
-    color: "hsl(142 76% 36%)",
+    color: "#10B981", // Emerald green
   },
   pt: {
     label: "PT 회원",
-    color: "hsl(38 92% 50%)",
+    color: "#F59E0B", // Amber
   },
   inactive: {
     label: "휴면 회원",
-    color: "hsl(215 14% 34%)",
+    color: "#6B7280", // Cool gray
   },
 };
 
 const revenueChartConfig = {
   membership: {
     label: "회원권",
-    color: "hsl(var(--primary))",
+    color: "#8B5CF6", // Purple
   },
   pt: {
     label: "PT 이용권",
-    color: "hsl(142 76% 36%)",
+    color: "#06B6D4", // Cyan
   },
   daily: {
     label: "일일권",
-    color: "hsl(38 92% 50%)",
+    color: "#F97316", // Orange
   },
   other: {
     label: "기타",
-    color: "hsl(262 83% 58%)",
+    color: "#EC4899", // Pink
   },
 };
 
 const membershipTypeData = [
-  { name: '1개월', value: 45, fill: 'hsl(var(--primary))' },
-  { name: '3개월', value: 30, fill: 'hsl(199 89% 48%)' },
-  { name: '6개월', value: 15, fill: 'hsl(142 76% 36%)' },
-  { name: '12개월', value: 10, fill: 'hsl(38 92% 50%)' },
+  { name: '1개월', value: 45, fill: '#3B82F6' }, // Blue
+  { name: '3개월', value: 30, fill: '#10B981' }, // Emerald
+  { name: '6개월', value: 15, fill: '#F59E0B' }, // Amber
+  { name: '12개월', value: 10, fill: '#8B5CF6' }, // Purple
 ];
 
 const Statistics = () => {
@@ -107,15 +106,15 @@ const Statistics = () => {
         </div>
         
         <Tabs defaultValue="members" className="space-y-8">
-          <TabsList className="grid w-full max-w-md mx-auto grid-cols-3 h-14 p-1 bg-white/70 dark:bg-slate-800/70 backdrop-blur-lg border shadow-lg">
-            <TabsTrigger value="members" className="text-sm font-medium">회원 통계</TabsTrigger>
-            <TabsTrigger value="revenue" className="text-sm font-medium">매출 통계</TabsTrigger>
-            <TabsTrigger value="staff" className="text-sm font-medium">직원 실적</TabsTrigger>
+          <TabsList className="grid w-full max-w-md mx-auto grid-cols-3 h-16 p-1 bg-white dark:bg-slate-800 backdrop-blur-lg border shadow-lg rounded-lg">
+            <TabsTrigger value="members" className="text-sm font-medium h-12 rounded-md data-[state=active]:bg-gym-primary data-[state=active]:text-white">회원 통계</TabsTrigger>
+            <TabsTrigger value="revenue" className="text-sm font-medium h-12 rounded-md data-[state=active]:bg-gym-primary data-[state=active]:text-white">매출 통계</TabsTrigger>
+            <TabsTrigger value="staff" className="text-sm font-medium h-12 rounded-md data-[state=active]:bg-gym-primary data-[state=active]:text-white">직원 실적</TabsTrigger>
           </TabsList>
           
           <TabsContent value="members" className="space-y-8">
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-              <Card className="shadow-xl border-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg overflow-hidden">
+              <Card className="shadow-xl border bg-white dark:bg-slate-900 overflow-hidden">
                 <CardHeader className="pb-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30">
                   <CardTitle className="flex items-center gap-3 text-xl">
                     <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/50">
@@ -125,7 +124,7 @@ const Statistics = () => {
                   </CardTitle>
                   <CardDescription className="text-base">{currentBusiness} 회원 변화 추이</CardDescription>
                 </CardHeader>
-                <CardContent className="pt-6">
+                <CardContent className="pt-6 bg-white dark:bg-slate-900">
                   <div className="w-full overflow-hidden">
                     <ChartContainer config={memberChartConfig} className="h-[350px] w-full">
                       <BarChart data={memberData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
@@ -173,7 +172,7 @@ const Statistics = () => {
                 </CardContent>
               </Card>
               
-              <Card className="shadow-xl border-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg overflow-hidden">
+              <Card className="shadow-xl border bg-white dark:bg-slate-900 overflow-hidden">
                 <CardHeader className="pb-6 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30">
                   <CardTitle className="flex items-center gap-3 text-xl">
                     <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/50">
@@ -183,7 +182,7 @@ const Statistics = () => {
                   </CardTitle>
                   <CardDescription className="text-base">현재 등록된 회원권 유형별 현황</CardDescription>
                 </CardHeader>
-                <CardContent className="pt-6">
+                <CardContent className="pt-6 bg-white dark:bg-slate-900">
                   <div className="w-full flex justify-center overflow-hidden">
                     <ChartContainer config={{}} className="h-[350px] w-full max-w-[400px]">
                       <PieChart>
@@ -197,7 +196,7 @@ const Statistics = () => {
                           innerRadius={50}
                           fill="#8884d8"
                           dataKey="value"
-                          stroke="hsl(var(--background))"
+                          stroke="white"
                           strokeWidth={3}
                         >
                           {membershipTypeData.map((entry, index) => (
@@ -209,7 +208,7 @@ const Statistics = () => {
                             if (active && payload && payload.length) {
                               const data = payload[0];
                               return (
-                                <div className="rounded-xl border bg-background/95 backdrop-blur-sm p-3 shadow-lg">
+                                <div className="rounded-xl border bg-white dark:bg-slate-800 p-3 shadow-lg">
                                   <div className="grid gap-2">
                                     <div className="flex items-center justify-between">
                                       <span className="text-sm text-muted-foreground">{data.name}</span>
@@ -229,7 +228,7 @@ const Statistics = () => {
               </Card>
             </div>
             
-            <Card className="shadow-xl border-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg overflow-hidden">
+            <Card className="shadow-xl border bg-white dark:bg-slate-900 overflow-hidden">
               <CardHeader className="bg-gradient-to-r from-emerald-50 to-cyan-50 dark:from-emerald-950/30 dark:to-cyan-950/30">
                 <CardTitle className="flex items-center gap-3 text-xl">
                   <div className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/50">
@@ -239,7 +238,7 @@ const Statistics = () => {
                 </CardTitle>
                 <CardDescription className="text-base">{currentBusiness} 회원 현황 세부사항</CardDescription>
               </CardHeader>
-              <CardContent className="pt-6">
+              <CardContent className="pt-6 bg-white dark:bg-slate-900">
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
                   <div className="text-center p-6 border-0 rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/30 dark:to-blue-900/30 shadow-lg">
                     <div className="text-3xl font-bold text-blue-700 dark:text-blue-400 mb-2">{currentMonthData.total}</div>
@@ -267,7 +266,7 @@ const Statistics = () => {
           </TabsContent>
           
           <TabsContent value="revenue" className="space-y-8">
-            <Card className="shadow-xl border-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg overflow-hidden">
+            <Card className="shadow-xl border bg-white dark:bg-slate-900 overflow-hidden">
               <CardHeader className="pb-6 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30">
                 <CardTitle className="flex items-center gap-3 text-xl">
                   <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/50">
@@ -277,26 +276,26 @@ const Statistics = () => {
                 </CardTitle>
                 <CardDescription className="text-base">{currentBusiness} 매출 변화 추이</CardDescription>
               </CardHeader>
-              <CardContent className="pt-6">
+              <CardContent className="pt-6 bg-white dark:bg-slate-900">
                 <div className="w-full overflow-hidden">
                   <ChartContainer config={revenueChartConfig} className="h-[400px] w-full">
                     <AreaChart data={revenueData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                       <defs>
                         <linearGradient id="membership" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8}/>
-                          <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0.1}/>
+                          <stop offset="5%" stopColor="#8B5CF6" stopOpacity={0.8}/>
+                          <stop offset="95%" stopColor="#8B5CF6" stopOpacity={0.1}/>
                         </linearGradient>
                         <linearGradient id="pt" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="hsl(142 76% 36%)" stopOpacity={0.8}/>
-                          <stop offset="95%" stopColor="hsl(142 76% 36%)" stopOpacity={0.1}/>
+                          <stop offset="5%" stopColor="#06B6D4" stopOpacity={0.8}/>
+                          <stop offset="95%" stopColor="#06B6D4" stopOpacity={0.1}/>
                         </linearGradient>
                         <linearGradient id="daily" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="hsl(38 92% 50%)" stopOpacity={0.8}/>
-                          <stop offset="95%" stopColor="hsl(38 92% 50%)" stopOpacity={0.1}/>
+                          <stop offset="5%" stopColor="#F97316" stopOpacity={0.8}/>
+                          <stop offset="95%" stopColor="#F97316" stopOpacity={0.1}/>
                         </linearGradient>
                         <linearGradient id="other" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="hsl(262 83% 58%)" stopOpacity={0.8}/>
-                          <stop offset="95%" stopColor="hsl(262 83% 58%)" stopOpacity={0.1}/>
+                          <stop offset="5%" stopColor="#EC4899" stopOpacity={0.8}/>
+                          <stop offset="95%" stopColor="#EC4899" stopOpacity={0.1}/>
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" opacity={0.3} />
@@ -322,7 +321,7 @@ const Statistics = () => {
                         type="monotone" 
                         dataKey="membership" 
                         stackId="1" 
-                        stroke="hsl(var(--primary))" 
+                        stroke="#8B5CF6" 
                         fill="url(#membership)" 
                         strokeWidth={2}
                       />
@@ -330,7 +329,7 @@ const Statistics = () => {
                         type="monotone" 
                         dataKey="pt" 
                         stackId="1" 
-                        stroke="hsl(142 76% 36%)" 
+                        stroke="#06B6D4" 
                         fill="url(#pt)" 
                         strokeWidth={2}
                       />
@@ -338,7 +337,7 @@ const Statistics = () => {
                         type="monotone" 
                         dataKey="daily" 
                         stackId="1" 
-                        stroke="hsl(38 92% 50%)" 
+                        stroke="#F97316" 
                         fill="url(#daily)" 
                         strokeWidth={2}
                       />
@@ -346,7 +345,7 @@ const Statistics = () => {
                         type="monotone" 
                         dataKey="other" 
                         stackId="1" 
-                        stroke="hsl(262 83% 58%)" 
+                        stroke="#EC4899" 
                         fill="url(#other)" 
                         strokeWidth={2}
                       />
@@ -357,14 +356,14 @@ const Statistics = () => {
             </Card>
             
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-              <Card className="shadow-xl border-0 bg-gradient-to-br from-green-50 to-emerald-100/50 dark:from-green-950/30 dark:to-emerald-900/30 backdrop-blur-lg overflow-hidden">
-                <CardHeader className="pb-6">
+              <Card className="shadow-xl border bg-white dark:bg-slate-900 overflow-hidden">
+                <CardHeader className="pb-6 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30">
                   <CardTitle className="flex items-center gap-3 text-xl text-green-700 dark:text-green-400">
                     <TrendingUp className="h-6 w-6" />
                     수입 요약 (5월)
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="bg-white dark:bg-slate-900">
                   <div className="space-y-4">
                     <div className="flex items-center justify-between p-4 rounded-xl bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm shadow-md">
                       <div className="text-sm font-semibold">총 매출</div>
@@ -390,14 +389,14 @@ const Statistics = () => {
                 </CardContent>
               </Card>
               
-              <Card className="shadow-xl border-0 bg-gradient-to-br from-red-50 to-pink-100/50 dark:from-red-950/30 dark:to-pink-900/30 backdrop-blur-lg overflow-hidden">
-                <CardHeader className="pb-6">
+              <Card className="shadow-xl border bg-white dark:bg-slate-900 overflow-hidden">
+                <CardHeader className="pb-6 bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-950/30 dark:to-pink-950/30">
                   <CardTitle className="flex items-center gap-3 text-xl text-red-700 dark:text-red-400">
                     <TrendingDown className="h-6 w-6" />
                     지출 요약 (5월)
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="bg-white dark:bg-slate-900">
                   <div className="space-y-4">
                     <div className="flex items-center justify-between p-4 rounded-xl bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm shadow-md">
                       <div className="text-sm font-semibold">총 지출</div>
@@ -426,7 +425,7 @@ const Statistics = () => {
           </TabsContent>
           
           <TabsContent value="staff" className="space-y-8">
-            <Card className="shadow-xl border-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg overflow-hidden">
+            <Card className="shadow-xl border bg-white dark:bg-slate-900 overflow-hidden">
               <CardHeader className="bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/30">
                 <CardTitle className="flex items-center gap-3 text-xl">
                   <div className="p-2 rounded-lg bg-violet-100 dark:bg-violet-900/50">
@@ -436,7 +435,7 @@ const Statistics = () => {
                 </CardTitle>
                 <CardDescription className="text-base">직원별 PT 수업 및 매출 현황</CardDescription>
               </CardHeader>
-              <CardContent className="pt-6">
+              <CardContent className="pt-6 bg-white dark:bg-slate-900">
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>

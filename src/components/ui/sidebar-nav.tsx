@@ -47,18 +47,13 @@ export function SidebarNav({ className, ...props }: SidebarNavProps) {
       href: "/daily-tickets",
       icon: <CreditCard className="h-5 w-5" />,
     },
-    {
-      title: "출석 체크",
-      href: "/attendance",
-      icon: <ClipboardCheck className="h-5 w-5" />,
-    },
   ]
 
   const ownerOnlyItems = [
     {
-      title: "상품 관리",
-      href: "/products",
-      icon: <Package className="h-5 w-5" />,
+      title: "문자 메시지",
+      href: "/messages",
+      icon: <MessageSquare className="h-5 w-5" />,
     },
     {
       title: "락커룸 관리",
@@ -66,14 +61,19 @@ export function SidebarNav({ className, ...props }: SidebarNavProps) {
       icon: <Settings className="h-5 w-5" />,
     },
     {
-      title: "문자 메시지",
-      href: "/messages",
-      icon: <MessageSquare className="h-5 w-5" />,
+      title: "상품 관리",
+      href: "/products",
+      icon: <Package className="h-5 w-5" />,
     },
     {
       title: "캘린더 관리",
       href: "/calendar",
       icon: <Calendar className="h-5 w-5" />,
+    },
+    {
+      title: "직원 관리",
+      href: "/staff",
+      icon: <UserPlus className="h-5 w-5" />,
     },
     {
       title: "커뮤니티",
@@ -84,11 +84,6 @@ export function SidebarNav({ className, ...props }: SidebarNavProps) {
       title: "통계",
       href: "/statistics",
       icon: <BarChart3 className="h-5 w-5" />,
-    },
-    {
-      title: "직원 관리",
-      href: "/staff",
-      icon: <UserPlus className="h-5 w-5" />,
     },
   ]
 

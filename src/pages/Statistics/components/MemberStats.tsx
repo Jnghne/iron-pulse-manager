@@ -26,7 +26,7 @@ export const MemberStats = ({
     <div className="space-y-8">
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
         <Card className="shadow-xl border bg-white dark:bg-slate-900 overflow-hidden">
-          <CardHeader className="pb-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30">
+          <CardHeader className="pb-6 bg-slate-50/70 dark:bg-slate-800/20 border-b">
             <CardTitle className="flex items-center gap-3 text-xl">
               <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/50">
                 <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
@@ -35,7 +35,7 @@ export const MemberStats = ({
             </CardTitle>
             <CardDescription className="text-base">{businessName} 회원 변화 추이</CardDescription>
           </CardHeader>
-          <CardContent className="pt-6 bg-white dark:bg-slate-900">
+          <CardContent className="pt-6 bg-white dark:bg-slate-900 divide-y divide-slate-100 dark:divide-slate-800">
             <div className="w-full overflow-hidden">
               <ChartContainer config={memberChartConfig} className="h-[350px] w-full">
                 <BarChart data={memberData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>

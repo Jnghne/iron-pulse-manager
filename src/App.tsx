@@ -28,7 +28,7 @@ import MessageSystem from "./pages/MessageSystem";
 import Calendar from "./pages/Calendar";
 import Statistics from "./pages/Statistics";
 import TrainerManagement from "./pages/TrainerManagement";
-import StaffManagement from "./pages/staff";
+import StaffManagement from "./pages/staff/Staff";
 import StaffDetail from "./pages/staff/StaffDetail";
 import ProductListPage from "./pages/products/ProductListPage";
 import Community from "./pages/Community";

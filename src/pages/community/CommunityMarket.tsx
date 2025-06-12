@@ -180,15 +180,9 @@ const CommunityMarket = () => {
           <Link to="/community">
             <Button variant="outline" size="sm">
               <ArrowLeft className="h-4 w-4 mr-2" />
-              커뮤니티
+              뒤로가기
             </Button>
           </Link>
-          <div>
-            <h1 className="text-3xl font-bold">중고거래 장터</h1>
-            <p className="text-muted-foreground mt-1">
-              헬스장 기구와 용품을 안전하게 거래하세요
-            </p>
-          </div>
         </div>
         <Link to="/community/market/write">
           <Button>

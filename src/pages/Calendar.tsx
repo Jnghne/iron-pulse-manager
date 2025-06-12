@@ -134,12 +134,7 @@ const Calendar = () => {
   return (
     <div className="space-y-6 h-full">
       {/* 헤더 */}
-      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">캘린더</h1>
-          <p className="text-muted-foreground">일정 및 직원 스케줄을 관리합니다.</p>
-        </div>
-        
+      <div className="flex flex-col sm:flex-row justify-end sm:items-center gap-4">
         <div className="flex items-center gap-3">
           {/* 직원 필터 */}
           <Popover>

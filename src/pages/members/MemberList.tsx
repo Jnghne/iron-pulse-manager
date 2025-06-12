@@ -154,11 +154,7 @@ const MemberList = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">회원 관리</h1>
-          <p className="text-muted-foreground">회원 정보를 조회하고 관리합니다.</p>
-        </div>
+      <div className="flex flex-col sm:flex-row justify-end items-start sm:items-center gap-4">
         <Button 
           className="w-full sm:w-auto bg-gym-primary hover:bg-gym-primary/90"
           onClick={() => navigate("/members/new")}
@@ -228,11 +224,7 @@ const MemberList = () => {
       </div>
       
       <Card>
-        <CardHeader>
-          <CardTitle>회원 목록</CardTitle>
-          <CardDescription>전체 {filteredMembers.length}명의 회원이 있습니다.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="pt-6 space-y-4">
           {/* 검색 및 필터 영역 */}
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">

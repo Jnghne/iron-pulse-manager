@@ -2,7 +2,7 @@
 // src/pages/products/ProductListPage.tsx
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Edit, Trash2 } from 'lucide-react';
+import { PlusCircle, Edit, Trash2, Package } from 'lucide-react';
 import { Product, ProductType } from '@/types/product'; 
 import { mockProducts } from '@/data/mockProducts';
 import { ProductAddModal } from '@/components/features/product/ProductAddModal';
@@ -18,11 +18,12 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { toast } from '@/components/ui/use-toast';
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 // 상품 유형 이름을 반환하는 함수 (기존과 동일)
 const getProductTypeName = (type: ProductType): string => {
   switch (type) {
-    case ProductType.MEMBERSHIP: return '회원권';
+    case ProductType.MEMBERSHIP: return '헬스';
     case ProductType.PT: return 'PT';
     case ProductType.LOCKER: return '락커';
     case ProductType.OTHER: return '기타';
@@ -30,19 +31,19 @@ const getProductTypeName = (type: ProductType): string => {
   }
 };
 
-// 상품 유형별 뱃지 스타일 (회원 목록과 비슷한 톤으로 변경)
+// 상품 유형별 뱃지 스타일 (회원 목록과 동일한 스타일로 통일)
 const getProductTypeBadgeStyle = (type: ProductType) => {
   switch (type) {
     case ProductType.MEMBERSHIP:
-      return "bg-blue-100 text-blue-800 hover:bg-blue-200";
+      return "bg-blue-50 text-blue-700";
     case ProductType.PT:
-      return "bg-purple-100 text-purple-800 hover:bg-purple-200";
+      return "bg-purple-50 text-purple-700";
     case ProductType.LOCKER:
-      return "bg-green-100 text-green-800 hover:bg-green-200";
+      return "bg-green-50 text-green-700";
     case ProductType.OTHER:
-      return "bg-orange-100 text-orange-800 hover:bg-orange-200";
+      return "bg-gray-100 text-gray-700";
     default:
-      return "bg-gray-100 text-gray-800 hover:bg-gray-200";
+      return "bg-gray-100 text-gray-700";
   }
 };
 
@@ -106,56 +107,68 @@ const ProductListPage: React.FC = () => {
 
   return (
     <div className="container mx-auto py-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">상품 관리</h1>
+      <div className="flex justify-end items-center mb-6">
         <Button onClick={handleOpenAddModal} className="bg-gym-primary hover:bg-gym-primary/90 text-white">
           <PlusCircle className="mr-2 h-5 w-5" /> 상품 추가
         </Button>
       </div>
-
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
-        <TabsList>
-          {productTabs.map(tab => (
-            <TabsTrigger key={tab.value} value={tab.value}>
-              {tab.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-      </Tabs>
-
-      <div className="border rounded-lg">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>상품명</TableHead>
-              <TableHead>유형</TableHead>
-              <TableHead>가격</TableHead>
-              <TableHead>상태</TableHead>
-              <TableHead>최근 수정일</TableHead>
-              <TableHead className="text-right">관리</TableHead>
-            </TableRow>
-          </TableHeader>
+      
+      <Card>
+        <CardHeader>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Tabs 
+              value={activeTab} 
+              onValueChange={setActiveTab} 
+              className="w-full sm:w-auto"
+            >
+              <TabsList className="grid w-full grid-cols-5">
+                {productTabs.map(tab => (
+                  <TabsTrigger key={tab.value} value={tab.value}>
+                    {tab.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="rounded-md border overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>상품명</TableHead>
+                  <TableHead>유형</TableHead>
+                  <TableHead>가격</TableHead>
+                  <TableHead>상태</TableHead>
+                  <TableHead>최근 수정일</TableHead>
+                  <TableHead className="text-right">관리</TableHead>
+                </TableRow>
+              </TableHeader>
           <TableBody>
             {filteredProducts.length > 0 ? (
               filteredProducts.map((product) => (
                 <TableRow key={product.id}>
                   <TableCell className="font-medium">{product.name}</TableCell>
                   <TableCell>
-                    <Badge 
-                      variant="outline"
-                      className={getProductTypeBadgeStyle(product.type)}
+                    <span 
+                      className={`px-2 py-1 text-xs rounded-full font-medium ${getProductTypeBadgeStyle(product.type)}`}
                     >
                       {getProductTypeName(product.type)}
-                    </Badge>
+                    </span>
                   </TableCell>
                   <TableCell>{product.price.toLocaleString()}원</TableCell>
                   <TableCell>
-                    <Badge 
-                      variant={product.isActive ? 'default' : 'outline'}
-                      className={product.isActive ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-red-600 hover:bg-red-700 text-white'}
-                    >
-                      {product.isActive ? '활성' : '비활성'}
-                    </Badge>
+                    {product.isActive ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                        <span className="h-1.5 w-1.5 rounded-full bg-green-600"></span>
+                        활성
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                        <span className="h-1.5 w-1.5 rounded-full bg-gray-600"></span>
+                        비활성
+                      </span>
+                    )}
                   </TableCell>
                   <TableCell>{new Date(product.updatedAt).toLocaleDateString('ko-KR')}</TableCell>
                   <TableCell className="text-right space-x-2">
@@ -189,8 +202,10 @@ const ProductListPage: React.FC = () => {
               </TableRow>
             )}
           </TableBody>
-        </Table>
-      </div>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
 
       <ProductAddModal 
         isOpen={isAddModalOpen} 

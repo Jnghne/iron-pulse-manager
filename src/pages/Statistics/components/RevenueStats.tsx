@@ -17,8 +17,8 @@ export const RevenueStats = ({ revenueData, revenueChartConfig, businessName }: 
 
   return (
     <div className="space-y-8">
-      <Card className="shadow-xl border bg-white dark:bg-slate-900 overflow-hidden">
-        <CardHeader className="pb-6 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30">
+      <Card className="shadow-xl border bg-slate-50/70 dark:bg-slate-800/20 border-b overflow-hidden">
+        <CardHeader className="pb-6 bg-slate-50/70 dark:bg-slate-800/20 border-b">
           <CardTitle className="flex items-center gap-3 text-xl">
             <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/50">
               <DollarSign className="h-5 w-5 text-green-600 dark:text-green-400" />
@@ -27,7 +27,7 @@ export const RevenueStats = ({ revenueData, revenueChartConfig, businessName }: 
           </CardTitle>
           <CardDescription className="text-base">{businessName} 매출 변화 추이</CardDescription>
         </CardHeader>
-        <CardContent className="pt-6 bg-white dark:bg-slate-900">
+        <CardContent className="pt-6 bg-white dark:bg-slate-900 divide-y divide-slate-100 dark:divide-slate-800">
           <div className="w-full overflow-hidden">
             <ChartContainer config={revenueChartConfig} className="h-[400px] w-full">
               <AreaChart data={revenueData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
@@ -107,14 +107,14 @@ export const RevenueStats = ({ revenueData, revenueChartConfig, businessName }: 
       </Card>
       
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-        <Card className="shadow-xl border bg-white dark:bg-slate-900 overflow-hidden">
-          <CardHeader className="pb-6 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30">
+        <Card className="shadow-xl border bg-slate-50/70 dark:bg-slate-800/20 border-b overflow-hidden">
+          <CardHeader className="pb-6 bg-slate-50/70 dark:bg-slate-800/20 border-b">
             <CardTitle className="flex items-center gap-3 text-xl text-green-700 dark:text-green-400">
               <TrendingUp className="h-6 w-6" />
               수입 요약 (5월)
             </CardTitle>
           </CardHeader>
-          <CardContent className="bg-white dark:bg-slate-900">
+          <CardContent className="bg-white dark:bg-slate-900 divide-y divide-slate-100 dark:divide-slate-800">
             <div className="space-y-4">
               <div className="flex items-center justify-between p-4 rounded-xl bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm shadow-md">
                 <div className="text-sm font-semibold">총 매출</div>
@@ -140,14 +140,14 @@ export const RevenueStats = ({ revenueData, revenueChartConfig, businessName }: 
           </CardContent>
         </Card>
         
-        <Card className="shadow-xl border bg-white dark:bg-slate-900 overflow-hidden">
-          <CardHeader className="pb-6 bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-950/30 dark:to-pink-950/30">
+        <Card className="shadow-xl border bg-slate-50/70 dark:bg-slate-800/20 border-b overflow-hidden">
+          <CardHeader className="pb-6 bg-slate-50/70 dark:bg-slate-800/20 border-b">
             <CardTitle className="flex items-center gap-3 text-xl text-red-700 dark:text-red-400">
               <TrendingDown className="h-6 w-6" />
               지출 요약 (5월)
             </CardTitle>
           </CardHeader>
-          <CardContent className="bg-white dark:bg-slate-900">
+          <CardContent className="bg-white dark:bg-slate-900 divide-y divide-slate-100 dark:divide-slate-800">
             <div className="space-y-4">
               <div className="flex items-center justify-between p-4 rounded-xl bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm shadow-md">
                 <div className="text-sm font-semibold">총 지출</div>

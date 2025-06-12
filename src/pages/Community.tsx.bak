@@ -94,7 +94,7 @@ const Community = () => {
       {/* 최근 활동 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="border-0 shadow-lg overflow-hidden bg-white dark:bg-slate-900">
-          <CardHeader className="border-b bg-slate-50/70 dark:bg-slate-800/20">
+          <CardHeader className="border-b bg-slate-50 dark:bg-slate-800/50">
             <CardTitle className="flex items-center gap-2 text-lg">
               <div className="p-1.5 rounded-md bg-blue-50 dark:bg-blue-900/20">
                 <MessageSquare className="h-4 w-4 text-blue-600 dark:text-blue-400" />
@@ -109,7 +109,7 @@ const Community = () => {
                 { title: "PT 가격 정책 어떻게 하시나요?", author: "이관장", views: 142, comments: 18, hot: true },
                 { title: "여름철 헬스장 에어컨 관리 팁", author: "박관장", views: 98, comments: 12, hot: false },
               ].map((post, index) => (
-                <div key={index} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/30 transition-colors">
+                <div key={index} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                   <div className="flex justify-between items-center p-4">
                     <div className="flex-1 min-w-0 pr-4">
                       <div className="flex items-center gap-2">
@@ -149,7 +149,7 @@ const Community = () => {
         </Card>
 
         <Card className="border-0 shadow-lg overflow-hidden bg-white dark:bg-slate-900">
-          <CardHeader className="border-b bg-slate-50/70 dark:bg-slate-800/20">
+          <CardHeader className="border-b bg-slate-50 dark:bg-slate-800/50">
             <CardTitle className="flex items-center gap-2 text-lg">
               <div className="p-1.5 rounded-md bg-green-50 dark:bg-green-900/20">
                 <ShoppingCart className="h-4 w-4 text-green-600 dark:text-green-400" />
@@ -164,7 +164,7 @@ const Community = () => {
                 { title: "덤벨 세트 (1kg~50kg)", price: "800,000원", seller: "부산 해운대", status: "예약중", image: "https://placehold.co/60x60" },
                 { title: "벤치프레스 + 바벨 세트", price: "450,000원", seller: "대구 수성구", status: "판매중", image: "https://placehold.co/60x60" },
               ].map((item, index) => (
-                <div key={index} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/30 transition-colors">
+                <div key={index} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                   <div className="flex items-center p-4">
                     <div className="flex-shrink-0 mr-4 rounded-md overflow-hidden bg-gray-50 dark:bg-gray-800/50 h-[60px] w-[60px] flex items-center justify-center">
                       <ShoppingCart className="h-6 w-6 text-gray-400" />

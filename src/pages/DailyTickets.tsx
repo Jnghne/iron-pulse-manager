@@ -151,11 +151,7 @@ const DailyTickets = () => {
   
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between sm:items-center space-y-2 sm:space-y-0">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">일일권 이력</h1>
-          <p className="text-muted-foreground">일자별 일일권 이용 회원을 조회합니다.</p>
-        </div>
+      <div className="flex flex-col sm:flex-row justify-end sm:items-center space-y-2 sm:space-y-0">
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
             <Button className="w-full sm:w-auto bg-gym-primary hover:bg-gym-primary/90">
@@ -245,7 +241,6 @@ const DailyTickets = () => {
       
       <Card>
         <CardHeader>
-          <CardTitle>일일권 이용 현황</CardTitle>
           <div className="flex flex-col sm:flex-row gap-4">
             <Tabs
               defaultValue="all"

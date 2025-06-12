@@ -133,15 +133,9 @@ const CommunityBoard = () => {
           <Link to="/community">
             <Button variant="outline" size="sm">
               <ArrowLeft className="h-4 w-4 mr-2" />
-              커뮤니티
+              뒤로가기
             </Button>
           </Link>
-          <div>
-            <h1 className="text-3xl font-bold">자유 소통 게시판</h1>
-            <p className="text-muted-foreground mt-1">
-              전국 헬스장 관장님들과 자유롭게 소통하세요
-            </p>
-          </div>
         </div>
         <Link to="/community/board/write">
           <Button>

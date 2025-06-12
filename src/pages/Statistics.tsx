@@ -3,7 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Area, AreaChart } from 'recharts';
+import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Area, AreaChart } from 'recharts';
 import { TrendingUp, TrendingDown, Users, DollarSign, Calendar, Award } from 'lucide-react';
 
 // Mock data for demonstration (only for the logged-in business)
@@ -32,33 +33,50 @@ const staffData = [
   { name: '최직원', pt: 25, revenue: 2500000, rating: 4.5, newMembers: 6, retentionRate: 75, status: '휴직' },
 ];
 
-// 통계 UI에 적합한 색상 팔레트
-const CHART_COLORS = {
-  primary: '#2563eb',    // 기본 파란색
-  success: '#16a34a',    // 초록색
-  warning: '#f59e0b',    // 주황색
-  danger: '#dc2626',     // 빨간색
-  info: '#0ea5e9',       // 하늘색
-  purple: '#9333ea',     // 보라색
-  gray: '#6b7280',       // 회색
+// Chart configuration with modern colors and better accessibility
+const memberChartConfig = {
+  total: {
+    label: "총 회원수",
+    color: "hsl(var(--primary))",
+  },
+  active: {
+    label: "활성 회원",
+    color: "hsl(142 76% 36%)",
+  },
+  pt: {
+    label: "PT 회원",
+    color: "hsl(38 92% 50%)",
+  },
+  inactive: {
+    label: "휴면 회원",
+    color: "hsl(215 14% 34%)",
+  },
+};
+
+const revenueChartConfig = {
+  membership: {
+    label: "회원권",
+    color: "hsl(var(--primary))",
+  },
+  pt: {
+    label: "PT 이용권",
+    color: "hsl(142 76% 36%)",
+  },
+  daily: {
+    label: "일일권",
+    color: "hsl(38 92% 50%)",
+  },
+  other: {
+    label: "기타",
+    color: "hsl(262 83% 58%)",
+  },
 };
 
 const membershipTypeData = [
-  { name: '1개월', value: 45, fill: CHART_COLORS.primary },
-  { name: '3개월', value: 30, fill: CHART_COLORS.info },
-  { name: '6개월', value: 15, fill: CHART_COLORS.success },
-  { name: '12개월', value: 10, fill: CHART_COLORS.warning },
-];
-
-// 차트에 사용할 색상 배열
-const CHART_COLOR_ARRAY = [
-  CHART_COLORS.primary,
-  CHART_COLORS.success,
-  CHART_COLORS.warning, 
-  CHART_COLORS.danger,
-  CHART_COLORS.info,
-  CHART_COLORS.purple,
-  CHART_COLORS.gray,
+  { name: '1개월', value: 45, fill: 'hsl(var(--primary))' },
+  { name: '3개월', value: 30, fill: 'hsl(199 89% 48%)' },
+  { name: '6개월', value: 15, fill: 'hsl(142 76% 36%)' },
+  { name: '12개월', value: 10, fill: 'hsl(38 92% 50%)' },
 ];
 
 const Statistics = () => {
@@ -94,35 +112,70 @@ const Statistics = () => {
         
         <TabsContent value="members" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>월별 회원 현황</CardTitle>
+            <Card className="shadow-lg border-0 bg-gradient-to-br from-background to-muted/20">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5 text-primary" />
+                  월별 회원 현황
+                </CardTitle>
                 <CardDescription>{currentBusiness} 회원 변화 추이</CardDescription>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
+                <ChartContainer config={memberChartConfig} className="h-[350px]">
                   <BarChart data={memberData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="total" name="총 회원수" fill={CHART_COLORS.primary} />
-                    <Bar dataKey="active" name="활성 회원" fill={CHART_COLORS.success} />
-                    <Bar dataKey="pt" name="PT 회원" fill={CHART_COLORS.warning} />
-                    <Bar dataKey="inactive" name="휴면 회원" fill={CHART_COLORS.gray} />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" opacity={0.5} />
+                    <XAxis 
+                      dataKey="name" 
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+                    />
+                    <YAxis 
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+                    />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <ChartLegend content={<ChartLegendContent />} />
+                    <Bar 
+                      dataKey="total" 
+                      name="총 회원수" 
+                      fill="var(--color-total)" 
+                      radius={[4, 4, 0, 0]}
+                    />
+                    <Bar 
+                      dataKey="active" 
+                      name="활성 회원" 
+                      fill="var(--color-active)"
+                      radius={[4, 4, 0, 0]}
+                    />
+                    <Bar 
+                      dataKey="pt" 
+                      name="PT 회원" 
+                      fill="var(--color-pt)"
+                      radius={[4, 4, 0, 0]}
+                    />
+                    <Bar 
+                      dataKey="inactive" 
+                      name="휴면 회원" 
+                      fill="var(--color-inactive)"
+                      radius={[4, 4, 0, 0]}
+                    />
                   </BarChart>
-                </ResponsiveContainer>
+                </ChartContainer>
               </CardContent>
             </Card>
             
-            <Card>
-              <CardHeader>
-                <CardTitle>회원권 유형 분포</CardTitle>
+            <Card className="shadow-lg border-0 bg-gradient-to-br from-background to-muted/20">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="h-5 w-5 text-primary" />
+                  회원권 유형 분포
+                </CardTitle>
                 <CardDescription>현재 등록된 회원권 유형별 현황</CardDescription>
               </CardHeader>
               <CardContent className="flex justify-center">
-                <ResponsiveContainer width="100%" height={300}>
+                <ChartContainer config={{}} className="h-[350px]">
                   <PieChart>
                     <Pie
                       data={membershipTypeData}
@@ -130,46 +183,69 @@ const Statistics = () => {
                       cy="50%"
                       labelLine={false}
                       label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                      outerRadius={80}
+                      outerRadius={120}
+                      innerRadius={40}
                       fill="#8884d8"
                       dataKey="value"
+                      stroke="hsl(var(--background))"
+                      strokeWidth={2}
                     >
                       {membershipTypeData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.fill} />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(value) => `${value}명`} />
+                    <ChartTooltip 
+                      content={({ active, payload }) => {
+                        if (active && payload && payload.length) {
+                          const data = payload[0];
+                          return (
+                            <div className="rounded-lg border bg-background p-2 shadow-sm">
+                              <div className="grid gap-2">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-sm text-muted-foreground">{data.name}</span>
+                                  <span className="font-medium">{data.value}명</span>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
                   </PieChart>
-                </ResponsiveContainer>
+                </ChartContainer>
               </CardContent>
             </Card>
           </div>
           
-          <Card>
+          <Card className="shadow-lg border-0 bg-gradient-to-br from-background to-muted/20">
             <CardHeader>
-              <CardTitle>회원 요약</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Award className="h-5 w-5 text-primary" />
+                회원 요약
+              </CardTitle>
               <CardDescription>{currentBusiness} 회원 현황 세부사항</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                <div className="text-center p-4 border rounded-lg bg-blue-100/50">
-                  <div className="text-2xl font-bold text-blue-700">{currentMonthData.total}</div>
+                <div className="text-center p-6 border rounded-xl bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/20 dark:to-blue-900/20">
+                  <div className="text-3xl font-bold text-blue-700 dark:text-blue-400 mb-2">{currentMonthData.total}</div>
                   <div className="text-sm text-muted-foreground">총 회원 수</div>
                 </div>
-                <div className="text-center p-4 border rounded-lg bg-green-100/50">
-                  <div className="text-2xl font-bold text-green-700">{currentMonthData.active}</div>
+                <div className="text-center p-6 border rounded-xl bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-950/20 dark:to-green-900/20">
+                  <div className="text-3xl font-bold text-green-700 dark:text-green-400 mb-2">{currentMonthData.active}</div>
                   <div className="text-sm text-muted-foreground">활성 회원</div>
                 </div>
-                <div className="text-center p-4 border rounded-lg bg-amber-100/50">
-                  <div className="text-2xl font-bold text-amber-700">{currentMonthData.pt}</div>
+                <div className="text-center p-6 border rounded-xl bg-gradient-to-br from-amber-50 to-amber-100/50 dark:from-amber-950/20 dark:to-amber-900/20">
+                  <div className="text-3xl font-bold text-amber-700 dark:text-amber-400 mb-2">{currentMonthData.pt}</div>
                   <div className="text-sm text-muted-foreground">PT 회원</div>
                 </div>
-                <div className="text-center p-4 border rounded-lg bg-slate-100/50">
-                  <div className="text-2xl font-bold text-slate-700">{currentMonthData.inactive}</div>
+                <div className="text-center p-6 border rounded-xl bg-gradient-to-br from-slate-50 to-slate-100/50 dark:from-slate-950/20 dark:to-slate-900/20">
+                  <div className="text-3xl font-bold text-slate-700 dark:text-slate-400 mb-2">{currentMonthData.inactive}</div>
                   <div className="text-sm text-muted-foreground">휴면 회원</div>
                 </div>
-                <div className="text-center p-4 border rounded-lg bg-sky-100/50">
-                  <div className="text-2xl font-bold text-sky-700">32</div>
+                <div className="text-center p-6 border rounded-xl bg-gradient-to-br from-sky-50 to-sky-100/50 dark:from-sky-950/20 dark:to-sky-900/20">
+                  <div className="text-3xl font-bold text-sky-700 dark:text-sky-400 mb-2">32</div>
                   <div className="text-sm text-muted-foreground">신규 회원</div>
                 </div>
               </div>
@@ -178,52 +254,118 @@ const Statistics = () => {
         </TabsContent>
         
         <TabsContent value="revenue" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>월별 매출 현황</CardTitle>
+          <Card className="shadow-lg border-0 bg-gradient-to-br from-background to-muted/20">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2">
+                <DollarSign className="h-5 w-5 text-primary" />
+                월별 매출 현황
+              </CardTitle>
               <CardDescription>{currentBusiness} 매출 변화 추이</CardDescription>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={revenueData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <Tooltip formatter={(value) => `${Number(value).toLocaleString()}원`} />
-                  <Legend />
-                  <Bar dataKey="membership" name="회원권" fill={CHART_COLORS.primary} />
-                  <Bar dataKey="pt" name="PT 이용권" fill={CHART_COLORS.success} />
-                  <Bar dataKey="daily" name="일일권" fill={CHART_COLORS.warning} />
-                  <Bar dataKey="other" name="기타" fill={CHART_COLORS.purple} />
-                </BarChart>
-              </ResponsiveContainer>
+              <ChartContainer config={revenueChartConfig} className="h-[400px]">
+                <AreaChart data={revenueData}>
+                  <defs>
+                    <linearGradient id="membership" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0.1}/>
+                    </linearGradient>
+                    <linearGradient id="pt" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(142 76% 36%)" stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor="hsl(142 76% 36%)" stopOpacity={0.1}/>
+                    </linearGradient>
+                    <linearGradient id="daily" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(38 92% 50%)" stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor="hsl(38 92% 50%)" stopOpacity={0.1}/>
+                    </linearGradient>
+                    <linearGradient id="other" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(262 83% 58%)" stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor="hsl(262 83% 58%)" stopOpacity={0.1}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" opacity={0.5} />
+                  <XAxis 
+                    dataKey="month" 
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+                  />
+                  <YAxis 
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+                    tickFormatter={(value) => `${(value / 1000000).toFixed(0)}M`}
+                  />
+                  <ChartTooltip 
+                    content={<ChartTooltipContent 
+                      formatter={(value) => `${Number(value).toLocaleString()}원`}
+                    />} 
+                  />
+                  <ChartLegend content={<ChartLegendContent />} />
+                  <Area 
+                    type="monotone" 
+                    dataKey="membership" 
+                    stackId="1" 
+                    stroke="hsl(var(--primary))" 
+                    fill="url(#membership)" 
+                    strokeWidth={2}
+                  />
+                  <Area 
+                    type="monotone" 
+                    dataKey="pt" 
+                    stackId="1" 
+                    stroke="hsl(142 76% 36%)" 
+                    fill="url(#pt)" 
+                    strokeWidth={2}
+                  />
+                  <Area 
+                    type="monotone" 
+                    dataKey="daily" 
+                    stackId="1" 
+                    stroke="hsl(38 92% 50%)" 
+                    fill="url(#daily)" 
+                    strokeWidth={2}
+                  />
+                  <Area 
+                    type="monotone" 
+                    dataKey="other" 
+                    stackId="1" 
+                    stroke="hsl(262 83% 58%)" 
+                    fill="url(#other)" 
+                    strokeWidth={2}
+                  />
+                </AreaChart>
+              </ChartContainer>
             </CardContent>
           </Card>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>수입 요약 (5월)</CardTitle>
+            <Card className="shadow-lg border-0 bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-950/20 dark:to-green-900/20">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-2 text-green-700 dark:text-green-400">
+                  <TrendingUp className="h-5 w-5" />
+                  수입 요약 (5월)
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-background/50">
                     <div className="text-sm font-medium">총 매출</div>
-                    <div className="font-bold">{totalCurrentRevenue.toLocaleString()}원</div>
+                    <div className="font-bold text-lg">{totalCurrentRevenue.toLocaleString()}원</div>
                   </div>
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-background/30">
                     <div className="text-sm font-medium">회원권 매출</div>
                     <div className="font-bold">{currentRevenue.membership.toLocaleString()}원 ({Math.round((currentRevenue.membership / totalCurrentRevenue) * 100)}%)</div>
                   </div>
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-background/30">
                     <div className="text-sm font-medium">PT 이용권 매출</div>
                     <div className="font-bold">{currentRevenue.pt.toLocaleString()}원 ({Math.round((currentRevenue.pt / totalCurrentRevenue) * 100)}%)</div>
                   </div>
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-background/30">
                     <div className="text-sm font-medium">일일권 매출</div>
                     <div className="font-bold">{currentRevenue.daily.toLocaleString()}원 ({Math.round((currentRevenue.daily / totalCurrentRevenue) * 100)}%)</div>
                   </div>
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-background/30">
                     <div className="text-sm font-medium">기타 매출</div>
                     <div className="font-bold">{currentRevenue.other.toLocaleString()}원 ({Math.round((currentRevenue.other / totalCurrentRevenue) * 100)}%)</div>
                   </div>
@@ -231,29 +373,32 @@ const Statistics = () => {
               </CardContent>
             </Card>
             
-            <Card>
-              <CardHeader>
-                <CardTitle>지출 요약 (5월)</CardTitle>
+            <Card className="shadow-lg border-0 bg-gradient-to-br from-red-50 to-red-100/50 dark:from-red-950/20 dark:to-red-900/20">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-2 text-red-700 dark:text-red-400">
+                  <TrendingDown className="h-5 w-5" />
+                  지출 요약 (5월)
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-background/50">
                     <div className="text-sm font-medium">총 지출</div>
-                    <div className="font-bold text-red-400">4,850,000원</div>
+                    <div className="font-bold text-lg text-red-600 dark:text-red-400">4,850,000원</div>
                   </div>
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-background/30">
                     <div className="text-sm font-medium">인건비</div>
                     <div className="font-bold">3,200,000원 (66.0%)</div>
                   </div>
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-background/30">
                     <div className="text-sm font-medium">임대료</div>
                     <div className="font-bold">1,000,000원 (20.6%)</div>
                   </div>
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-background/30">
                     <div className="text-sm font-medium">수도/전기</div>
                     <div className="font-bold">350,000원 (7.2%)</div>
                   </div>
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-background/30">
                     <div className="text-sm font-medium">기타 경비</div>
                     <div className="font-bold">300,000원 (6.2%)</div>
                   </div>
@@ -264,43 +409,46 @@ const Statistics = () => {
         </TabsContent>
         
         <TabsContent value="staff" className="space-y-6">
-          <Card>
+          <Card className="shadow-lg border-0 bg-gradient-to-br from-background to-muted/20">
             <CardHeader>
-              <CardTitle>직원 실적</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5 text-primary" />
+                직원 실적
+              </CardTitle>
               <CardDescription>직원별 PT 수업 및 매출 현황</CardDescription>
             </CardHeader>
             <CardContent>
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead>직원명</TableHead>
-                    <TableHead className="text-center">PT 수업 수</TableHead>
-                    <TableHead className="text-center">매출</TableHead>
-                    <TableHead className="text-center">평점</TableHead>
-                    <TableHead className="text-center">신규 회원</TableHead>
-                    <TableHead className="text-center">회원 유지율</TableHead>
-                    <TableHead className="text-center">상태</TableHead>
+                  <TableRow className="border-border/50">
+                    <TableHead className="font-semibold">직원명</TableHead>
+                    <TableHead className="text-center font-semibold">PT 수업 수</TableHead>
+                    <TableHead className="text-center font-semibold">매출</TableHead>
+                    <TableHead className="text-center font-semibold">평점</TableHead>
+                    <TableHead className="text-center font-semibold">신규 회원</TableHead>
+                    <TableHead className="text-center font-semibold">회원 유지율</TableHead>
+                    <TableHead className="text-center font-semibold">상태</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {staffData.map((staff) => (
-                    <TableRow key={staff.name}>
+                    <TableRow key={staff.name} className="border-border/50 hover:bg-muted/30">
                       <TableCell className="font-medium">{staff.name}</TableCell>
                       <TableCell className="text-center">{staff.pt}회</TableCell>
-                      <TableCell className="text-center font-semibold text-green-500">
+                      <TableCell className="text-center font-semibold text-green-600 dark:text-green-400">
                         {staff.revenue.toLocaleString()}원
                       </TableCell>
                       <TableCell className="text-center">
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-yellow-100 text-yellow-600">
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 font-medium">
                           ⭐ {staff.rating}
                         </span>
                       </TableCell>
-                      <TableCell className="text-center">{staff.newMembers}명</TableCell>
+                      <TableCell className="text-center font-medium">{staff.newMembers}명</TableCell>
                       <TableCell className="text-center">
-                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs ${
-                          staff.retentionRate >= 80 ? 'bg-green-100 text-green-600' : 
-                          staff.retentionRate >= 75 ? 'bg-yellow-100 text-yellow-600' : 
-                          'bg-red-100 text-red-600'
+                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                          staff.retentionRate >= 80 ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 
+                          staff.retentionRate >= 75 ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' : 
+                          'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
                         }`}>
                           {staff.retentionRate}%
                         </span>
@@ -308,6 +456,7 @@ const Statistics = () => {
                       <TableCell className="text-center">
                         <Badge 
                           variant={staff.status === '정상' ? 'default' : staff.status === '휴직' ? 'secondary' : 'destructive'}
+                          className="font-medium"
                         >
                           {staff.status}
                         </Badge>

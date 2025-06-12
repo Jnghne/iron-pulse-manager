@@ -154,8 +154,9 @@ const MemberCreate = () => {
         id: newMemberId,
         name: data.name,
         gender: data.gender,
-        birthDate: data.birthDate ? format(data.birthDate, "yyyy-MM-dd") : "",
+        birthDate: data.birthDate ? format(data.birthDate, "yyyy-MM-dd") : undefined,
         phone: data.phoneNumber,
+        phoneNumber: data.phoneNumber, // Member 인터페이스에 있는 phoneNumber도 설정
         email: data.email || undefined,
         address: `${data.address.address1} ${data.address.address2 || ''}`.trim(),
         memberType: "일반",
@@ -164,6 +165,7 @@ const MemberCreate = () => {
         attendanceRate: 0,
         smsConsent: data.smsConsent,
         memberNotes: data.memberNotes || undefined,
+        registrationPath: data.registrationPath || undefined,
         // --- 나머지 Member 타입 필드들은 mockData에 따라 기본값 또는 undefined로 설정 ---
         expiryDate: undefined,
         ptRemaining: undefined,
@@ -186,7 +188,7 @@ const MemberCreate = () => {
         lockerInfo: undefined,
         otherProducts: undefined,
         suspensionRecords: undefined,
-        trainerNotes: data.memberNotes || undefined, // 이전 코드에서 memberNotes로 되어있던 것을 trainerNotes로 유지하거나, Member 타입 정의와 일치시킬 필요가 있습니다. 여기서는 일단 trainerNotes로 두겠습니다.
+        trainerNotes: data.memberNotes || undefined
       };
 
       mockMembers.unshift(newMember);

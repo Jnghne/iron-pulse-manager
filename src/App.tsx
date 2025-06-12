@@ -28,6 +28,8 @@ import MessageSystem from "./pages/MessageSystem";
 import Calendar from "./pages/Calendar";
 import Statistics from "./pages/Statistics";
 import TrainerManagement from "./pages/TrainerManagement";
+import StaffManagement from "./pages/staff";
+import StaffDetail from "./pages/staff/StaffDetail";
 import ProductListPage from "./pages/products/ProductListPage";
 import Community from "./pages/Community";
 import CommunityBoard from "./pages/community/CommunityBoard";
@@ -69,6 +71,8 @@ const App = () => (
             <Route path="calendar" element={<Calendar />} />
             <Route path="statistics" element={<Statistics />} />
             <Route path="trainers" element={<TrainerManagement />} />
+            <Route path="staff" element={<StaffManagement />} />
+            <Route path="staff/:id" element={<StaffDetail />} />
             <Route path="my-page" element={<MyPage />} />
             <Route path="community" element={<Community />} />
             <Route path="community/board" element={<CommunityBoard />} />

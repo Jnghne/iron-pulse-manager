@@ -86,8 +86,8 @@ export function SidebarNav({ className, ...props }: SidebarNavProps) {
       icon: <BarChart3 className="h-5 w-5" />,
     },
     {
-      title: "트레이너 관리",
-      href: "/trainers",
+      title: "직원 관리",
+      href: "/staff",
       icon: <UserPlus className="h-5 w-5" />,
     },
   ]

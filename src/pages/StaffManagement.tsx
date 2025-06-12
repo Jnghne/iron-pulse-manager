@@ -10,8 +10,39 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserPlus, Search, Eye, Check, X, Phone, Mail, Calendar, Users } from "lucide-react";
 
+// 직원 타입 정의
+interface Staff {
+  id: string;
+  name: string;
+  phone: string;
+  email: string;
+  address: string;
+  account: string;
+  workHours: string;
+  memberCount: number;
+  revenue: number;
+  status: string;
+  approvalDate: string;
+  joinDate: string;
+}
+
+// 가입 요청 타입 정의
+interface JoinRequest {
+  id: string;
+  name: string;
+  phone: string;
+  email: string;
+  address: string;
+  account: string;
+  workHours: string;
+  status: string;
+  joinDate: string;
+  experience: string;
+  certification: string;
+}
+
 // Mock data for staff
-const staffMock = [
+const staffMock: Staff[] = [
   {
     id: "ST001",
     name: "김직원",
@@ -57,7 +88,7 @@ const staffMock = [
 ];
 
 // Mock data for join requests
-const joinRequestsMock = [
+const joinRequestsMock: JoinRequest[] = [
   {
     id: "JR001",
     name: "정신입",
@@ -100,22 +131,22 @@ const joinRequestsMock = [
 ];
 
 const StaffManagement = () => {
-  const [staff, setStaff] = useState(staffMock);
-  const [joinRequests, setJoinRequests] = useState(joinRequestsMock);
+  const [staff, setStaff] = useState<Staff[]>(staffMock);
+  const [joinRequests, setJoinRequests] = useState<JoinRequest[]>(joinRequestsMock);
   const [searchQuery, setSearchQuery] = useState("");
   const [joinSearchQuery, setJoinSearchQuery] = useState("");
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [joinDetailDialogOpen, setJoinDetailDialogOpen] = useState(false);
-  const [selectedStaff, setSelectedStaff] = useState<any>(null);
-  const [selectedJoinRequest, setSelectedJoinRequest] = useState<any>(null);
+  const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
+  const [selectedJoinRequest, setSelectedJoinRequest] = useState<JoinRequest | null>(null);
   const [activeTab, setActiveTab] = useState("info");
 
-  const handleViewStaffDetails = (staffMember: any) => {
+  const handleViewStaffDetails = (staffMember: Staff) => {
     setSelectedStaff(staffMember);
     setDetailDialogOpen(true);
   };
 
-  const handleViewJoinDetails = (joinRequest: any) => {
+  const handleViewJoinDetails = (joinRequest: JoinRequest) => {
     setSelectedJoinRequest(joinRequest);
     setJoinDetailDialogOpen(true);
   };
@@ -528,7 +559,7 @@ const StaffManagement = () => {
                   </Button>
                   <Button 
                     onClick={() => handleApproveStaff(selectedJoinRequest.id)}
-                    className="gap-2 bg-gym-primary hover:bg-gym-primary/90"
+                    className="gap-2 bg-primary hover:bg-primary/90"
                   >
                     <Check className="h-4 w-4" />
                     승인

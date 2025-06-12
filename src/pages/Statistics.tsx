@@ -32,15 +32,34 @@ const staffData = [
   { name: '최직원', pt: 25, revenue: 2500000, rating: 4.5, newMembers: 6, retentionRate: 75, status: '휴직' },
 ];
 
+// 통계 UI에 적합한 색상 팔레트
+const CHART_COLORS = {
+  primary: '#2563eb',    // 기본 파란색
+  success: '#16a34a',    // 초록색
+  warning: '#f59e0b',    // 주황색
+  danger: '#dc2626',     // 빨간색
+  info: '#0ea5e9',       // 하늘색
+  purple: '#9333ea',     // 보라색
+  gray: '#6b7280',       // 회색
+};
+
 const membershipTypeData = [
-  { name: '1개월', value: 45, fill: '#FFE5E5' },
-  { name: '3개월', value: 30, fill: '#E5F5FF' },
-  { name: '6개월', value: 15, fill: '#E5FFE5' },
-  { name: '12개월', value: 10, fill: '#FFF5E5' },
+  { name: '1개월', value: 45, fill: CHART_COLORS.primary },
+  { name: '3개월', value: 30, fill: CHART_COLORS.info },
+  { name: '6개월', value: 15, fill: CHART_COLORS.success },
+  { name: '12개월', value: 10, fill: CHART_COLORS.warning },
 ];
 
-// Pastel colors for charts
-const PASTEL_COLORS = ['#FFE5E5', '#E5F5FF', '#E5FFE5', '#FFF5E5', '#F5E5FF'];
+// 차트에 사용할 색상 배열
+const CHART_COLOR_ARRAY = [
+  CHART_COLORS.primary,
+  CHART_COLORS.success,
+  CHART_COLORS.warning, 
+  CHART_COLORS.danger,
+  CHART_COLORS.info,
+  CHART_COLORS.purple,
+  CHART_COLORS.gray,
+];
 
 const Statistics = () => {
   // 현재 월 데이터
@@ -88,10 +107,10 @@ const Statistics = () => {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="total" name="총 회원수" fill="#FFE5E5" />
-                    <Bar dataKey="active" name="활성 회원" fill="#E5FFE5" />
-                    <Bar dataKey="pt" name="PT 회원" fill="#FFF5E5" />
-                    <Bar dataKey="inactive" name="휴면 회원" fill="#F5E5FF" />
+                    <Bar dataKey="total" name="총 회원수" fill={CHART_COLORS.primary} />
+                    <Bar dataKey="active" name="활성 회원" fill={CHART_COLORS.success} />
+                    <Bar dataKey="pt" name="PT 회원" fill={CHART_COLORS.warning} />
+                    <Bar dataKey="inactive" name="휴면 회원" fill={CHART_COLORS.gray} />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -133,24 +152,24 @@ const Statistics = () => {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                <div className="text-center p-4 border rounded-lg bg-pink-50/50">
-                  <div className="text-2xl font-bold">{currentMonthData.total}</div>
+                <div className="text-center p-4 border rounded-lg bg-blue-100/50">
+                  <div className="text-2xl font-bold text-blue-700">{currentMonthData.total}</div>
                   <div className="text-sm text-muted-foreground">총 회원 수</div>
                 </div>
-                <div className="text-center p-4 border rounded-lg bg-green-50/50">
-                  <div className="text-2xl font-bold text-green-500">{currentMonthData.active}</div>
+                <div className="text-center p-4 border rounded-lg bg-green-100/50">
+                  <div className="text-2xl font-bold text-green-700">{currentMonthData.active}</div>
                   <div className="text-sm text-muted-foreground">활성 회원</div>
                 </div>
-                <div className="text-center p-4 border rounded-lg bg-yellow-50/50">
-                  <div className="text-2xl font-bold text-yellow-500">{currentMonthData.pt}</div>
+                <div className="text-center p-4 border rounded-lg bg-amber-100/50">
+                  <div className="text-2xl font-bold text-amber-700">{currentMonthData.pt}</div>
                   <div className="text-sm text-muted-foreground">PT 회원</div>
                 </div>
-                <div className="text-center p-4 border rounded-lg bg-red-50/50">
-                  <div className="text-2xl font-bold text-red-400">{currentMonthData.inactive}</div>
+                <div className="text-center p-4 border rounded-lg bg-slate-100/50">
+                  <div className="text-2xl font-bold text-slate-700">{currentMonthData.inactive}</div>
                   <div className="text-sm text-muted-foreground">휴면 회원</div>
                 </div>
-                <div className="text-center p-4 border rounded-lg bg-blue-50/50">
-                  <div className="text-2xl font-bold text-blue-500">32</div>
+                <div className="text-center p-4 border rounded-lg bg-sky-100/50">
+                  <div className="text-2xl font-bold text-sky-700">32</div>
                   <div className="text-sm text-muted-foreground">신규 회원</div>
                 </div>
               </div>
@@ -172,10 +191,10 @@ const Statistics = () => {
                   <YAxis />
                   <Tooltip formatter={(value) => `${Number(value).toLocaleString()}원`} />
                   <Legend />
-                  <Bar dataKey="membership" name="회원권" fill="#FFE5E5" />
-                  <Bar dataKey="pt" name="PT 이용권" fill="#E5FFE5" />
-                  <Bar dataKey="daily" name="일일권" fill="#FFF5E5" />
-                  <Bar dataKey="other" name="기타" fill="#F5E5FF" />
+                  <Bar dataKey="membership" name="회원권" fill={CHART_COLORS.primary} />
+                  <Bar dataKey="pt" name="PT 이용권" fill={CHART_COLORS.success} />
+                  <Bar dataKey="daily" name="일일권" fill={CHART_COLORS.warning} />
+                  <Bar dataKey="other" name="기타" fill={CHART_COLORS.purple} />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>

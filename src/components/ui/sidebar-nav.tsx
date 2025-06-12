@@ -94,6 +94,17 @@ export function SidebarNav({ className, ...props }: SidebarNavProps) {
 
   const items = [...defaultItems, ...(isOwner ? ownerOnlyItems : [])]
 
+  // 현재 경로가 특정 메뉴의 하위 경로인지 확인하는 함수
+  const isPathActive = (itemPath: string) => {
+    // 루트 경로는 정확히 일치할 때만 활성화
+    if (itemPath === "/" || itemPath === "/dashboard" || itemPath === "/trainer-dashboard") {
+      return pathname === itemPath;
+    }
+    
+    // 나머지 경로는 시작 부분이 일치하면 활성화
+    return pathname.startsWith(itemPath);
+  };
+
   return (
     <nav 
       className={cn(
@@ -109,7 +120,7 @@ export function SidebarNav({ className, ...props }: SidebarNavProps) {
           to={item.href} 
           className="w-full"
         >
-          <SidebarItem active={pathname === item.href}>
+          <SidebarItem active={isPathActive(item.href)}>
             {item.icon}
             {!collapsed && <span className="ml-3">{item.title}</span>}
           </SidebarItem>

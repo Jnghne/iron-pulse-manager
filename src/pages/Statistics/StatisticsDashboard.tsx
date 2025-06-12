@@ -22,7 +22,6 @@ export const StatisticsDashboard = () => {
             <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               통계 대시보드
             </h1>
-            <p className="text-lg text-muted-foreground">{currentBusiness}의 운영 현황을 확인합니다.</p>
           </div>
         </div>
         

@@ -77,7 +77,6 @@ export const MemberSummary = ({ member }: MemberSummaryProps) => {
               ))}
             </div>
 
-            {/* 출석률 섹션 제거됨 */}
           </div>
 
           {/* 구분선 (모바일에서만 표시) */}

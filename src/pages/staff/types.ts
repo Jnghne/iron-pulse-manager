@@ -15,6 +15,7 @@ export interface Staff {
   workHours?: string;
   revenue?: number;
   isRegistration?: boolean;
+  note?: string;
 }
 
 export interface StaffRegistration {

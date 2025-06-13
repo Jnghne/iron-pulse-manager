@@ -13,6 +13,8 @@ export interface Staff {
   workHours?: string;
   memo?: string;
   revenue?: number;
+  gender?: string;
+  note?: string;
 }
 
 // 직원 가입 요청 타입 정의
@@ -53,7 +55,9 @@ export const staffMockData: Staff[] = [
     account: "국민은행 123-456-78910",
     workHours: "09:00-18:00",
     memo: "",
-    revenue: 2400000
+    revenue: 2400000,
+    gender: "male",
+    note: "",
   },
   {
     id: "ST002",
@@ -68,7 +72,9 @@ export const staffMockData: Staff[] = [
     account: "신한은행 123-456-78910",
     workHours: "13:00-22:00",
     memo: "",
-    revenue: 1600000
+    revenue: 1600000,
+    gender: "female",
+    note: "",
   },
   {
     id: "ST003",
@@ -83,8 +89,10 @@ export const staffMockData: Staff[] = [
     account: "우리은행 123-456-78910",
     workHours: "10:00-19:00",
     memo: "",
-    revenue: 1800000
-  },
+    revenue: 1800000,
+    gender: "female",
+    note: "",
+    },
   {
     id: "ST004",
     name: "최준호",
@@ -98,7 +106,9 @@ export const staffMockData: Staff[] = [
     account: "하나은행 123-456-78910",
     workHours: "06:00-15:00",
     memo: "",
-    revenue: 0
+    revenue: 0,
+    gender: "male",
+    note: "",
   },
   {
     id: "REG001", // 가입 요청 ID를 그대로 사용
@@ -113,7 +123,9 @@ export const staffMockData: Staff[] = [
     account: "기업은행 123-456-78910",
     workHours: "09:00-18:00",
     memo: "",
-    revenue: 0
+    revenue: 0,
+    gender: "M",
+    note: "",
   },
   {
     id: "REG002", // 가입 요청 ID를 그대로 사용
@@ -128,7 +140,9 @@ export const staffMockData: Staff[] = [
     account: "SC은행 123-456-78910",
     workHours: "12:00-21:00",
     memo: "",
-    revenue: 0
+    revenue: 0,
+    gender: "male",
+    note: "",
   }
 ];
 

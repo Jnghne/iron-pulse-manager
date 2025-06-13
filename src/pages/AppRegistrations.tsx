@@ -1,3 +1,4 @@
+
 import { useState, memo, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -160,8 +161,8 @@ const AppRegistrations = () => {
         <div className="bg-white rounded-lg p-6 border-white shadow-lg">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-orange-600">승인 대기</p>
-              <p className="text-3xl font-bold text-orange-700">{pendingCount}</p>
+              <p className="text-sm font-medium text-gray-900">승인 대기</p>
+              <p className="text-3xl font-bold text-gray-900">{pendingCount}</p>
             </div>
             <div className="p-3 bg-orange-100 rounded-lg">
               <Calendar className="h-6 w-6 text-orange-600" />
@@ -172,8 +173,8 @@ const AppRegistrations = () => {
         <div className="bg-white rounded-lg p-6 border-white shadow-lg">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-emerald-600">승인 완료</p>
-              <p className="text-3xl font-bold text-emerald-700">{approvedCount}</p>
+              <p className="text-sm font-medium text-gray-900">승인 완료</p>
+              <p className="text-3xl font-bold text-gray-900">{approvedCount}</p>
             </div>
             <div className="p-3 bg-emerald-100 rounded-lg">
               <Check className="h-6 w-6 text-emerald-600" />
@@ -184,8 +185,8 @@ const AppRegistrations = () => {
         <div className="bg-white rounded-lg p-6 border-white shadow-lg">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-red-600">승인 거절</p>
-              <p className="text-3xl font-bold text-red-700">{rejectedCount}</p>
+              <p className="text-sm font-medium text-gray-900">승인 거절</p>
+              <p className="text-3xl font-bold text-gray-900">{rejectedCount}</p>
             </div>
             <div className="p-3 bg-red-100 rounded-lg">
               <X className="h-6 w-6 text-red-600" />

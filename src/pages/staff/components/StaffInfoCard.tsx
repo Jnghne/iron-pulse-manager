@@ -73,14 +73,6 @@ export const StaffInfoCard = ({ staff }: StaffInfoCardProps) => {
           <div className="space-y-4">
             <div className="flex items-center justify-between py-3 border-b border-gray-100">
               <div className="flex items-center gap-3">
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-medium text-muted-foreground">입사일</span>
-              </div>
-              <span className="font-semibold">{staff.hireDate}</span>
-            </div>
-            
-            <div className="flex items-center justify-between py-3 border-b border-gray-100">
-              <div className="flex items-center gap-3">
                 <span className="text-sm font-medium text-muted-foreground">상태</span>
               </div>
               <Badge 

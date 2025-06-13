@@ -31,6 +31,7 @@ import TrainerManagement from "./pages/TrainerManagement";
 import StaffManagement from "./pages/staff/Staff";
 import StaffDetail from "./pages/staff/StaffDetail";
 import ProductListPage from "./pages/products/ProductListPage";
+import AppRegistrations from "./pages/AppRegistrations";
 import Community from "./pages/Community";
 import CommunityBoard from "./pages/community/CommunityBoard";
 import PostDetail from "./pages/community/PostDetail";
@@ -73,6 +74,7 @@ const App = () => (
             <Route path="trainers" element={<TrainerManagement />} />
             <Route path="staff" element={<StaffManagement />} />
             <Route path="staff/:id" element={<StaffDetail />} />
+            <Route path="app-registrations" element={<AppRegistrations />} />
             <Route path="my-page" element={<MyPage />} />
             <Route path="community" element={<Community />} />
             <Route path="community/board" element={<CommunityBoard />} />

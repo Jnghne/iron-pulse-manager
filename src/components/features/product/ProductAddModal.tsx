@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -21,9 +22,11 @@ import {
   DialogTitle,
   DialogFooter,
   DialogClose,
+  DialogDescription,
 } from '@/components/ui/dialog';
 import { ProductFormValues, ProductType, Product } from '@/types/product';
 import { toast } from '@/components/ui/use-toast';
+import { Package, Calendar, Users, Dumbbell, Settings } from 'lucide-react';
 
 // Zod 스키마 (ProductFormPage.tsx와 동일하게 사용)
 const productFormSchema = z.object({
@@ -43,15 +46,43 @@ const productFormSchema = z.object({
 interface ProductAddModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onProductAdd: (newProduct: Product) => void; // 실제로는 API 호출 후 반환된 Product 객체
+  onProductAdd: (newProduct: Product) => void;
 }
+
+const getProductTypeIcon = (type: ProductType) => {
+  switch (type) {
+    case ProductType.MEMBERSHIP:
+      return <Calendar className="h-4 w-4" />;
+    case ProductType.PT:
+      return <Dumbbell className="h-4 w-4" />;
+    case ProductType.LOCKER:
+      return <Settings className="h-4 w-4" />;
+    default:
+      return <Package className="h-4 w-4" />;
+  }
+};
+
+const getProductTypeName = (type: ProductType) => {
+  switch (type) {
+    case ProductType.MEMBERSHIP:
+      return '회원권';
+    case ProductType.PT:
+      return 'PT';
+    case ProductType.LOCKER:
+      return '락커';
+    case ProductType.OTHER:
+      return '기타';
+    default:
+      return '';
+  }
+};
 
 export const ProductAddModal: React.FC<ProductAddModalProps> = ({ isOpen, onClose, onProductAdd }) => {
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productFormSchema),
     defaultValues: {
       name: '',
-      type: undefined, // ProductType.MEMBERSHIP,
+      type: undefined,
       price: '',
       description: '',
       durationDays: '',
@@ -62,7 +93,7 @@ export const ProductAddModal: React.FC<ProductAddModalProps> = ({ isOpen, onClos
 
   useEffect(() => {
     if (isOpen) {
-      form.reset(); // 모달이 열릴 때마다 폼 리셋
+      form.reset();
     }
   }, [isOpen, form]);
 
@@ -75,7 +106,6 @@ export const ProductAddModal: React.FC<ProductAddModalProps> = ({ isOpen, onClos
     const numericTotalSessions = data.totalSessions ? parseInt(data.totalSessions) : undefined;
 
     try {
-      // 임시 ID 생성 (실제로는 API 응답에서 ID를 받음)
       const newProduct: Product = {
         id: `prod_${Date.now().toString()}`,
         ...data,
@@ -86,12 +116,12 @@ export const ProductAddModal: React.FC<ProductAddModalProps> = ({ isOpen, onClos
         updatedAt: new Date(),
       };
       
-      onProductAdd(newProduct); // 부모 컴포넌트로 새 상품 정보 전달
+      onProductAdd(newProduct);
       toast({
         title: '상품이 성공적으로 등록되었습니다.',
         description: data.name,
       });
-      onClose(); // 모달 닫기
+      onClose();
     } catch (error) {
       toast({
         title: '오류 발생',
@@ -105,91 +135,181 @@ export const ProductAddModal: React.FC<ProductAddModalProps> = ({ isOpen, onClos
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[650px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>새 상품 추가</DialogTitle>
+          <DialogTitle className="text-xl font-semibold flex items-center gap-2">
+            <Package className="h-5 w-5" />
+            새 상품 추가
+          </DialogTitle>
+          <DialogDescription>
+            새로운 상품의 정보를 입력하여 등록하세요.
+          </DialogDescription>
         </DialogHeader>
+        
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 py-4">
-          <div>
-            <Label htmlFor="name">상품명</Label>
-            <Input id="name" {...form.register('name')} />
-            {form.formState.errors.name && (
-              <p className="text-sm text-red-500 mt-1">{form.formState.errors.name.message}</p>
-            )}
+          {/* 기본 정보 섹션 */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium text-gray-900 border-b pb-2">기본 정보</h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="name" className="text-sm font-medium">
+                  상품명 <span className="text-red-500">*</span>
+                </Label>
+                <Input 
+                  id="name" 
+                  {...form.register('name')} 
+                  placeholder="예: 헬스 3개월 회원권"
+                  className={form.formState.errors.name ? "border-red-500" : ""}
+                />
+                {form.formState.errors.name && (
+                  <p className="text-sm text-red-500">{form.formState.errors.name.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="type" className="text-sm font-medium">
+                  상품 유형 <span className="text-red-500">*</span>
+                </Label>
+                <Select
+                  value={form.watch('type')}
+                  onValueChange={(value) => form.setValue('type', value as ProductType, { shouldValidate: true })}
+                >
+                  <SelectTrigger 
+                    id="type" 
+                    className={form.formState.errors.type ? "border-red-500" : ""}
+                  >
+                    <SelectValue placeholder="상품 유형 선택" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.values(ProductType).map((type) => (
+                      <SelectItem key={type} value={type}>
+                        <div className="flex items-center gap-2">
+                          {getProductTypeIcon(type)}
+                          {getProductTypeName(type)}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {form.formState.errors.type && (
+                  <p className="text-sm text-red-500">{form.formState.errors.type.message}</p>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="price" className="text-sm font-medium">
+                가격 <span className="text-red-500">*</span>
+              </Label>
+              <div className="relative">
+                <Input 
+                  id="price" 
+                  type="number" 
+                  {...form.register('price')} 
+                  placeholder="50000" 
+                  className={`pr-8 ${form.formState.errors.price ? "border-red-500" : ""}`}
+                />
+                <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">원</span>
+              </div>
+              {form.formState.errors.price && (
+                <p className="text-sm text-red-500">{form.formState.errors.price.message}</p>
+              )}
+            </div>
           </div>
 
-          <div>
-            <Label htmlFor="type">상품 유형</Label>
-            <Select
-              value={form.watch('type')}
-              onValueChange={(value) => form.setValue('type', value as ProductType, { shouldValidate: true })}
-            >
-              <SelectTrigger id="type">
-                <SelectValue placeholder="상품 유형 선택" />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.values(ProductType).map((type) => (
-                  <SelectItem key={type} value={type}>
-                    {type === ProductType.MEMBERSHIP && '회원권'}
-                    {type === ProductType.PT && 'PT'}
-                    {type === ProductType.LOCKER && '락커'}
-                    {type === ProductType.OTHER && '기타'}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {form.formState.errors.type && (
-              <p className="text-sm text-red-500 mt-1">{form.formState.errors.type.message}</p>
-            )}
-          </div>
+          {/* 상품별 옵션 섹션 */}
+          {selectedProductType && (
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium text-gray-900 border-b pb-2">상품 옵션</h3>
+              
+              {selectedProductType === ProductType.MEMBERSHIP && (
+                <div className="space-y-2">
+                  <Label htmlFor="durationDays" className="text-sm font-medium flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
+                    이용 기간 (일)
+                  </Label>
+                  <div className="relative">
+                    <Input 
+                      id="durationDays" 
+                      type="number" 
+                      {...form.register('durationDays')} 
+                      placeholder="30" 
+                      className={`pr-8 ${form.formState.errors.durationDays ? "border-red-500" : ""}`}
+                    />
+                    <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">일</span>
+                  </div>
+                  {form.formState.errors.durationDays && (
+                    <p className="text-sm text-red-500">{form.formState.errors.durationDays.message}</p>
+                  )}
+                </div>
+              )}
 
-          <div>
-            <Label htmlFor="price">가격</Label>
-            <Input id="price" type="number" {...form.register('price')} placeholder="예: 50000" />
-            {form.formState.errors.price && (
-              <p className="text-sm text-red-500 mt-1">{form.formState.errors.price.message}</p>
-            )}
-          </div>
-          
-          {selectedProductType === ProductType.MEMBERSHIP && (
-            <div>
-              <Label htmlFor="durationDays">기간 (일)</Label>
-              <Input id="durationDays" type="number" {...form.register('durationDays')} placeholder="예: 30 (30일)" />
-              {form.formState.errors.durationDays && (
-                <p className="text-sm text-red-500 mt-1">{form.formState.errors.durationDays.message}</p>
+              {selectedProductType === ProductType.PT && (
+                <div className="space-y-2">
+                  <Label htmlFor="totalSessions" className="text-sm font-medium flex items-center gap-2">
+                    <Dumbbell className="h-4 w-4" />
+                    총 이용 횟수
+                  </Label>
+                  <div className="relative">
+                    <Input 
+                      id="totalSessions" 
+                      type="number" 
+                      {...form.register('totalSessions')} 
+                      placeholder="10" 
+                      className={`pr-8 ${form.formState.errors.totalSessions ? "border-red-500" : ""}`}
+                    />
+                    <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">회</span>
+                  </div>
+                  {form.formState.errors.totalSessions && (
+                    <p className="text-sm text-red-500">{form.formState.errors.totalSessions.message}</p>
+                  )}
+                </div>
               )}
             </div>
           )}
 
-          {selectedProductType === ProductType.PT && (
-            <div>
-              <Label htmlFor="totalSessions">총 횟수</Label>
-              <Input id="totalSessions" type="number" {...form.register('totalSessions')} placeholder="예: 10 (10회)" />
-              {form.formState.errors.totalSessions && (
-                <p className="text-sm text-red-500 mt-1">{form.formState.errors.totalSessions.message}</p>
-              )}
+          {/* 추가 정보 섹션 */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium text-gray-900 border-b pb-2">추가 정보</h3>
+            
+            <div className="space-y-2">
+              <Label htmlFor="description" className="text-sm font-medium">
+                상품 설명
+              </Label>
+              <Textarea 
+                id="description" 
+                {...form.register('description')} 
+                placeholder="상품에 대한 자세한 설명을 입력하세요."
+                rows={3}
+              />
             </div>
-          )}
 
-          <div>
-            <Label htmlFor="description">상품 설명 (선택)</Label>
-            <Textarea id="description" {...form.register('description')} placeholder="상품에 대한 설명을 입력하세요." />
+            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+              <div className="space-y-1">
+                <Label htmlFor="isActive" className="text-sm font-medium">
+                  상품 활성화
+                </Label>
+                <p className="text-xs text-gray-500">
+                  비활성화된 상품은 고객이 구매할 수 없습니다.
+                </p>
+              </div>
+              <Switch 
+                id="isActive" 
+                checked={form.watch('isActive')} 
+                onCheckedChange={(checked) => form.setValue('isActive', checked)}
+              />
+            </div>
           </div>
 
-          <div className="flex items-center space-x-2">
-            <Switch 
-              id="isActive" 
-              checked={form.watch('isActive')} 
-              onCheckedChange={(checked) => form.setValue('isActive', checked)}
-            />
-            <Label htmlFor="isActive">상품 활성화</Label>
-          </div>
-
-          <DialogFooter>
+          <DialogFooter className="gap-2">
             <DialogClose asChild>
               <Button type="button" variant="outline">취소</Button>
             </DialogClose>
-            <Button type="submit">등록하기</Button>
+            <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+              <Package className="h-4 w-4 mr-2" />
+              상품 등록
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

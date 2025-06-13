@@ -14,6 +14,7 @@ import {
   UserPlus,
   Package,
   Users2, // 커뮤니티 아이콘 추가
+  Smartphone, // 앱 가입 관리 아이콘 추가
 } from "lucide-react"
 import { SidebarItem } from "./sidebar"
 import { cn } from "@/lib/utils"
@@ -74,6 +75,11 @@ export function SidebarNav({ className, ...props }: SidebarNavProps) {
       title: "직원 관리",
       href: "/staff",
       icon: <UserPlus className="h-5 w-5" />,
+    },
+    {
+      title: "앱 가입 관리",
+      href: "/app-registrations",
+      icon: <Smartphone className="h-5 w-5" />,
     },
     {
       title: "커뮤니티",

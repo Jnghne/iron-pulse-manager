@@ -1,3 +1,4 @@
+
 import { Badge } from "@/components/ui/badge";
 import { memo } from "react";
 import { Calendar, Home, Mail, Phone, UserCircle, UserRound } from "lucide-react";

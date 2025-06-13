@@ -23,7 +23,8 @@ export interface StaffRegistration {
   phone: string;
   email: string;
   status: 'pending' | 'rejected';
-  registrationDate: string;
+  approvalDate: string; // Changed from registrationDate to approvalDate
+  memberCount: number; // Added missing property
   position?: string;
   address?: string;
   memo?: string;

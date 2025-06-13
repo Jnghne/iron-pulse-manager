@@ -22,7 +22,7 @@ export interface StaffRegistration {
   phone: string;
   email: string;
   status: 'pending' | 'rejected';
-  registrationDate: string;
+  approvalDate: string;
   position?: string;
   address?: string;
   memo?: string;
@@ -168,7 +168,8 @@ export const registrationMockData: StaffRegistration[] = [
     phone: "010-7654-3210",
     email: "lee.mj@example.com",
     status: "pending",
-    registrationDate: "2025-06-07",
+    approvalDate: "2025-06-07", // Changed from registrationDate to approvalDate
+    memberCount: 0, // Added missing property
     position: "헬스 트레이너",
     address: "서울시 서초구",
     memo: ""
@@ -179,7 +180,8 @@ export const registrationMockData: StaffRegistration[] = [
     phone: "010-6543-2109",
     email: "jang@example.com",
     status: "pending",
-    registrationDate: "2025-06-08",
+    approvalDate: "2025-06-08", // Changed from registrationDate to approvalDate
+    memberCount: 0, // Added missing property
     position: "스포츠 마사지사",
     address: "서울시 중구",
     memo: ""
@@ -190,7 +192,8 @@ export const registrationMockData: StaffRegistration[] = [
     phone: "010-5432-1098",
     email: "lim@example.com",
     status: "rejected",
-    registrationDate: "2025-06-01",
+    approvalDate: "2025-06-01", // Changed from registrationDate to approvalDate
+    memberCount: 0, // Added missing property
     position: "에어로빅 강사",
     address: "서울시 양천구",
     memo: ""

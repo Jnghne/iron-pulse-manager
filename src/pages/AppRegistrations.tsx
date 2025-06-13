@@ -1,4 +1,3 @@
-
 import { useState, memo, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -156,53 +155,40 @@ const AppRegistrations = () => {
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
-      {/* 헤더 */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border">
-        <div className="flex items-center gap-4 mb-4">
-          <div className="p-3 bg-blue-500 rounded-xl">
-            <Smartphone className="h-6 w-6 text-white" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight text-gray-900">앱 가입 관리</h1>
-            <p className="text-muted-foreground">PT 회원들의 앱 가입 요청을 효율적으로 관리하세요.</p>
+      {/* 헤더 - 통계 카드만 표시 */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-white rounded-lg p-6 border-white shadow-lg">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-orange-600">승인 대기</p>
+              <p className="text-3xl font-bold text-orange-700">{pendingCount}</p>
+            </div>
+            <div className="p-3 bg-orange-100 rounded-lg">
+              <Calendar className="h-6 w-6 text-orange-600" />
+            </div>
           </div>
         </div>
-
-        {/* 통계 카드 */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-white rounded-lg p-4 border border-orange-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-orange-600">승인 대기</p>
-                <p className="text-2xl font-bold text-orange-700">{pendingCount}</p>
-              </div>
-              <div className="p-2 bg-orange-100 rounded-lg">
-                <Calendar className="h-5 w-5 text-orange-600" />
-              </div>
+        
+        <div className="bg-white rounded-lg p-6 border-white shadow-lg">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-emerald-600">승인 완료</p>
+              <p className="text-3xl font-bold text-emerald-700">{approvedCount}</p>
+            </div>
+            <div className="p-3 bg-emerald-100 rounded-lg">
+              <Check className="h-6 w-6 text-emerald-600" />
             </div>
           </div>
-          
-          <div className="bg-white rounded-lg p-4 border border-emerald-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-emerald-600">승인 완료</p>
-                <p className="text-2xl font-bold text-emerald-700">{approvedCount}</p>
-              </div>
-              <div className="p-2 bg-emerald-100 rounded-lg">
-                <Check className="h-5 w-5 text-emerald-600" />
-              </div>
+        </div>
+        
+        <div className="bg-white rounded-lg p-6 border-white shadow-lg">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-red-600">승인 거절</p>
+              <p className="text-3xl font-bold text-red-700">{rejectedCount}</p>
             </div>
-          </div>
-          
-          <div className="bg-white rounded-lg p-4 border border-red-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-red-600">승인 거절</p>
-                <p className="text-2xl font-bold text-red-700">{rejectedCount}</p>
-              </div>
-              <div className="p-2 bg-red-100 rounded-lg">
-                <X className="h-5 w-5 text-red-600" />
-              </div>
+            <div className="p-3 bg-red-100 rounded-lg">
+              <X className="h-6 w-6 text-red-600" />
             </div>
           </div>
         </div>

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -63,59 +62,42 @@ const StaffDetail = () => {
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
-      {/* 헤더 */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" onClick={handleBack} className="shrink-0">
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <div className="flex-1">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-              <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-                {staff.name}
-              </h1>
-              {isRegistration && (
-                <div className="flex items-center gap-2">
-                  <div className="h-2 w-2 bg-orange-500 rounded-full animate-pulse"></div>
-                  <span className="text-sm font-medium text-orange-600 bg-orange-50 px-2 py-1 rounded-full">
-                    가입 요청
-                  </span>
-                </div>
-              )}
-            </div>
-            <p className="text-muted-foreground mt-1">
-              {isRegistration ? '가입 요청 상세 정보 및 승인 관리' : '직원 상세 정보 및 실적 관리'}
-            </p>
-          </div>
-          
-          {/* 승인 액션 버튼 */}
-          {isRegistration && (
+      {/* 헤더 - 뒤로가기 버튼만 */}
+      <div className="flex items-center gap-4">
+        <Button variant="ghost" size="sm" onClick={handleBack} className="shrink-0">
+          <ArrowLeft className="h-4 w-4" />
+          뒤로가기
+        </Button>
+        
+        {/* 승인 액션 버튼 */}
+        {isRegistration && (
+          <div className="ml-auto">
             <ApprovalActions staff={staff as Staff} />
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* 메인 컨텐츠 */}
       <div className="space-y-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <div className="border-b">
-            <TabsList className="grid w-full max-w-lg grid-cols-3 h-12 bg-muted/50">
+          <div className="bg-white rounded-lg border shadow-sm p-1">
+            <TabsList className="grid w-full max-w-lg grid-cols-3 h-12 bg-transparent gap-1">
               <TabsTrigger 
                 value="info" 
-                className="text-sm font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm"
+                className="text-sm font-medium data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-md rounded-md transition-all"
               >
                 기본 정보
               </TabsTrigger>
               <TabsTrigger 
                 value="members" 
-                className="text-sm font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm" 
+                className="text-sm font-medium data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-md rounded-md transition-all" 
                 disabled={isRegistration}
               >
                 담당 회원
               </TabsTrigger>
               <TabsTrigger 
                 value="performance" 
-                className="text-sm font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm" 
+                className="text-sm font-medium data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=active]:shadow-md rounded-md transition-all" 
                 disabled={isRegistration}
               >
                 실적 분석
@@ -125,15 +107,11 @@ const StaffDetail = () => {
 
           <div className="mt-8">
             <TabsContent value="info" className="space-y-0">
-              <Card className="border-0 shadow-none bg-transparent">
-                <CardContent className="p-0">
-                  {isRegistration ? (
-                    <ApprovalPendingInfo staff={staff as Staff} />
-                  ) : (
-                    <StaffBasicInfo staff={staff as Staff} onStaffUpdate={setStaff} />
-                  )}
-                </CardContent>
-              </Card>
+              {isRegistration ? (
+                <ApprovalPendingInfo staff={staff as Staff} />
+              ) : (
+                <StaffBasicInfo staff={staff as Staff} onStaffUpdate={setStaff} />
+              )}
             </TabsContent>
 
             <TabsContent value="members" className="space-y-0">

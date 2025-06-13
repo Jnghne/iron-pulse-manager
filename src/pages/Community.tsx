@@ -53,14 +53,14 @@ const Community = () => {
         <Link to="/community/market" className="block h-full">
           <Card className="overflow-hidden h-full border shadow-md hover:shadow-lg transition-all duration-300 bg-white dark:bg-slate-900">
             <div className="absolute top-0 right-0 p-3">
-              <Badge variant="secondary" className="bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300 font-medium">
+              <Badge variant="secondary" className="bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300 font-medium">
                 <TrendingUp className="w-3 h-3 mr-1" /> 인기 거래
               </Badge>
             </div>
             <CardHeader className="pb-2">
               <div className="flex items-center gap-3 mb-2">
-                <div className="p-3 rounded-full bg-green-50 dark:bg-green-900/20">
-                  <ShoppingCart className="h-6 w-6 text-green-600 dark:text-green-400" />
+                <div className="p-3 rounded-full bg-blue-50 dark:bg-blue-900/20">
+                  <ShoppingCart className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div>
                   <CardTitle className="text-xl font-bold">중고거래 장터</CardTitle>
@@ -76,14 +76,14 @@ const Community = () => {
               <div className="grid grid-cols-2 gap-4 mb-6">
                 <div className="bg-white dark:bg-slate-800 rounded-lg p-3 shadow-sm">
                   <div className="text-sm text-muted-foreground">판매중인 상품</div>
-                  <div className="text-2xl font-bold text-green-600 dark:text-green-400">148개</div>
+                  <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">148개</div>
                 </div>
                 <div className="bg-white dark:bg-slate-800 rounded-lg p-3 shadow-sm">
                   <div className="text-sm text-muted-foreground">이번 달 거래</div>
                   <div className="text-2xl font-bold">67건</div>
                 </div>
               </div>
-              <Button className="w-full" size="lg" variant="secondary">
+              <Button className="w-full" size="lg">
                 <ShoppingCart className="mr-2 h-4 w-4" /> 장터 바로가기
               </Button>
             </CardContent>
@@ -151,8 +151,8 @@ const Community = () => {
         <Card className="border-0 shadow-lg overflow-hidden bg-white dark:bg-slate-900">
           <CardHeader className="border-b bg-slate-50/70 dark:bg-slate-800/20">
             <CardTitle className="flex items-center gap-2 text-lg">
-              <div className="p-1.5 rounded-md bg-green-50 dark:bg-green-900/20">
-                <ShoppingCart className="h-4 w-4 text-green-600 dark:text-green-400" />
+              <div className="p-1.5 rounded-md bg-blue-50 dark:bg-blue-900/20">
+                <ShoppingCart className="h-4 w-4 text-blue-600 dark:text-blue-400" />
               </div>
               인기 중고거래 상품
             </CardTitle>
@@ -178,7 +178,7 @@ const Community = () => {
                     </div>
                     <div className="ml-4">
                       <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                        item.status === '판매중' ? 'bg-green-50 text-green-800 dark:bg-green-900/20 dark:text-green-400' : 'bg-orange-50 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400'
+                        item.status === '판매중' ? 'bg-blue-50 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400' : 'bg-gray-50 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400'
                       }`}>
                         {item.status}
                       </span>
@@ -188,7 +188,7 @@ const Community = () => {
               ))}
             </div>
             <div className="p-3 text-center border-t">
-              <Button variant="ghost" size="sm" className="text-green-600 dark:text-green-400 font-medium">
+              <Button variant="ghost" size="sm" className="text-blue-600 dark:text-blue-400 font-medium">
                 더 보기
               </Button>
             </div>

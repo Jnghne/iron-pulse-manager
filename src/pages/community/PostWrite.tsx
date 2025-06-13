@@ -95,12 +95,6 @@ const PostWrite = () => {
             목록으로
           </Button>
         </Link>
-        <div>
-          <h1 className="text-2xl font-bold">새 글 작성</h1>
-          <p className="text-muted-foreground">
-            헬스장 관장님들과 공유하고 싶은 내용을 작성해주세요.
-          </p>
-        </div>
       </div>
 
       {/* 글쓰기 폼 */}

@@ -99,10 +99,7 @@ const PostWrite = () => {
 
       {/* 글쓰기 폼 */}
       <Card>
-        <CardHeader>
-          <CardTitle>게시글 작성</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-6 pt-6">
           {/* 카테고리 */}
           <div className="space-y-2">
             <Label htmlFor="category">카테고리</Label>

@@ -129,20 +129,11 @@ const MarketItemWrite = () => {
             목록으로
           </Button>
         </Link>
-        <div>
-          <h1 className="text-2xl font-bold">중고상품 판매하기</h1>
-          <p className="text-muted-foreground">
-            헬스장 관장님들과 안전하게 거래하세요
-          </p>
-        </div>
       </div>
 
       {/* 판매하기 폼 */}
       <Card>
-        <CardHeader>
-          <CardTitle>상품 정보 입력</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-6 pt-6">
           {/* 카테고리 */}
           <div className="space-y-2">
             <Label htmlFor="category">카테고리 *</Label>

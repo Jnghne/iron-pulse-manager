@@ -174,9 +174,6 @@ const PostDetail = () => {
             목록으로
           </Button>
         </Link>
-        <div>
-          <h1 className="text-2xl font-bold">게시글 상세</h1>
-        </div>
       </div>
 
       {/* 게시글 */}

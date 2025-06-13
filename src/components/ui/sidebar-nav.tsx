@@ -52,6 +52,11 @@ export function SidebarNav({ className, ...props }: SidebarNavProps) {
 
   const ownerOnlyItems = [
     {
+      title: "앱 가입 관리",
+      href: "/app-registrations",
+      icon: <Smartphone className="h-5 w-5" />,
+    },
+    {
       title: "문자 메시지",
       href: "/messages",
       icon: <MessageSquare className="h-5 w-5" />,
@@ -75,11 +80,6 @@ export function SidebarNav({ className, ...props }: SidebarNavProps) {
       title: "직원 관리",
       href: "/staff",
       icon: <UserPlus className="h-5 w-5" />,
-    },
-    {
-      title: "앱 가입 관리",
-      href: "/app-registrations",
-      icon: <Smartphone className="h-5 w-5" />,
     },
     {
       title: "커뮤니티",

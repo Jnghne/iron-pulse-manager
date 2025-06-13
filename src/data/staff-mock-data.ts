@@ -169,7 +169,6 @@ export const registrationMockData: StaffRegistration[] = [
     email: "lee.mj@example.com",
     status: "pending",
     approvalDate: "2025-06-07",
-    memberCount: 0,
     position: "헬스 트레이너",
     address: "서울시 서초구",
     memo: ""
@@ -181,7 +180,6 @@ export const registrationMockData: StaffRegistration[] = [
     email: "jang@example.com",
     status: "pending",
     approvalDate: "2025-06-08",
-    memberCount: 0,
     position: "스포츠 마사지사",
     address: "서울시 중구",
     memo: ""
@@ -193,7 +191,6 @@ export const registrationMockData: StaffRegistration[] = [
     email: "lim@example.com",
     status: "rejected",
     approvalDate: "2025-06-01",
-    memberCount: 0,
     position: "에어로빅 강사",
     address: "서울시 양천구",
     memo: ""

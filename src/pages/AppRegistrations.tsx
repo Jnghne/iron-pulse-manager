@@ -6,7 +6,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Search, Check, X, Smartphone, Eye } from "lucide-react";
+import { Search, Check, X, Smartphone, Eye, Users, Calendar, Mail, Phone } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 interface AppRegistration {
   id: string;
@@ -61,11 +62,26 @@ const appRegistrationsMock: AppRegistration[] = [
 const AppRegistrationStatusBadge = memo<{ status: AppRegistration['status'] }>(({ status }) => {
   switch (status) {
     case 'pending':
-      return <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200">승인대기</Badge>;
+      return (
+        <Badge className="bg-gradient-to-r from-yellow-100 to-orange-100 text-orange-800 border-orange-200 hover:bg-orange-200">
+          <div className="w-2 h-2 bg-orange-500 rounded-full mr-1 animate-pulse"></div>
+          승인대기
+        </Badge>
+      );
     case 'approved':
-      return <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-200">승인완료</Badge>;
+      return (
+        <Badge className="bg-gradient-to-r from-emerald-100 to-green-100 text-emerald-800 border-emerald-200 hover:bg-emerald-200">
+          <Check className="w-3 h-3 mr-1" />
+          승인완료
+        </Badge>
+      );
     case 'rejected':
-      return <Badge className="bg-rose-100 text-rose-800 hover:bg-rose-200">승인거절</Badge>;
+      return (
+        <Badge className="bg-gradient-to-r from-rose-100 to-red-100 text-rose-800 border-rose-200 hover:bg-rose-200">
+          <X className="w-3 h-3 mr-1" />
+          승인거절
+        </Badge>
+      );
     default:
       return null;
   }
@@ -99,7 +115,13 @@ const AppRegistrations = () => {
           : reg
       )
     );
-  }, []);
+    
+    const registration = registrations.find(r => r.id === registrationId);
+    toast({
+      title: "승인 완료",
+      description: `${registration?.name}님의 앱 가입이 승인되었습니다.`,
+    });
+  }, [registrations]);
 
   // 거절 처리
   const handleReject = useCallback((registrationId: string) => {
@@ -110,7 +132,14 @@ const AppRegistrations = () => {
           : reg
       )
     );
-  }, []);
+    
+    const registration = registrations.find(r => r.id === registrationId);
+    toast({
+      title: "거절 완료",
+      description: `${registration?.name}님의 앱 가입 요청이 거절되었습니다.`,
+      variant: "destructive",
+    });
+  }, [registrations]);
 
   // 검색 결과 필터링
   const filteredRegistrations = registrations.filter(reg => 
@@ -120,113 +149,178 @@ const AppRegistrations = () => {
     (reg.trainerName && reg.trainerName.includes(searchQuery))
   );
 
-  return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between sm:items-center space-y-2 sm:space-y-0">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">앱 가입 관리</h1>
-          <p className="text-muted-foreground">PT 회원들의 앱 가입 요청을 관리합니다.</p>
-        </div>
-      </div>
+  // 통계
+  const pendingCount = registrations.filter(r => r.status === 'pending').length;
+  const approvedCount = registrations.filter(r => r.status === 'approved').length;
+  const rejectedCount = registrations.filter(r => r.status === 'rejected').length;
 
-      <div className="flex flex-col sm:flex-row justify-between sm:items-center space-y-2 sm:space-y-0 gap-4">
-        <div className="flex-1">
-          <div className="relative">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="이름, 연락처, 이메일, 담당 트레이너로 검색..."
-              className="pl-8 w-full sm:w-[400px]"
-              value={searchQuery}
-              onChange={handleSearchChange}
-            />
+  return (
+    <div className="space-y-8 max-w-7xl mx-auto">
+      {/* 헤더 */}
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border">
+        <div className="flex items-center gap-4 mb-4">
+          <div className="p-3 bg-blue-500 rounded-xl">
+            <Smartphone className="h-6 w-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight text-gray-900">앱 가입 관리</h1>
+            <p className="text-muted-foreground">PT 회원들의 앱 가입 요청을 효율적으로 관리하세요.</p>
+          </div>
+        </div>
+
+        {/* 통계 카드 */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-white rounded-lg p-4 border border-orange-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-orange-600">승인 대기</p>
+                <p className="text-2xl font-bold text-orange-700">{pendingCount}</p>
+              </div>
+              <div className="p-2 bg-orange-100 rounded-lg">
+                <Calendar className="h-5 w-5 text-orange-600" />
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-lg p-4 border border-emerald-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-emerald-600">승인 완료</p>
+                <p className="text-2xl font-bold text-emerald-700">{approvedCount}</p>
+              </div>
+              <div className="p-2 bg-emerald-100 rounded-lg">
+                <Check className="h-5 w-5 text-emerald-600" />
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-lg p-4 border border-red-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-red-600">승인 거절</p>
+                <p className="text-2xl font-bold text-red-700">{rejectedCount}</p>
+              </div>
+              <div className="p-2 bg-red-100 rounded-lg">
+                <X className="h-5 w-5 text-red-600" />
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Smartphone className="h-5 w-5" />
+      {/* 검색 */}
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center space-y-4 sm:space-y-0 gap-4">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="search"
+            placeholder="이름, 연락처, 이메일, 담당 트레이너로 검색..."
+            className="pl-9 h-11"
+            value={searchQuery}
+            onChange={handleSearchChange}
+          />
+        </div>
+      </div>
+
+      {/* 가입 요청 목록 */}
+      <Card className="border-0 shadow-lg">
+        <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-t-lg">
+          <CardTitle className="flex items-center gap-3">
+            <Users className="h-5 w-5" />
             앱 가입 요청 목록
+            <Badge variant="secondary" className="ml-auto">
+              총 {filteredRegistrations.length}건
+            </Badge>
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="rounded-md border overflow-hidden">
-            <div className="relative w-full overflow-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[80px]">#</TableHead>
-                    <TableHead>이름</TableHead>
-                    <TableHead>연락처</TableHead>
-                    <TableHead>이메일</TableHead>
-                    <TableHead>담당 트레이너</TableHead>
-                    <TableHead>신청일</TableHead>
-                    <TableHead>상태</TableHead>
-                    <TableHead className="text-right">관리</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredRegistrations.length > 0 ? (
-                    filteredRegistrations.map((registration, index) => (
-                      <TableRow key={registration.id}>
-                        <TableCell>{index + 1}</TableCell>
-                        <TableCell className="font-medium">{registration.name}</TableCell>
-                        <TableCell>{registration.phone}</TableCell>
-                        <TableCell>{registration.email}</TableCell>
-                        <TableCell>{registration.trainerName}</TableCell>
-                        <TableCell>{registration.registrationDate}</TableCell>
-                        <TableCell>
-                          <AppRegistrationStatusBadge status={registration.status} />
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-1">
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              onClick={() => handleViewDetails(registration)}
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                            {registration.status === 'pending' && (
-                              <>
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm"
-                                  onClick={() => handleApprove(registration.id)}
-                                  className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                                >
-                                  <Check className="h-4 w-4" />
-                                </Button>
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm"
-                                  onClick={() => handleReject(registration.id)}
-                                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                >
-                                  <X className="h-4 w-4" />
-                                </Button>
-                              </>
-                            )}
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={8} className="text-center py-10">
-                        <div className="flex flex-col items-center justify-center text-muted-foreground">
-                          <Search className="h-10 w-10 mb-2" />
-                          <p>검색 결과가 없습니다.</p>
-                          <p className="text-sm">다른 검색어를 입력해 보세요.</p>
+        <CardContent className="p-0">
+          <div className="overflow-hidden">
+            <Table>
+              <TableHeader className="bg-muted/30">
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="w-[60px] font-semibold">#</TableHead>
+                  <TableHead className="font-semibold">이름</TableHead>
+                  <TableHead className="font-semibold">연락처</TableHead>
+                  <TableHead className="font-semibold">이메일</TableHead>
+                  <TableHead className="font-semibold">담당 트레이너</TableHead>
+                  <TableHead className="font-semibold">신청일</TableHead>
+                  <TableHead className="font-semibold">상태</TableHead>
+                  <TableHead className="text-right font-semibold">관리</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredRegistrations.length > 0 ? (
+                  filteredRegistrations.map((registration, index) => (
+                    <TableRow 
+                      key={registration.id}
+                      className="hover:bg-muted/30 transition-colors"
+                    >
+                      <TableCell className="font-medium text-muted-foreground">
+                        {index + 1}
+                      </TableCell>
+                      <TableCell className="font-medium">{registration.name}</TableCell>
+                      <TableCell className="text-muted-foreground">{registration.phone}</TableCell>
+                      <TableCell className="text-muted-foreground">{registration.email}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="font-normal">
+                          {registration.trainerName}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">{registration.registrationDate}</TableCell>
+                      <TableCell>
+                        <AppRegistrationStatusBadge status={registration.status} />
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-1">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => handleViewDetails(registration)}
+                            className="h-8 w-8 p-0 hover:bg-blue-50"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          {registration.status === 'pending' && (
+                            <>
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => handleApprove(registration.id)}
+                                className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
+                              >
+                                <Check className="h-4 w-4" />
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => handleReject(registration.id)}
+                                className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center py-12">
+                      <div className="flex flex-col items-center justify-center text-muted-foreground space-y-3">
+                        <div className="p-4 bg-muted/30 rounded-full">
+                          <Search className="h-8 w-8" />
+                        </div>
+                        <div>
+                          <p className="font-medium">검색 결과가 없습니다</p>
+                          <p className="text-sm">다른 검색어를 입력해 보세요</p>
+                        </div>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
           </div>
         </CardContent>
       </Card>
@@ -234,39 +328,73 @@ const AppRegistrations = () => {
       {/* 상세 정보 다이얼로그 */}
       {selectedRegistration && (
         <Dialog open={detailDialogOpen} onOpenChange={setDetailDialogOpen}>
-          <DialogContent className="sm:max-w-[500px]">
+          <DialogContent className="sm:max-w-[550px]">
             <DialogHeader>
-              <DialogTitle>앱 가입 요청 상세</DialogTitle>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="p-2 bg-blue-100 rounded-full">
+                  <Smartphone className="h-5 w-5 text-blue-600" />
+                </div>
+                <DialogTitle className="text-xl">앱 가입 요청 상세</DialogTitle>
+              </div>
               <DialogDescription>
                 회원의 앱 가입 요청 정보를 확인하고 승인/거절 처리를 할 수 있습니다.
               </DialogDescription>
             </DialogHeader>
             
-            <div className="space-y-4 py-4">
-              <div className="grid grid-cols-3 gap-4 items-center">
-                <div className="font-medium text-right">이름</div>
-                <div className="col-span-2">{selectedRegistration.name}</div>
-              </div>
-              <div className="grid grid-cols-3 gap-4 items-center">
-                <div className="font-medium text-right">연락처</div>
-                <div className="col-span-2">{selectedRegistration.phone}</div>
-              </div>
-              <div className="grid grid-cols-3 gap-4 items-center">
-                <div className="font-medium text-right">이메일</div>
-                <div className="col-span-2">{selectedRegistration.email}</div>
-              </div>
-              <div className="grid grid-cols-3 gap-4 items-center">
-                <div className="font-medium text-right">담당 트레이너</div>
-                <div className="col-span-2">{selectedRegistration.trainerName}</div>
-              </div>
-              <div className="grid grid-cols-3 gap-4 items-center">
-                <div className="font-medium text-right">신청일</div>
-                <div className="col-span-2">{selectedRegistration.registrationDate}</div>
-              </div>
-              <div className="grid grid-cols-3 gap-4 items-center">
-                <div className="font-medium text-right">상태</div>
-                <div className="col-span-2">
-                  <AppRegistrationStatusBadge status={selectedRegistration.status} />
+            <div className="space-y-6 py-4">
+              {/* 기본 정보 */}
+              <div className="bg-muted/30 rounded-lg p-4 space-y-4">
+                <h4 className="font-semibold text-gray-900 mb-3">기본 정보</h4>
+                
+                <div className="grid grid-cols-4 gap-3 items-center">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Users className="h-4 w-4" />
+                    <span className="text-sm font-medium">이름</span>
+                  </div>
+                  <div className="col-span-3 font-medium">{selectedRegistration.name}</div>
+                </div>
+                
+                <div className="grid grid-cols-4 gap-3 items-center">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Phone className="h-4 w-4" />
+                    <span className="text-sm font-medium">연락처</span>
+                  </div>
+                  <div className="col-span-3 font-medium">{selectedRegistration.phone}</div>
+                </div>
+                
+                <div className="grid grid-cols-4 gap-3 items-center">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Mail className="h-4 w-4" />
+                    <span className="text-sm font-medium">이메일</span>
+                  </div>
+                  <div className="col-span-3 font-medium">{selectedRegistration.email}</div>
+                </div>
+                
+                <div className="grid grid-cols-4 gap-3 items-center">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Users className="h-4 w-4" />
+                    <span className="text-sm font-medium">담당 트레이너</span>
+                  </div>
+                  <div className="col-span-3">
+                    <Badge variant="outline">{selectedRegistration.trainerName}</Badge>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-4 gap-3 items-center">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Calendar className="h-4 w-4" />
+                    <span className="text-sm font-medium">신청일</span>
+                  </div>
+                  <div className="col-span-3 font-medium">{selectedRegistration.registrationDate}</div>
+                </div>
+                
+                <div className="grid grid-cols-4 gap-3 items-center">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <span className="text-sm font-medium">상태</span>
+                  </div>
+                  <div className="col-span-3">
+                    <AppRegistrationStatusBadge status={selectedRegistration.status} />
+                  </div>
                 </div>
               </div>
             </div>
@@ -293,7 +421,7 @@ const AppRegistrations = () => {
                       handleApprove(selectedRegistration.id);
                       setDetailDialogOpen(false);
                     }}
-                    className="gap-2 bg-primary hover:bg-primary/90"
+                    className="gap-2 bg-emerald-600 hover:bg-emerald-700"
                   >
                     <Check className="h-4 w-4" />
                     승인

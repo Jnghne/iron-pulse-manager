@@ -1,8 +1,7 @@
-
 // src/pages/products/ProductListPage.tsx
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Edit, Trash2, Package } from 'lucide-react';
+import { PlusCircle, Edit, Trash2, Package, ShoppingBag, Star, Calendar, DollarSign, MoreHorizontal } from 'lucide-react';
 import { Product, ProductType } from '@/types/product'; 
 import { mockProducts } from '@/data/mockProducts';
 import { ProductAddModal } from '@/components/features/product/ProductAddModal';
@@ -18,7 +17,13 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { toast } from '@/components/ui/use-toast';
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 // 상품 유형 이름을 반환하는 함수 (기존과 동일)
 const getProductTypeName = (type: ProductType): string => {
@@ -31,19 +36,34 @@ const getProductTypeName = (type: ProductType): string => {
   }
 };
 
-// 상품 유형별 뱃지 스타일 (회원 목록과 동일한 스타일로 통일)
+// 상품 유형별 뱃지 스타일과 아이콘
 const getProductTypeBadgeStyle = (type: ProductType) => {
   switch (type) {
     case ProductType.MEMBERSHIP:
-      return "bg-blue-50 text-blue-700";
+      return {
+        className: "bg-blue-50 text-blue-700 border-blue-200",
+        icon: <ShoppingBag className="w-3 h-3 mr-1" />
+      };
     case ProductType.PT:
-      return "bg-purple-50 text-purple-700";
+      return {
+        className: "bg-purple-50 text-purple-700 border-purple-200",
+        icon: <Star className="w-3 h-3 mr-1" />
+      };
     case ProductType.LOCKER:
-      return "bg-green-50 text-green-700";
+      return {
+        className: "bg-green-50 text-green-700 border-green-200",
+        icon: <Package className="w-3 h-3 mr-1" />
+      };
     case ProductType.OTHER:
-      return "bg-gray-100 text-gray-700";
+      return {
+        className: "bg-gray-100 text-gray-700 border-gray-200",
+        icon: <MoreHorizontal className="w-3 h-3 mr-1" />
+      };
     default:
-      return "bg-gray-100 text-gray-700";
+      return {
+        className: "bg-gray-100 text-gray-700 border-gray-200",
+        icon: <MoreHorizontal className="w-3 h-3 mr-1" />
+      };
   }
 };
 
@@ -108,22 +128,29 @@ const ProductListPage: React.FC = () => {
   return (
     <div className="container mx-auto py-8">
       <div className="flex justify-end items-center mb-6">
-        <Button onClick={handleOpenAddModal} className="bg-gym-primary hover:bg-gym-primary/90 text-white">
+        <Button onClick={handleOpenAddModal} className="bg-blue-600 hover:bg-blue-700 text-white">
           <PlusCircle className="mr-2 h-5 w-5" /> 상품 추가
         </Button>
       </div>
       
-      <Card>
-        <CardHeader>
-          <div className="flex flex-col sm:flex-row gap-4">
+      <Card className="border-0 shadow-lg bg-white dark:bg-slate-900">
+        <CardHeader className="border-b bg-slate-50/70 dark:bg-slate-800/20">
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <div className="p-1.5 rounded-md bg-blue-50 dark:bg-blue-900/20">
+                <Package className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              </div>
+              상품 목록
+              <Badge variant="secondary" className="ml-2">{filteredProducts.length}개</Badge>
+            </CardTitle>
             <Tabs 
               value={activeTab} 
               onValueChange={setActiveTab} 
-              className="w-full sm:w-auto"
+              className="w-auto"
             >
-              <TabsList className="grid w-full grid-cols-5">
+              <TabsList className="grid grid-cols-5 h-9">
                 {productTabs.map(tab => (
-                  <TabsTrigger key={tab.value} value={tab.value}>
+                  <TabsTrigger key={tab.value} value={tab.value} className="text-xs px-3">
                     {tab.label}
                   </TabsTrigger>
                 ))}
@@ -131,78 +158,99 @@ const ProductListPage: React.FC = () => {
             </Tabs>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="rounded-md border overflow-hidden">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>상품명</TableHead>
-                  <TableHead>유형</TableHead>
-                  <TableHead>가격</TableHead>
-                  <TableHead>상태</TableHead>
-                  <TableHead>최근 수정일</TableHead>
-                  <TableHead className="text-right">관리</TableHead>
-                </TableRow>
-              </TableHeader>
-          <TableBody>
+        <CardContent className="p-0">
+          <div className="divide-y divide-gray-100 dark:divide-gray-800">
             {filteredProducts.length > 0 ? (
-              filteredProducts.map((product) => (
-                <TableRow key={product.id}>
-                  <TableCell className="font-medium">{product.name}</TableCell>
-                  <TableCell>
-                    <span 
-                      className={`px-2 py-1 text-xs rounded-full font-medium ${getProductTypeBadgeStyle(product.type)}`}
-                    >
-                      {getProductTypeName(product.type)}
-                    </span>
-                  </TableCell>
-                  <TableCell>{product.price.toLocaleString()}원</TableCell>
-                  <TableCell>
-                    {product.isActive ? (
-                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                        <span className="h-1.5 w-1.5 rounded-full bg-green-600"></span>
-                        활성
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
-                        <span className="h-1.5 w-1.5 rounded-full bg-gray-600"></span>
-                        비활성
-                      </span>
-                    )}
-                  </TableCell>
-                  <TableCell>{new Date(product.updatedAt).toLocaleDateString('ko-KR')}</TableCell>
-                  <TableCell className="text-right space-x-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleOpenEditModal(product)}
-                      className="hover:border-gym-primary hover:text-gym-primary"
-                      aria-label="상품 수정"
-                    >
-                      <Edit className="mr-1 h-4 w-4" /> 수정
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => handleDeleteProduct(product.id)}
-                      aria-label="상품 삭제"
-                    >
-                      <Trash2 className="mr-1 h-4 w-4" /> 삭제
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))
+              filteredProducts.map((product) => {
+                const badgeStyle = getProductTypeBadgeStyle(product.type);
+                return (
+                  <div key={product.id} className="group hover:bg-slate-50/80 dark:hover:bg-slate-800/30 transition-all duration-200 p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4 flex-1">
+                        <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-900/50 flex items-center justify-center">
+                          <Package className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-3 mb-1">
+                            <h4 className="font-semibold text-gray-900 dark:text-white">{product.name}</h4>
+                            <Badge className={`${badgeStyle.className} border font-medium`}>
+                              {badgeStyle.icon}
+                              {getProductTypeName(product.type)}
+                            </Badge>
+                            {product.isActive ? (
+                              <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200 font-medium">
+                                <div className="w-2 h-2 bg-emerald-500 rounded-full mr-1.5"></div>
+                                활성
+                              </Badge>
+                            ) : (
+                              <Badge className="bg-gray-50 text-gray-700 border-gray-200 font-medium">
+                                <div className="w-2 h-2 bg-gray-500 rounded-full mr-1.5"></div>
+                                비활성
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+                            <span className="flex items-center gap-1 font-medium text-gray-900 dark:text-white">
+                              <DollarSign className="h-3 w-3" />
+                              {product.price.toLocaleString()}원
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Calendar className="h-3 w-3" />
+                              {new Date(product.updatedAt).toLocaleDateString('ko-KR')}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-2">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleOpenEditModal(product)}>
+                              <Edit className="mr-2 h-4 w-4" />
+                              수정
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              onClick={() => handleDeleteProduct(product.id)}
+                              className="text-red-600 dark:text-red-400"
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              삭제
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
             ) : (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center h-24">
-                  {activeTab === 'all' && mockProducts.length === 0 
-                    ? '등록된 상품이 없습니다. 새 상품을 추가해주세요.' 
-                    : `${getProductTypeName(activeTab as ProductType)} 유형의 상품이 없습니다.`}
-                </TableCell>
-              </TableRow>
+              <div className="text-center py-16">
+                <div className="flex flex-col items-center justify-center text-muted-foreground">
+                  <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
+                    <Package className="h-8 w-8" />
+                  </div>
+                  <h3 className="text-lg font-medium mb-2">
+                    {activeTab === 'all' && mockProducts.length === 0 
+                      ? '등록된 상품이 없습니다' 
+                      : `${getProductTypeName(activeTab as ProductType)} 상품이 없습니다`}
+                  </h3>
+                  <p className="text-sm mb-4">
+                    {activeTab === 'all' && mockProducts.length === 0 
+                      ? '새 상품을 추가해주세요' 
+                      : '다른 유형을 선택하거나 새 상품을 추가해보세요'}
+                  </p>
+                  <Button onClick={handleOpenAddModal} variant="outline">
+                    <PlusCircle className="mr-2 h-4 w-4" /> 상품 추가
+                  </Button>
+                </div>
+              </div>
             )}
-          </TableBody>
-            </Table>
           </div>
         </CardContent>
       </Card>

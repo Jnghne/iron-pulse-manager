@@ -40,7 +40,6 @@ export const RegistrationManagement = memo(() => {
     setSearchQuery(e.target.value);
   }, []);
 
-
   // 승인 처리
   const handleApprove = useCallback(() => {
     if (!selectedRegistration) return;
@@ -130,7 +129,7 @@ export const RegistrationManagement = memo(() => {
                         <TableCell>
                           <RegistrationStatusBadge status={registration.status} />
                         </TableCell>
-                        <TableCell>{registration.registrationDate}</TableCell>
+                        <TableCell>{registration.approvalDate}</TableCell>
                       </TableRow>
                     ))
                   ) : (

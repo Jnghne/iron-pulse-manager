@@ -80,7 +80,7 @@ const StaffDetail = () => {
           <div className="mt-6">
             <TabsContent value="info" className="space-y-0">
               {isRegistration ? (
-                <ApprovalPendingInfo staff={staff as StaffRegistration} />
+                <ApprovalPendingInfo staff={staff as Staff} />
               ) : (
                 <StaffBasicInfo staff={staff as Staff} onStaffUpdate={setStaff} />
               )}

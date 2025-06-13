@@ -163,37 +163,37 @@ export const membersMockData: Record<string, Member[]> = {
 // 가입 요청 목록 mock 데이터
 export const registrationMockData: StaffRegistration[] = [
   {
-    id: "REG003", // 추가된 ID
+    id: "REG003",
     name: "이민지",
     phone: "010-7654-3210",
     email: "lee.mj@example.com",
     status: "pending",
-    approvalDate: "2025-06-07", // Changed from registrationDate to approvalDate
-    memberCount: 0, // Added missing property
+    approvalDate: "2025-06-07",
+    memberCount: 0,
     position: "헬스 트레이너",
     address: "서울시 서초구",
     memo: ""
   },
   {
-    id: "REG004", // 추가된 ID
+    id: "REG004",
     name: "장하준",
     phone: "010-6543-2109",
     email: "jang@example.com",
     status: "pending",
-    approvalDate: "2025-06-08", // Changed from registrationDate to approvalDate
-    memberCount: 0, // Added missing property
+    approvalDate: "2025-06-08",
+    memberCount: 0,
     position: "스포츠 마사지사",
     address: "서울시 중구",
     memo: ""
   },
   {
-    id: "REG005", // 추가된 ID
+    id: "REG005",
     name: "임수진",
     phone: "010-5432-1098",
     email: "lim@example.com",
     status: "rejected",
-    approvalDate: "2025-06-01", // Changed from registrationDate to approvalDate
-    memberCount: 0, // Added missing property
+    approvalDate: "2025-06-01",
+    memberCount: 0,
     position: "에어로빅 강사",
     address: "서울시 양천구",
     memo: ""

@@ -29,44 +29,44 @@ export const staffData: StaffData[] = [
 export const memberChartConfig: ChartConfig = {
   total: {
     label: "총 회원수",
-    color: "#3B82F6",
+    color: "#4EA8DE",
   },
   active: {
     label: "활성 회원",
-    color: "#10B981",
+    color: "#3b82f6",
   },
   pt: {
     label: "PT 회원",
-    color: "#F59E0B",
+    color: "#8b5cf6",
   },
   inactive: {
     label: "휴면 회원",
-    color: "#6B7280",
+    color: "#6b7280",
   },
 };
 
 export const revenueChartConfig: ChartConfig = {
   membership: {
     label: "회원권",
-    color: "#8B5CF6",
+    color: "#4EA8DE",
   },
   pt: {
     label: "PT 이용권",
-    color: "#06B6D4",
+    color: "#8FB4FF",
   },
   daily: {
     label: "일일권",
-    color: "#F97316",
+    color: "#A78BFA",
   },
   other: {
     label: "기타",
-    color: "#EC4899",
+    color: "#FB7185",
   },
 };
 
 export const membershipTypeData: MembershipTypeData[] = [
-  { name: '1개월', value: 45, fill: '#3B82F6' },
-  { name: '3개월', value: 30, fill: '#10B981' },
-  { name: '6개월', value: 15, fill: '#F59E0B' },
-  { name: '12개월', value: 10, fill: '#8B5CF6' },
+  { name: '1개월', value: 45, fill: '#4EA8DE' },
+  { name: '3개월', value: 30, fill: '#8FB4FF' },
+  { name: '6개월', value: 15, fill: '#A78BFA' },
+  { name: '12개월', value: 10, fill: '#FB7185' },
 ];

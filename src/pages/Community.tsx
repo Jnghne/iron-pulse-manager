@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, MessageSquare, TrendingUp, ShoppingCart, Activity, Edit3, Calendar } from "lucide-react";
+import { Users, MessageSquare, TrendingUp, ShoppingCart, Edit3, Calendar, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Community = () => {
@@ -36,83 +36,61 @@ const Community = () => {
   return (
     <div className="space-y-6">
       {/* 메뉴 카드 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Link to="/community/board" className="block h-full">
-          <Card className="overflow-hidden h-full border shadow-md hover:shadow-lg transition-all duration-300 bg-white dark:bg-slate-900">
-            <div className="absolute top-0 right-0 p-3">
-              <Badge variant="secondary" className="bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300 font-medium">
-                <Activity className="w-3 h-3 mr-1" /> 활발한 활동
-              </Badge>
-            </div>
-            <CardHeader className="pb-2">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="p-3 rounded-full bg-blue-50 dark:bg-blue-900/20">
-                  <MessageSquare className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Link to="/community/board" className="block group">
+          <Card className="border hover:shadow-md hover:border-blue-300 transition-all duration-200 bg-white dark:bg-slate-900">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-900/20">
+                    <MessageSquare className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">자유 소통 게시판</h3>
+                    <p className="text-sm text-muted-foreground">지식과 경험 공유</p>
+                  </div>
                 </div>
-                <div>
-                  <CardTitle className="text-xl font-bold">자유 소통 게시판</CardTitle>
-                  <CardDescription>관장님들의 지식과 경험을 공유하는 공간</CardDescription>
+                <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg px-3 py-2 flex-1">
+                  <div className="text-xs text-blue-600 dark:text-blue-400 font-medium">오늘 새 글</div>
+                  <div className="text-lg font-bold text-blue-700 dark:text-blue-300">24개</div>
+                </div>
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg px-3 py-2 flex-1">
+                  <div className="text-xs text-gray-600 dark:text-gray-400 font-medium">총 게시글</div>
+                  <div className="text-lg font-bold text-gray-700 dark:text-gray-300">3,421개</div>
                 </div>
               </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground mb-8">
-                전국 헬스장 관장님들과 자유로운 주제로 소통하고 정보를 공유하세요. 
-                운영 노하우, 고민 상담, 업계 동향 등 다양한 이야기를 나눌 수 있습니다.
-              </p>
-              <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="bg-white dark:bg-slate-800 rounded-lg p-3 shadow-sm">
-                  <div className="text-sm text-muted-foreground">오늘 새 글</div>
-                  <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">24개</div>
-                </div>
-                <div className="bg-white dark:bg-slate-800 rounded-lg p-3 shadow-sm">
-                  <div className="text-sm text-muted-foreground">총 게시글</div>
-                  <div className="text-2xl font-bold">3,421개</div>
-                </div>
-              </div>
-              <Button className="w-full" size="lg">
-                <MessageSquare className="mr-2 h-4 w-4" /> 게시판 바로가기
-              </Button>
             </CardContent>
           </Card>
         </Link>
 
-        <Link to="/community/market" className="block h-full">
-          <Card className="overflow-hidden h-full border shadow-md hover:shadow-lg transition-all duration-300 bg-white dark:bg-slate-900">
-            <div className="absolute top-0 right-0 p-3">
-              <Badge variant="secondary" className="bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300 font-medium">
-                <TrendingUp className="w-3 h-3 mr-1" /> 인기 거래
-              </Badge>
-            </div>
-            <CardHeader className="pb-2">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="p-3 rounded-full bg-blue-50 dark:bg-blue-900/20">
-                  <ShoppingCart className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+        <Link to="/community/market" className="block group">
+          <Card className="border hover:shadow-md hover:border-blue-300 transition-all duration-200 bg-white dark:bg-slate-900">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-900/20">
+                    <ShoppingCart className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">중고거래 장터</h3>
+                    <p className="text-sm text-muted-foreground">헬스 장비 거래</p>
+                  </div>
                 </div>
-                <div>
-                  <CardTitle className="text-xl font-bold">중고거래 장터</CardTitle>
-                  <CardDescription>안전하고 합리적인 헬스 장비 거래</CardDescription>
+                <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg px-3 py-2 flex-1">
+                  <div className="text-xs text-blue-600 dark:text-blue-400 font-medium">판매중</div>
+                  <div className="text-lg font-bold text-blue-700 dark:text-blue-300">148개</div>
+                </div>
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg px-3 py-2 flex-1">
+                  <div className="text-xs text-gray-600 dark:text-gray-400 font-medium">이달 거래</div>
+                  <div className="text-lg font-bold text-gray-700 dark:text-gray-300">67건</div>
                 </div>
               </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground mb-8">
-                헬스장 운영에 필요한 기구와 용품을 안전하고 합리적인 가격에 
-                거래하세요. 검증된 관장님들과의 거래로 더욱 안심할 수 있습니다.
-              </p>
-              <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="bg-white dark:bg-slate-800 rounded-lg p-3 shadow-sm">
-                  <div className="text-sm text-muted-foreground">판매중인 상품</div>
-                  <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">148개</div>
-                </div>
-                <div className="bg-white dark:bg-slate-800 rounded-lg p-3 shadow-sm">
-                  <div className="text-sm text-muted-foreground">이번 달 거래</div>
-                  <div className="text-2xl font-bold">67건</div>
-                </div>
-              </div>
-              <Button className="w-full" size="lg">
-                <ShoppingCart className="mr-2 h-4 w-4" /> 장터 바로가기
-              </Button>
             </CardContent>
           </Card>
         </Link>

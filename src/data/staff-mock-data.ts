@@ -12,6 +12,7 @@ export interface Staff {
   account?: string;
   workHours?: string;
   memo?: string;
+  revenue?: number;
 }
 
 // 직원 가입 요청 타입 정의
@@ -51,7 +52,8 @@ export const staffMockData: Staff[] = [
     address: "서울시 강남구",
     account: "국민은행 123-456-78910",
     workHours: "09:00-18:00",
-    memo: ""
+    memo: "",
+    revenue: 2400000
   },
   {
     id: "ST002",
@@ -65,7 +67,8 @@ export const staffMockData: Staff[] = [
     address: "서울시 서초구",
     account: "신한은행 123-456-78910",
     workHours: "13:00-22:00",
-    memo: ""
+    memo: "",
+    revenue: 1600000
   },
   {
     id: "ST003",
@@ -79,7 +82,8 @@ export const staffMockData: Staff[] = [
     address: "서울시 송파구",
     account: "우리은행 123-456-78910",
     workHours: "10:00-19:00",
-    memo: ""
+    memo: "",
+    revenue: 1800000
   },
   {
     id: "ST004",
@@ -93,7 +97,8 @@ export const staffMockData: Staff[] = [
     address: "서울시 동작구",
     account: "하나은행 123-456-78910",
     workHours: "06:00-15:00",
-    memo: ""
+    memo: "",
+    revenue: 0
   },
   {
     id: "REG001", // 가입 요청 ID를 그대로 사용
@@ -107,7 +112,8 @@ export const staffMockData: Staff[] = [
     address: "서울시 강서구",
     account: "기업은행 123-456-78910",
     workHours: "09:00-18:00",
-    memo: ""
+    memo: "",
+    revenue: 0
   },
   {
     id: "REG002", // 가입 요청 ID를 그대로 사용
@@ -121,7 +127,8 @@ export const staffMockData: Staff[] = [
     address: "서울시 마포구",
     account: "SC은행 123-456-78910",
     workHours: "12:00-21:00",
-    memo: ""
+    memo: "",
+    revenue: 0
   }
 ];
 

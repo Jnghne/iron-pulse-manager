@@ -1,4 +1,5 @@
-import { memo } from "react";
+
+import { memo, useState, useEffect } from "react";
 import { Users } from "lucide-react";
 import { 
   Table, 
@@ -9,12 +10,20 @@ import {
   TableRow 
 } from "@/components/ui/table";
 import { Member } from "../types";
+import { membersMockData } from "@/data/staff-mock-data";
 
 interface StaffMembersListProps {
-  members: Member[];
+  staffId: string;
 }
 
-export const StaffMembersList = memo<StaffMembersListProps>(({ members }) => {
+export const StaffMembersList = memo<StaffMembersListProps>(({ staffId }) => {
+  const [members, setMembers] = useState<Member[]>([]);
+
+  useEffect(() => {
+    const staffMembers = membersMockData[staffId] || [];
+    setMembers(staffMembers);
+  }, [staffId]);
+
   return (
     <>
       {members.length > 0 ? (

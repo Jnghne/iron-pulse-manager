@@ -26,6 +26,7 @@ const Login = () => {
       if (email === "owner@test.com" && password === "owner123") {
         localStorage.setItem("isAuthenticated", "true");
         localStorage.setItem("userRole", "owner");
+        localStorage.setItem("userPermission", "general");
         localStorage.setItem("userEmail", email);
         localStorage.setItem("selectedGym", "seoul-gangnam");
         localStorage.setItem("selectedGymName", "강남 피트니스 센터");
@@ -51,6 +52,7 @@ const Login = () => {
     setTimeout(() => {
       localStorage.setItem("isAuthenticated", "true");
       localStorage.setItem("userRole", "owner");
+      localStorage.setItem("userPermission", "general");
       localStorage.setItem("userEmail", "owner@test.com");
       localStorage.setItem("selectedGym", "seoul-gangnam");
       localStorage.setItem("selectedGymName", "강남 피트니스 센터");

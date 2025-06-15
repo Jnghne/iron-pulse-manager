@@ -22,9 +22,10 @@ import { useSidebar } from "./sidebar"
 // 타입 오류를 해결하기 위해 새로운 속성 추가
 interface SidebarNavProps extends React.HTMLAttributes<HTMLElement> {
   variant?: 'default' | 'mobile';
+  userPermission?: string;
 }
 
-export function SidebarNav({ className, ...props }: SidebarNavProps) {
+export function SidebarNav({ className, userPermission = 'general', ...props }: SidebarNavProps) {
   const location = useLocation()
   const pathname = location.pathname
   const { collapsed } = useSidebar()
@@ -47,17 +48,7 @@ export function SidebarNav({ className, ...props }: SidebarNavProps) {
     },
   ]
 
-  const ownerOnlyItems = [
-    {
-      title: "문자 메시지",
-      href: "/messages",
-      icon: <MessageSquare className="h-5 w-5" />,
-    },
-    {
-      title: "락커룸 관리",
-      href: "/locker-room",
-      icon: <Settings className="h-5 w-5" />,
-    },
+  const masterOnlyItems = [
     {
       title: "상품 관리",
       href: "/products",
@@ -85,7 +76,22 @@ export function SidebarNav({ className, ...props }: SidebarNavProps) {
     },
   ]
 
-  const items = [...defaultItems, ...ownerOnlyItems]
+  const generalItems = [
+    {
+      title: "문자 메시지",
+      href: "/messages",
+      icon: <MessageSquare className="h-5 w-5" />,
+    },
+    {
+      title: "락커룸 관리",
+      href: "/locker-room",
+      icon: <Settings className="h-5 w-5" />,
+    },
+  ]
+
+  const items = userPermission === 'master' 
+    ? [...defaultItems, ...generalItems, ...masterOnlyItems]
+    : [...defaultItems, ...generalItems]
 
   // 현재 경로가 특정 메뉴의 하위 경로인지 확인하는 함수
   const isPathActive = (itemPath: string) => {

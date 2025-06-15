@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, MessageSquare, TrendingUp, ShoppingCart, Edit3, Calendar, ArrowRight } from "lucide-react";
+import { Users, MessageSquare, ShoppingCart, Edit3, Calendar, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Community = () => {
@@ -52,16 +52,6 @@ const Community = () => {
                 </div>
                 <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
               </div>
-              <div className="flex items-center gap-4">
-                <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg px-3 py-2 flex-1">
-                  <div className="text-xs text-blue-600 dark:text-blue-400 font-medium">오늘 새 글</div>
-                  <div className="text-lg font-bold text-blue-700 dark:text-blue-300">24개</div>
-                </div>
-                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg px-3 py-2 flex-1">
-                  <div className="text-xs text-gray-600 dark:text-gray-400 font-medium">총 게시글</div>
-                  <div className="text-lg font-bold text-gray-700 dark:text-gray-300">3,421개</div>
-                </div>
-              </div>
             </CardContent>
           </Card>
         </Link>
@@ -80,16 +70,6 @@ const Community = () => {
                   </div>
                 </div>
                 <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg px-3 py-2 flex-1">
-                  <div className="text-xs text-blue-600 dark:text-blue-400 font-medium">판매중</div>
-                  <div className="text-lg font-bold text-blue-700 dark:text-blue-300">148개</div>
-                </div>
-                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg px-3 py-2 flex-1">
-                  <div className="text-xs text-gray-600 dark:text-gray-400 font-medium">이달 거래</div>
-                  <div className="text-lg font-bold text-gray-700 dark:text-gray-300">67건</div>
-                </div>
               </div>
             </CardContent>
           </Card>
@@ -315,110 +295,6 @@ const Community = () => {
         </Card>
       </div>
 
-      {/* 최근 활동 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="border-0 shadow-lg overflow-hidden bg-white dark:bg-slate-900">
-          <CardHeader className="border-b bg-slate-50/70 dark:bg-slate-800/20">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <div className="p-1.5 rounded-md bg-blue-50 dark:bg-blue-900/20">
-                <MessageSquare className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-              </div>
-              최근 인기 게시글
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            <div className="divide-y divide-gray-100 dark:divide-gray-800">
-              {[
-                { title: "회원 관리 시스템 추천 부탁드립니다", author: "김관장", views: 156, comments: 23, hot: true },
-                { title: "PT 가격 정책 어떻게 하시나요?", author: "이관장", views: 142, comments: 18, hot: true },
-                { title: "여름철 헬스장 에어컨 관리 팁", author: "박관장", views: 98, comments: 12, hot: false },
-              ].map((post, index) => (
-                <div key={index} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/30 transition-colors">
-                  <div className="flex justify-between items-center p-4">
-                    <div className="flex-1 min-w-0 pr-4">
-                      <div className="flex items-center gap-2">
-                        <h4 className="font-medium text-sm truncate">{post.title}</h4>
-                        {post.hot && (
-                          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400">
-                            HOT
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-3 mt-1">
-                        <p className="text-xs text-muted-foreground">{post.author}</p>
-                        <div className="flex items-center text-xs text-muted-foreground">
-                          <span className="flex items-center">
-                            <Users className="h-3 w-3 mr-1" /> {post.views}
-                          </span>
-                          <span className="mx-1.5">·</span>
-                          <span className="flex items-center">
-                            <MessageSquare className="h-3 w-3 mr-1" /> {post.comments}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <Button variant="ghost" size="sm" className="rounded-full h-8 w-8 p-0">
-                      <TrendingUp className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="p-3 text-center border-t">
-              <Button variant="ghost" size="sm" className="text-blue-600 dark:text-blue-400 font-medium">
-                더 보기
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-0 shadow-lg overflow-hidden bg-white dark:bg-slate-900">
-          <CardHeader className="border-b bg-slate-50/70 dark:bg-slate-800/20">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <div className="p-1.5 rounded-md bg-blue-50 dark:bg-blue-900/20">
-                <ShoppingCart className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-              </div>
-              인기 중고거래 상품
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            <div className="divide-y divide-gray-100 dark:divide-gray-800">
-              {[
-                { title: "런닝머신 판매합니다 (거의 새것)", price: "1,200,000원", seller: "서울 강남", status: "판매중", image: "https://placehold.co/60x60" },
-                { title: "덤벨 세트 (1kg~50kg)", price: "800,000원", seller: "부산 해운대", status: "예약중", image: "https://placehold.co/60x60" },
-                { title: "벤치프레스 + 바벨 세트", price: "450,000원", seller: "대구 수성구", status: "판매중", image: "https://placehold.co/60x60" },
-              ].map((item, index) => (
-                <div key={index} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/30 transition-colors">
-                  <div className="flex items-center p-4">
-                    <div className="flex-shrink-0 mr-4 rounded-md overflow-hidden bg-gray-50 dark:bg-gray-800/50 h-[60px] w-[60px] flex items-center justify-center">
-                      <ShoppingCart className="h-6 w-6 text-gray-400" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-medium text-sm truncate">{item.title}</h4>
-                      <div className="flex items-center justify-between mt-1">
-                        <p className="text-xs text-muted-foreground">{item.seller}</p>
-                        <p className="font-semibold text-sm">{item.price}</p>
-                      </div>
-                    </div>
-                    <div className="ml-4">
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                        item.status === '판매중' ? 'bg-blue-50 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400' : 'bg-gray-50 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400'
-                      }`}>
-                        {item.status}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="p-3 text-center border-t">
-              <Button variant="ghost" size="sm" className="text-blue-600 dark:text-blue-400 font-medium">
-                더 보기
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
     </div>
   );
 };

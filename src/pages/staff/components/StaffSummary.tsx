@@ -2,7 +2,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { User, Phone, Mail, Building2, Calendar, MapPin, Users, FileText, Clock, CreditCard, Briefcase } from "lucide-react";
+import { User, Phone, Mail, Calendar, MapPin, Users, FileText, Clock, CreditCard, Briefcase } from "lucide-react";
 import { Staff } from "../types";
 
 interface StaffSummaryProps {
@@ -100,14 +100,6 @@ export const StaffSummary = ({ staff }: StaffSummaryProps) => {
                 </div>
               </div>
 
-              {/* 근무 지점 */}
-              <div className="flex items-start gap-2">
-                <Building2 className="h-5 w-5 text-muted-foreground mt-0.5" />
-                <div>
-                  <p className="text-sm text-muted-foreground mb-2">근무 지점</p>
-                  <p className="font-medium">본점</p>
-                </div>
-              </div>
 
               {/* 근무 시간 */}
               <div className="flex items-start gap-2">

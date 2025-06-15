@@ -42,6 +42,7 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
+import { FilterPopover, MemberStatus, MemberType, SortOption } from "@/components/features/filter/FilterPopover";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -49,9 +50,9 @@ const MemberList = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredMembers, setFilteredMembers] = useState<Member[]>(mockMembers);
   const [currentPage, setCurrentPage] = useState(1);
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [membershipFilter, setMembershipFilter] = useState<string>("all");
-  const [sortFilter, setSortFilter] = useState<string>("registration-desc");
+  const [statusFilter, setStatusFilter] = useState<MemberStatus>("all");
+  const [membershipFilter, setMembershipFilter] = useState<MemberType>("all");
+  const [sortFilter, setSortFilter] = useState<SortOption>("name");
   const navigate = useNavigate();
   
   // Filter members based on search query and filters
@@ -73,45 +74,40 @@ const MemberList = () => {
     if (statusFilter !== "all") {
       filtered = filtered.filter(member => {
         const status = getMembershipStatus(member);
-        return status === statusFilter;
+        if (statusFilter === "active" && status === "active") return true;
+        if (statusFilter === "expired" && status === "expired") return true;
+        if (statusFilter === "pending" && status === "expiring") return true;
+        return false;
       });
     }
     
     // 회원권 유형 필터링
     if (membershipFilter !== "all") {
       filtered = filtered.filter(member => {
-        if (membershipFilter === "membership" && member.membershipActive) return true;
+        if (membershipFilter === "regular" && member.memberType === "정회원") return true;
         if (membershipFilter === "pt" && member.hasPT) return true;
-        if (membershipFilter === "locker" && member.lockerId) return true;
+        if (membershipFilter === "vip" && member.memberType === "VIP 회원") return true;
+        if (membershipFilter === "student" && member.memberType === "학생 회원") return true;
         return false;
       });
     }
     
     // 정렬 적용
     filtered.sort((a, b) => {
+      // 변수 미리 선언
+      let aExpiryDate, bExpiryDate;
+      
       switch (sortFilter) {
-        case "registration-asc":
-          return new Date(a.registrationDate).getTime() - new Date(b.registrationDate).getTime();
-        case "registration-desc":
+        case "name":
+          return a.name.localeCompare(b.name);
+        case "registrationDate":
           return new Date(b.registrationDate).getTime() - new Date(a.registrationDate).getTime();
-        case "expiry-asc":
-          const aExpiryDate = a.expiryDate ? new Date(a.expiryDate).getTime() : Infinity;
-          const bExpiryDate = b.expiryDate ? new Date(b.expiryDate).getTime() : Infinity;
+        case "expiryDate":
+          aExpiryDate = a.expiryDate ? new Date(a.expiryDate).getTime() : Infinity;
+          bExpiryDate = b.expiryDate ? new Date(b.expiryDate).getTime() : Infinity;
           return aExpiryDate - bExpiryDate;
-        case "expiry-desc":
-          const aExpiryDateDesc = a.expiryDate ? new Date(a.expiryDate).getTime() : -Infinity;
-          const bExpiryDateDesc = b.expiryDate ? new Date(b.expiryDate).getTime() : -Infinity;
-          return bExpiryDateDesc - aExpiryDateDesc;
-        case "status-active":
-          const aStatus = getMembershipStatus(a);
-          const bStatus = getMembershipStatus(b);
-          if (aStatus === "active" && bStatus !== "active") return -1;
-          if (aStatus !== "active" && bStatus === "active") return 1;
-          return 0;
-        case "expiry-days-asc":
-          const aDaysLeft = a.expiryDate ? differenceInDays(parseISO(a.expiryDate), new Date()) : -Infinity;
-          const bDaysLeft = b.expiryDate ? differenceInDays(parseISO(b.expiryDate), new Date()) : -Infinity;
-          return aDaysLeft - bDaysLeft;
+        case "attendanceRate":
+          return b.attendanceRate - a.attendanceRate;
         default:
           return 0;
       }
@@ -168,10 +164,14 @@ const MemberList = () => {
   const getMembershipStatus = (member: Member) => {
     if (!member.membershipActive) return "expired";
     if (member.membershipEndDate) {
-      const endDate = parseISO(member.membershipEndDate);
-      if (isValid(endDate)) {
-        const daysLeft = differenceInDays(endDate, new Date());
-        if (daysLeft <= 7 && daysLeft >= 0) return "expiring";
+      try {
+        const endDate = parseISO(member.membershipEndDate);
+        if (isValid(endDate)) {
+          const daysLeft = differenceInDays(endDate, new Date());
+          if (daysLeft <= 7 && daysLeft >= 0) return "expiring";
+        }
+      } catch (error) {
+        console.error("날짜 파싱 오류:", error);
       }
     }
     return "active";
@@ -270,43 +270,13 @@ const MemberList = () => {
             </div>
             
             <div className="flex flex-row gap-2 flex-wrap">
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue placeholder="회원권 상태" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">모든 상태</SelectItem>
-                  <SelectItem value="active">활성</SelectItem>
-                  <SelectItem value="expiring">만료 임박</SelectItem>
-                  <SelectItem value="expired">만료됨</SelectItem>
-                </SelectContent>
-              </Select>
-              
-              <Select value={membershipFilter} onValueChange={setMembershipFilter}>
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue placeholder="회원권 유형" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">모든 유형</SelectItem>
-                  <SelectItem value="membership">회원권</SelectItem>
-                  <SelectItem value="pt">PT 이용권</SelectItem>
-                  <SelectItem value="locker">락커 이용</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select value={sortFilter} onValueChange={setSortFilter}>
-                <SelectTrigger className="w-[160px]">
-                  <SelectValue placeholder="정렬 기준" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="registration-desc">등록일 최신순</SelectItem>
-                  <SelectItem value="registration-asc">등록일 오래된순</SelectItem>
-                  <SelectItem value="expiry-asc">만료일 빠른순</SelectItem>
-                  <SelectItem value="expiry-desc">만료일 늦은순</SelectItem>
-                  <SelectItem value="expiry-days-asc">남은일수 적은순</SelectItem>
-                  <SelectItem value="status-active">활성회원 우선</SelectItem>
-                </SelectContent>
-              </Select>
+              <FilterPopover 
+                onFilterChange={(filters) => {
+                  setStatusFilter(filters.status);
+                  setMembershipFilter(filters.type);
+                  setSortFilter(filters.sort);
+                }}
+              />
               
               <Button variant="outline" size="icon" title="엑셀 다운로드">
                 <Download className="h-4 w-4" />

@@ -51,6 +51,7 @@ const MemberList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [membershipFilter, setMembershipFilter] = useState<string>("all");
+  const [sortFilter, setSortFilter] = useState<string>("registration-desc");
   const navigate = useNavigate();
   
   // Filter members based on search query and filters
@@ -86,9 +87,39 @@ const MemberList = () => {
       });
     }
     
+    // 정렬 적용
+    filtered.sort((a, b) => {
+      switch (sortFilter) {
+        case "registration-asc":
+          return new Date(a.registrationDate).getTime() - new Date(b.registrationDate).getTime();
+        case "registration-desc":
+          return new Date(b.registrationDate).getTime() - new Date(a.registrationDate).getTime();
+        case "expiry-asc":
+          const aExpiryDate = a.expiryDate ? new Date(a.expiryDate).getTime() : Infinity;
+          const bExpiryDate = b.expiryDate ? new Date(b.expiryDate).getTime() : Infinity;
+          return aExpiryDate - bExpiryDate;
+        case "expiry-desc":
+          const aExpiryDateDesc = a.expiryDate ? new Date(a.expiryDate).getTime() : -Infinity;
+          const bExpiryDateDesc = b.expiryDate ? new Date(b.expiryDate).getTime() : -Infinity;
+          return bExpiryDateDesc - aExpiryDateDesc;
+        case "status-active":
+          const aStatus = getMembershipStatus(a);
+          const bStatus = getMembershipStatus(b);
+          if (aStatus === "active" && bStatus !== "active") return -1;
+          if (aStatus !== "active" && bStatus === "active") return 1;
+          return 0;
+        case "expiry-days-asc":
+          const aDaysLeft = a.expiryDate ? differenceInDays(parseISO(a.expiryDate), new Date()) : -Infinity;
+          const bDaysLeft = b.expiryDate ? differenceInDays(parseISO(b.expiryDate), new Date()) : -Infinity;
+          return aDaysLeft - bDaysLeft;
+        default:
+          return 0;
+      }
+    });
+
     setFilteredMembers(filtered);
     setCurrentPage(1); // 필터링 시 첫 페이지로 이동
-  }, [searchQuery, statusFilter, membershipFilter]);  
+  }, [searchQuery, statusFilter, membershipFilter, sortFilter]);  
 
   const handleRowClick = (memberId: string) => {
     navigate(`/members/${memberId}`);
@@ -238,7 +269,7 @@ const MemberList = () => {
               />
             </div>
             
-            <div className="flex flex-row gap-2">
+            <div className="flex flex-row gap-2 flex-wrap">
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger className="w-[140px]">
                   <SelectValue placeholder="회원권 상태" />
@@ -260,6 +291,20 @@ const MemberList = () => {
                   <SelectItem value="membership">회원권</SelectItem>
                   <SelectItem value="pt">PT 이용권</SelectItem>
                   <SelectItem value="locker">락커 이용</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={sortFilter} onValueChange={setSortFilter}>
+                <SelectTrigger className="w-[160px]">
+                  <SelectValue placeholder="정렬 기준" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="registration-desc">등록일 최신순</SelectItem>
+                  <SelectItem value="registration-asc">등록일 오래된순</SelectItem>
+                  <SelectItem value="expiry-asc">만료일 빠른순</SelectItem>
+                  <SelectItem value="expiry-desc">만료일 늦은순</SelectItem>
+                  <SelectItem value="expiry-days-asc">남은일수 적은순</SelectItem>
+                  <SelectItem value="status-active">활성회원 우선</SelectItem>
                 </SelectContent>
               </Select>
               
@@ -368,9 +413,28 @@ const MemberList = () => {
                         {/* 만료일 */}
                         <TableCell className="text-center">
                           <div className="flex flex-col items-center">
-                            <span className="text-sm">{formatDate(member.expiryDate || '')}</span>
-                            {member.ptRemaining !== undefined && member.ptExpiryDate && (
-                              <span className="text-xs text-muted-foreground">PT: {formatDate(member.ptExpiryDate)}</span>
+                            {member.expiryDate ? (
+                              <>
+                                <span className="text-sm">{formatDate(member.expiryDate)}</span>
+                                {(() => {
+                                  const daysLeft = differenceInDays(parseISO(member.expiryDate), new Date());
+                                  if (daysLeft >= 0) {
+                                    return (
+                                      <span className={`text-xs ${daysLeft <= 7 ? 'text-red-500' : daysLeft <= 30 ? 'text-yellow-600' : 'text-muted-foreground'}`}>
+                                        {daysLeft}일 남음
+                                      </span>
+                                    );
+                                  } else {
+                                    return (
+                                      <span className="text-xs text-red-500">
+                                        {Math.abs(daysLeft)}일 초과
+                                      </span>
+                                    );
+                                  }
+                                })()}
+                              </>
+                            ) : (
+                              <span className="text-sm text-muted-foreground">-</span>
                             )}
                           </div>
                         </TableCell>
@@ -402,11 +466,6 @@ const MemberList = () => {
                               </span>
                             );
                           })()}
-                          {member.hasPT && member.ptRemaining !== undefined && (
-                            <div className="mt-1 text-xs text-muted-foreground">
-                              PT {member.ptRemaining}회 남음
-                            </div>
-                          )}
                         </TableCell>
                         
                         {/* 출석률 */}

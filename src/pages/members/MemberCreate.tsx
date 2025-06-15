@@ -54,8 +54,8 @@ const memberSchema = z.object({
   phoneNumber: z.string().refine(isValidPhoneNumber, { message: "유효한 핸드폰 번호를 입력해주세요. (010-0000-0000)" }),
   email: z.string().email({ message: "유효한 이메일 주소를 입력해주세요." }).optional().or(z.literal('')),
   address: z.object({
-    postalCode: z.string().min(5, { message: "우편번호를 검색해주세요." }),
-    address1: z.string().min(1, { message: "주소를 검색해주세요." }),
+    postalCode: z.string().optional(),
+    address1: z.string().optional(),
     address2: z.string().optional(),
   }),
   registrationPath: z.string().optional(),
@@ -158,7 +158,7 @@ const MemberCreate = () => {
         phone: data.phoneNumber,
         phoneNumber: data.phoneNumber, // Member 인터페이스에 있는 phoneNumber도 설정
         email: data.email || undefined,
-        address: `${data.address.address1} ${data.address.address2 || ''}`.trim(),
+        address: data.address.address1 ? `${data.address.address1} ${data.address.address2 || ''}`.trim() : undefined,
         memberType: "일반",
         registrationDate,
         membershipStatus: "pending",
@@ -315,7 +315,7 @@ const MemberCreate = () => {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="address.postalCode">우편번호 <span className="text-destructive">*</span></Label>
+              <Label htmlFor="address.postalCode">우편번호</Label>
               <div className="flex items-center gap-2">
                 <Controller
                   name="address.postalCode"
@@ -341,7 +341,7 @@ const MemberCreate = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="address.address1">주소 <span className="text-destructive">*</span></Label>
+              <Label htmlFor="address.address1">주소</Label>
               <Controller
                 name="address.address1"
                 control={control}

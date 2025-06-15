@@ -14,7 +14,8 @@ import {
   CreditCard, 
   UserPlus, 
   FileText,
-  MapPinned
+  MapPinned,
+  Smartphone
 } from "lucide-react";
 import { Member } from "@/data/mockData";
 import { formatPhoneNumber, formatDate, calculateAge } from "@/lib/utils";
@@ -37,8 +38,6 @@ export const MemberSummary = ({ member }: MemberSummaryProps) => {
 
   // 출석률 관련 함수 제거
 
-  // 이용 가능 지점 목록 (예시 데이터)
-  const availableBranches = member.availableBranches || ["본점"];
 
   return (
     <Card className="overflow-hidden">
@@ -123,18 +122,14 @@ export const MemberSummary = ({ member }: MemberSummaryProps) => {
                   </div>
                 </div>
                 
-                {/* 이용 가능 지점 */}
+                {/* 앱 이용 여부 */}
                 <div className="flex items-start gap-2">
-                  <Building className="h-5 w-5 text-muted-foreground mt-0.5" />
+                  <Smartphone className="h-5 w-5 text-muted-foreground mt-0.5" />
                   <div>
-                    <p className="text-sm text-muted-foreground mb-2">이용 가능 지점</p>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {availableBranches.map((branch, index) => (
-                        <Badge key={index} variant="outline" className="bg-gray-100">
-                          {branch}
-                        </Badge>
-                      ))}
-                    </div>
+                    <p className="text-sm text-muted-foreground mb-2">앱 이용 여부</p>
+                    <Badge className={member.appUsage ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-700"}>
+                      {member.appUsage ? "사용" : "미사용"}
+                    </Badge>
                   </div>
                 </div>
                 

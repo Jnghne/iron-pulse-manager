@@ -388,18 +388,12 @@ export const MembershipTab = ({
                     </span>
                   </div>
                 </div>
-                {member.availableBranches && member.availableBranches.length > 0 && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">이용 가능 지점</span>
-                    <div className="flex flex-wrap gap-1 justify-end">
-                      {member.availableBranches.map((branch, index) => (
-                        <Badge key={index} variant="outline" className="bg-gray-100">
-                          {branch}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">앱 이용 여부</span>
+                  <Badge className={member.appUsage ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-700"}>
+                    {member.appUsage ? "이용" : "미이용"}
+                  </Badge>
+                </div>
               </div>
             ) : (
               <div className="text-center py-6">
@@ -436,10 +430,10 @@ export const MembershipTab = ({
             <div>
               <CardTitle className="text-lg flex items-center gap-2">
                 <User className="h-5 w-5 text-gym-primary" />
-                PT 레슨권
+                개인 레슨 이용권
               </CardTitle>
               <CardDescription>
-                퍼스널 트레이닝 이용권 상태 및 정보
+                개인 레슨 이용권 상태 및 정보
               </CardDescription>
             </div>
             {/* PT 이용권이 없을 때만 신규 등록 버튼 표시 */}

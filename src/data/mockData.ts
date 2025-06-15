@@ -59,6 +59,7 @@ export interface Member {
 
   // 회원 상세 페이지 리뉴얼에 필요한 추가 필드
   availableBranches?: string[]; // 이용 가능 지점 목록
+  appUsage?: boolean; // 앱 이용 여부
   unpaidAmount?: number; // 잔여 미수금
   registrationPath?: string; // 방문/가입 경로
   memberNotes?: string; // 특이사항 메모
@@ -178,8 +179,8 @@ export const mockMembers: Member[] = [
     email: 'jiwon@example.com',
     address: '서울시 강남구 역삼동 123-45',
     memberType: '정회원',
-    registrationDate: '2023-01-15',
-    expiryDate: '2025-01-14',
+    registrationDate: '2025-01-15',
+    expiryDate: '2026-01-14',
     membershipStatus: 'active',
     ptRemaining: 15,
     ptTotal: 30,
@@ -197,7 +198,8 @@ export const mockMembers: Member[] = [
     membershipId: 'prod_001',
     membershipPrice: 50000,
     hasPT: true,
-    membershipStartDate: '2023-01-15'
+    membershipStartDate: '2023-01-15',
+    appUsage: true,
   },
   {
     id: 'M00002',
@@ -209,12 +211,12 @@ export const mockMembers: Member[] = [
     email: 'jihoon@example.com',
     address: '서울시 송파구 잠실동 456-78',
     memberType: '정회원',
-    registrationDate: '2023-02-10',
-    expiryDate: '2024-08-09',
+    registrationDate: '2025-02-10',
+    expiryDate: '2026-08-09',
     membershipStatus: 'active',
     ptRemaining: 8,
     ptTotal: 10,
-    ptStartDate: '2024-01-10',
+    ptStartDate: '2025-01-10',
     ptPrice: 700000,
     ptId: 'prod_002',
     ptExpiryDate: '2024-09-30',
@@ -229,7 +231,8 @@ export const mockMembers: Member[] = [
     membershipPrice: 50000,
     hasPT: true,
     lockerId: 'prod_003',
-    membershipStartDate: '2023-02-10'
+    membershipStartDate: '2023-02-10',
+    appUsage: true,
   },
   {
     id: 'M00003',
@@ -240,16 +243,17 @@ export const mockMembers: Member[] = [
     phoneNumber: '010-5555-7777',
     email: 'soojin@example.com',
     memberType: 'PT 회원',
-    registrationDate: '2023-03-20',
+    registrationDate: '2025-03-20',
     membershipStatus: 'active',
     ptRemaining: 22,
-    ptExpiryDate: '2024-12-31',
+    ptExpiryDate: '2026-12-31',
     attendanceRate: 78,
     trainerAssigned: '박지훈',
     smsConsent: false,
     membershipActive: false,
     hasPT: true,
-    ptId: 'prod_002' // PT 상품 ID 추가
+    ptId: 'prod_002', // PT 상품 ID 추가
+    appUsage: true,
   },
   {
     id: 'M00004',
@@ -260,17 +264,18 @@ export const mockMembers: Member[] = [
     phoneNumber: '010-2222-3333',
     email: 'donghyun@example.com',
     memberType: '일반회원',
-    registrationDate: '2023-05-05',
-    expiryDate: '2024-05-04',
+    registrationDate: '2025-05-05',
+    expiryDate: '2026-05-04',
     membershipStatus: 'expired',
     gymMembershipDaysLeft: 0,
-    gymMembershipExpiryDate: '2024-05-04',
+    gymMembershipExpiryDate: '2026-05-04',
     attendanceRate: 65,
     trainerAssigned: '김지원',
     smsConsent: true,
     membershipActive: false,
     hasPT: false,
-    lockerId: 'prod_003' // 락커 상품 ID 추가
+    lockerId: 'prod_003', // 락커 상품 ID 추가
+    appUsage: false,
   },
   {
     id: 'M00005',
@@ -281,11 +286,11 @@ export const mockMembers: Member[] = [
     phoneNumber: '010-8888-9999',
     email: 'younghee@example.com',
     memberType: 'VIP 회원',
-    registrationDate: '2023-01-02',
-    expiryDate: '2025-01-01',
+    registrationDate: '2025-01-02',
+    expiryDate: '2026-01-01',
     membershipStatus: 'active',
     ptRemaining: 30,
-    ptExpiryDate: '2025-01-01',
+    ptExpiryDate: '2026-01-01',
     gymMembershipDaysLeft: 220,
     gymMembershipExpiryDate: '2025-01-01',
     attendanceRate: 95,
@@ -297,7 +302,8 @@ export const mockMembers: Member[] = [
     lockerId: undefined, // 김영희 회원은 락커 미사용 (명시적으로 undefined 설정)
     membershipId: 'prod_001', // 헬스 6개월 상품 ID
     ptId: 'prod_002', // PT 10회 상품 ID
-    membershipStartDate: '2023-01-02'
+    membershipStartDate: '2023-01-02',
+    appUsage: true,
   },
   {
     id: 'M00006',
@@ -308,19 +314,20 @@ export const mockMembers: Member[] = [
     phoneNumber: '010-7777-6666',
     email: 'jiwon.choi@example.com',
     memberType: '정회원',
-    registrationDate: '2023-06-15',
-    expiryDate: '2024-06-14',
+    registrationDate: '2025-06-15',
+    expiryDate: '2026-06-14',
     membershipStatus: 'active',
     ptRemaining: 0,
     gymMembershipDaysLeft: 20,
-    gymMembershipExpiryDate: '2024-06-14',
+    gymMembershipExpiryDate: '2026-06-14',
     attendanceRate: 70,
     trainerAssigned: '김지원',
     smsConsent: true,
     membershipActive: true,
     hasPT: false,
     membershipId: 'prod_001', // 헬스 6개월 상품 ID
-    membershipStartDate: '2023-06-15'
+    membershipStartDate: '2023-06-15',
+    appUsage: false,
   },
   {
     id: 'M00007',
@@ -331,16 +338,17 @@ export const mockMembers: Member[] = [
     phoneNumber: '010-3333-4444',
     email: 'jiyoung@example.com',
     memberType: '학생 회원',
-    registrationDate: '2024-01-10',
-    expiryDate: '2024-07-09',
+    registrationDate: '2025-01-10',
+    expiryDate: '2025-07-09',
     membershipStatus: 'active',
     gymMembershipDaysLeft: 45,
-    gymMembershipExpiryDate: '2024-07-09',
+    gymMembershipExpiryDate: '2025-07-09',
     attendanceRate: 60,
     smsConsent: true,
     membershipActive: false,
     hasPT: false,
-    membershipStartDate: '2024-01-10'
+    membershipStartDate: '2024-01-10',
+    appUsage: false,
   },
   {
     id: 'M00008',
@@ -351,15 +359,16 @@ export const mockMembers: Member[] = [
     phoneNumber: '010-9999-8888',
     email: 'jinsoo@example.com',
     memberType: 'PT 회원',
-    registrationDate: '2023-09-01',
+    registrationDate: '2025-09-01',
     membershipStatus: 'active',
     ptRemaining: 5,
-    ptExpiryDate: '2024-06-30',
+    ptExpiryDate: '2026-06-30',
     attendanceRate: 88,
     trainerAssigned: '김지원',
     smsConsent: true,
     membershipActive: false,
-    hasPT: false
+    hasPT: false,
+    appUsage: false,
   },
   {
     id: 'M00009',
@@ -370,17 +379,18 @@ export const mockMembers: Member[] = [
     phoneNumber: '010-7777-8888',
     email: 'seoyeon@example.com',
     memberType: '월 회원',
-    registrationDate: '2024-04-01',
-    expiryDate: '2024-06-01',
+    registrationDate: '2025-04-01',
+    expiryDate: '2025-06-01',
     membershipStatus: 'active',
     gymMembershipDaysLeft: 5,
-    gymMembershipExpiryDate: '2024-06-01',
+    gymMembershipExpiryDate: '2025-06-01',
     attendanceRate: 45,
     smsConsent: false,
     membershipActive: true,
     hasPT: false,
     membershipId: 'prod_001', // 헬스 6개월 상품 ID
-    membershipStartDate: '2024-04-01'
+    membershipStartDate: '2024-04-01',
+    appUsage: false,
   },
   {
     id: 'M00010',
@@ -391,13 +401,13 @@ export const mockMembers: Member[] = [
     phoneNumber: '010-1111-2222',
     email: 'taeho@example.com',
     memberType: 'VIP 회원',
-    registrationDate: '2023-11-15',
-    expiryDate: '2024-11-14',
+    registrationDate: '2025-11-15',
+    expiryDate: '2026-11-14',
     membershipStatus: 'active',
     ptRemaining: 25,
     ptExpiryDate: '2026-12-31',
     gymMembershipDaysLeft: 170,
-    gymMembershipExpiryDate: '2024-11-14',
+    gymMembershipExpiryDate: '2026-11-14',
     attendanceRate: 90,
     trainerAssigned: '박지훈',
     trainerNotes: '개인 경기 준비 중. 근지구력 향상에 집중.',
@@ -407,7 +417,8 @@ export const mockMembers: Member[] = [
     lockerId: 'B05',
     membershipId: 'prod_001', // 헬스 6개월 상품 ID
     ptId: 'prod_002', // PT 10회 상품 ID
-    membershipStartDate: '2023-11-15'
+    membershipStartDate: '2023-11-15',
+    appUsage: true,
   },
   {
     id: 'M00011',
@@ -418,13 +429,13 @@ export const mockMembers: Member[] = [
     phoneNumber: '010-5555-6666',
     email: 'mira@example.com',
     memberType: '정회원',
-    registrationDate: '2023-08-01',
-    expiryDate: '2024-08-01',
+    registrationDate: '2025-08-01',
+    expiryDate: '2026-08-01',
     membershipStatus: 'active',
     ptRemaining: 12,
-    ptExpiryDate: '2024-10-31',
+    ptExpiryDate: '2026-10-31',
     gymMembershipDaysLeft: 65,
-    gymMembershipExpiryDate: '2024-08-01',
+    gymMembershipExpiryDate: '2026-08-01',
     attendanceRate: 75,
     trainerAssigned: '김지원',
     smsConsent: true,
@@ -432,7 +443,8 @@ export const mockMembers: Member[] = [
     hasPT: true,
     membershipId: 'prod_001', // 헬스 6개월 상품 ID
     ptId: 'prod_002', // PT 10회 상품 ID
-    membershipStartDate: '2023-08-01'
+    membershipStartDate: '2023-08-01',
+    appUsage: true,
   },
   {
     id: 'M00012',
@@ -443,15 +455,16 @@ export const mockMembers: Member[] = [
     phoneNumber: '010-4444-3333',
     email: 'sungjoon@example.com',
     memberType: '일반회원',
-    registrationDate: '2023-12-01',
-    expiryDate: '2024-05-31',
+    registrationDate: '2025-12-01',
+    expiryDate: '2026-05-31',
     membershipStatus: 'expired',
     gymMembershipDaysLeft: 0,
-    gymMembershipExpiryDate: '2024-05-31',
+    gymMembershipExpiryDate: '2026-05-31',
     attendanceRate: 50,
     smsConsent: false,
     membershipActive: false,
-    hasPT: false
+    hasPT: false,
+    appUsage: false,
   }
 ];
 

@@ -554,77 +554,36 @@ export const mockVisitorsData = [
   { name: '3일전', total: 40, male: 21, female: 19 },
 ];
 
-// 락커 데이터 (1-200번)
-export const mockLockers: Locker[] = (() => {
-  const lockers: Locker[] = [];
-  const currentDate = new Date();
-  
-  for (let i = 1; i <= 200; i++) {
-    const lockerId = `L${i.toString().padStart(3, '0')}`;
-    
-    // 약 40%의 락커를 사용중으로 설정
-    const isOccupied = Math.random() < 0.4;
-    
-    if (isOccupied) {
-      // 사용중인 락커에 대해 다양한 상태 생성
-      const random = Math.random();
-      let startDate: Date;
-      let endDate: Date;
-      
-      if (random < 0.1) {
-        // 10% - 만료된 락커
-        startDate = new Date(currentDate.getTime() - 180 * 24 * 60 * 60 * 1000); // 6개월 전 시작
-        endDate = new Date(currentDate.getTime() - 10 * 24 * 60 * 60 * 1000); // 10일 전 만료
-      } else if (random < 0.2) {
-        // 10% - 만료 임박 락커 (30일 이내)
-        startDate = new Date(currentDate.getTime() - 150 * 24 * 60 * 60 * 1000); // 5개월 전 시작
-        endDate = new Date(currentDate.getTime() + Math.floor(Math.random() * 30) * 24 * 60 * 60 * 1000); // 0-30일 후 만료
-      } else {
-        // 80% - 정상 사용중
-        startDate = new Date(currentDate.getTime() - Math.floor(Math.random() * 90) * 24 * 60 * 60 * 1000); // 0-3개월 전 시작
-        endDate = new Date(currentDate.getTime() + (30 + Math.floor(Math.random() * 330)) * 24 * 60 * 60 * 1000); // 30-360일 후 만료
-      }
-      
-      // 샘플 회원 정보
-      const sampleMembers = [
-        { id: 'M00001', name: '김지원' },
-        { id: 'M00002', name: '이지훈' },
-        { id: 'M00003', name: '박수진' },
-        { id: 'M00004', name: '정동현' },
-        { id: 'M00005', name: '김영희' },
-        { id: 'M00006', name: '최지원' },
-        { id: 'M00007', name: '이지영' },
-        { id: 'M00008', name: '박진수' },
-        { id: 'M00009', name: '이서연' },
-        { id: 'M00010', name: '김태호' },
-      ];
-      
-      const memberIndex = Math.floor(Math.random() * sampleMembers.length);
-      const member = sampleMembers[memberIndex];
-      
-      lockers.push({
-        id: lockerId,
-        number: i,
-        isOccupied: true,
-        memberId: member.id,
-        memberName: member.name,
-        startDate: startDate.toISOString().split('T')[0],
-        endDate: endDate.toISOString().split('T')[0],
-        fee: 60000 + Math.floor(Math.random() * 40000), // 60,000 ~ 100,000원
-        isPaid: Math.random() < 0.9 // 90% 결제 완료
-      });
-    } else {
-      // 비어있는 락커
-      lockers.push({
-        id: lockerId,
-        number: i,
-        isOccupied: false
-      });
-    }
-  }
-  
-  return lockers;
-})();
+// 락커 데이터 (1-200번) - 고정 데이터
+export const mockLockers: Locker[] = [
+  // 사용중인 락커들 (다양한 상태)
+  { id: 'L001', number: 1, isOccupied: true, memberId: 'M00001', memberName: '김지원', startDate: '2024-01-15', endDate: '2025-01-14', fee: 80000, isPaid: true },
+  { id: 'L002', number: 2, isOccupied: false },
+  { id: 'L003', number: 3, isOccupied: true, memberId: 'M00002', memberName: '이지훈', startDate: '2024-02-10', endDate: '2024-08-09', fee: 70000, isPaid: true }, // 만료
+  { id: 'L004', number: 4, isOccupied: false },
+  { id: 'L005', number: 5, isOccupied: true, memberId: 'M00003', memberName: '박수진', startDate: '2024-11-01', endDate: '2025-01-30', fee: 90000, isPaid: true }, // 만료 임박
+  { id: 'L006', number: 6, isOccupied: false },
+  { id: 'L007', number: 7, isOccupied: true, memberId: 'M00004', memberName: '정동현', startDate: '2024-06-15', endDate: '2025-06-14', fee: 85000, isPaid: true },
+  { id: 'L008', number: 8, isOccupied: false },
+  { id: 'L009', number: 9, isOccupied: true, memberId: 'M00005', memberName: '김영희', startDate: '2024-03-20', endDate: '2024-09-19', fee: 75000, isPaid: false }, // 만료
+  { id: 'L010', number: 10, isOccupied: false },
+  { id: 'L011', number: 11, isOccupied: true, memberId: 'M00006', memberName: '최지원', startDate: '2024-12-01', endDate: '2025-01-15', fee: 95000, isPaid: true }, // 만료 임박
+  { id: 'L012', number: 12, isOccupied: false },
+  { id: 'L013', number: 13, isOccupied: true, memberId: 'M00007', memberName: '이지영', startDate: '2024-08-10', endDate: '2025-08-09', fee: 88000, isPaid: true },
+  { id: 'L014', number: 14, isOccupied: false },
+  { id: 'L015', number: 15, isOccupied: true, memberId: 'M00008', memberName: '박진수', startDate: '2024-01-05', endDate: '2024-07-04', fee: 65000, isPaid: true }, // 만료
+  { id: 'L016', number: 16, isOccupied: false },
+  { id: 'L017', number: 17, isOccupied: true, memberId: 'M00009', memberName: '이서연', startDate: '2024-11-15', endDate: '2025-02-14', fee: 82000, isPaid: true },
+  { id: 'L018', number: 18, isOccupied: false },
+  { id: 'L019', number: 19, isOccupied: true, memberId: 'M00010', memberName: '김태호', startDate: '2024-12-10', endDate: '2025-01-20', fee: 92000, isPaid: true }, // 만료 임박
+  { id: 'L020', number: 20, isOccupied: false },
+  // 나머지 락커들은 비어있음 (21-200번)
+  ...Array.from({ length: 180 }, (_, i) => ({
+    id: `L${(i + 21).toString().padStart(3, '0')}`,
+    number: i + 21,
+    isOccupied: false
+  }))
+];
 
 // 출석 기록 생성 함수
 export const getMockAttendance = (memberId: string, days: number = 90): AttendanceRecord[] => {

@@ -1,380 +1,257 @@
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Users, Calendar, Dumbbell, MessageSquare, User, Bell, ChevronRight } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import MemberDetail from "./members/MemberDetail";
-import { mockMembers } from "@/data/mockData";
-import { formatDate } from "@/lib/utils";
-import { differenceInDays, parseISO, isValid, format } from "date-fns";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AreaChart, Area, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { Users, TrendingUp, TrendingDown, Clock, Dumbbell } from "lucide-react";
+import { mockVisitorsData, mockMembers } from "@/data/mockData";
+import SimpleCalendar from "@/components/SimpleCalendar";
 
-// 현재 트레이너가 담당하는 회원들만 필터링
-const currentTrainer = "박지훈"; // 실제 구현시 로그인한 트레이너 정보로 대체
-const trainerMembers = mockMembers.filter(member => member.trainerAssigned === currentTrainer);
-
-// 트레이너 대시보드 데이터 계산
-const trainerData = {
-  totalMembers: trainerMembers.length,
-  totalRemainingPT: trainerMembers.reduce((sum, member) => sum + (member.ptRemaining || 0), 0),
-  todayScheduledPT: 8, // 실제 구현시 API로 대체
-  todayScheduledConsultations: 3, // 실제 구현시 API로 대체
-  members: trainerMembers
+// Get total member count
+const getTotalMembers = () => {
+  return mockMembers.length;
 };
 
-// 공지사항 목록 (실제 구현시 API로 대체)
-const mockNotices = [
-  {
-    id: 1,
-    title: "5월 트레이너 미팅 일정 안내",
-    content: "5월 트레이너 미팅이 5월 30일 오후 6시에 진행됩니다. 참석 부탁드립니다.",
-    date: "2025-05-25T10:00:00",
-    author: "관리자",
-    isImportant: true
-  },
-  {
-    id: 2,
-    title: "신규 PT 프로그램 안내",
-    content: "신규 PT 프로그램이 6월부터 시작됩니다. 자세한 내용은 공지사항을 참고해주세요.",
-    date: "2025-05-20T14:30:00",
-    author: "관리자",
-    isImportant: false
-  },
-  {
-    id: 3,
-    title: "헬스장 장비 점검 일정",
-    content: "6월 1일부터 3일까지 헬스장 장비 점검이 있을 예정입니다. 해당 기간 동안 일부 장비 사용이 제한될 수 있습니다.",
-    date: "2025-05-28T09:15:00",
-    author: "시설관리자",
-    isImportant: true
-  },
-  {
-    id: 4,
-    title: "회원 만족도 조사 안내",
-    content: "6월 중 회원 만족도 조사가 진행될 예정입니다. 회원님들의 적극적인 참여를 부탁드립니다.",
-    date: "2025-05-15T11:45:00",
-    author: "관리자",
-    isImportant: false
-  },
-  {
-    id: 5,
-    title: "새로운 그룹 피트니스 프로그램 오픈",
-    content: "6월부터 새로운 그룹 피트니스 프로그램이 시작됩니다. 트레이너들은 관심 있는 회원들에게 안내해 주세요.",
-    date: "2025-05-10T16:20:00",
-    author: "프로그램 관리자",
-    isImportant: true
-  }
+// Get members with expiring memberships (within 30 days)
+const getExpiringMemberships = () => {
+  const today = new Date();
+  const thirtyDaysFromNow = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
+  
+  return mockMembers.filter(member => {
+    if (!member.expiryDate) return false;
+    const expiryDate = new Date(member.expiryDate);
+    return expiryDate >= today && expiryDate <= thirtyDaysFromNow;
+  }).length;
+};
+
+// Get PT members with expiring sessions (within 30 days)
+const getExpiringPTMembers = () => {
+  const today = new Date();
+  const thirtyDaysFromNow = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
+  
+  return mockMembers.filter(member => {
+    if (!member.ptExpiryDate || !member.ptRemaining || member.ptRemaining === 0) return false;
+    const ptExpiryDate = new Date(member.ptExpiryDate);
+    return ptExpiryDate >= today && ptExpiryDate <= thirtyDaysFromNow;
+  }).length;
+};
+
+// Function to get change percentage (mock data for now)
+const getChangePercentage = (type: 'members' | 'membership' | 'pt') => {
+  // Mock percentage changes
+  if (type === 'members') return 8.5;
+  if (type === 'membership') return -12.3;
+  if (type === 'pt') return 15.7;
+  return 0;
+};
+
+// Prepare visitor data for daily chart
+const dailyVisitorData = mockVisitorsData.slice(0, 7).map((item) => ({
+  date: item.name,
+  방문자: item.total,
+})).reverse();
+
+// Prepare visitor data for weekly chart (mock monthly data)
+const weeklyVisitorData = [
+  { date: '1주차', 방문자: 280 },
+  { date: '2주차', 방문자: 320 },
+  { date: '3주차', 방문자: 290 },
+  { date: '4주차', 방문자: 350 },
+  { date: '5주차', 방문자: 380 },
+  { date: '6주차', 방문자: 420 },
 ];
 
 const TrainerDashboard = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [sortField, setSortField] = useState("name");
-  const [sortDirection, setSortDirection] = useState("asc");
-  const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
-  const [selectedNoticeId, setSelectedNoticeId] = useState<number | null>(null);
-
-  const handleSort = (field: string) => {
-    if (sortField === field) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
-    } else {
-      setSortField(field);
-      setSortDirection("asc");
-    }
-  };
-
-  const filteredAndSortedMembers = trainerData.members
-    .filter(member => 
-      member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      member.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (member.phone && member.phone.toLowerCase().includes(searchTerm.toLowerCase()))
-    )
-    .sort((a, b) => {
-      const direction = sortDirection === "asc" ? 1 : -1;
-      if (sortField === "name") {
-        return direction * a.name.localeCompare(b.name);
-      }
-      if (sortField === "id") {
-        return direction * a.id.localeCompare(b.id);
-      }
-      if (sortField === "registrationDate" || sortField === "membershipEndDate" || sortField === "ptExpireDate") {
-        const aDate = a[sortField as keyof typeof a] ? new Date(a[sortField as keyof typeof a] as string).getTime() : 0;
-        const bDate = b[sortField as keyof typeof b] ? new Date(b[sortField as keyof typeof b] as string).getTime() : 0;
-        return direction * (aDate - bDate);
-      }
-      if (typeof a[sortField as keyof typeof a] === "boolean" && typeof b[sortField as keyof typeof b] === "boolean") {
-        return direction * (a[sortField as keyof typeof a] === b[sortField as keyof typeof b] ? 0 : a[sortField as keyof typeof a] ? 1 : -1);
-      }
-      const aValue = a[sortField as keyof typeof a] as number;
-      const bValue = b[sortField as keyof typeof b] as number;
-      return direction * (aValue - bValue);
-    });
-
+  const [visitorTab, setVisitorTab] = useState("daily");
+  
   return (
     <div className="space-y-8">
-      {/* 통계 카드 */}
-      <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="overflow-hidden relative bg-gradient-to-br from-white to-blue-50 dark:from-gray-900 dark:to-gray-800 border-none shadow-md hover:shadow-lg transition-all duration-300">
-          <div className="absolute top-0 right-0 w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-bl-3xl flex items-center justify-center">
-            <Users className="h-6 w-6 text-gym-primary" />
-          </div>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">총 PT 회원 수</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{trainerData.totalMembers}명</div>
-          </CardContent>
-        </Card>
-
-        <Card className="overflow-hidden relative bg-gradient-to-br from-white to-indigo-50 dark:from-gray-900 dark:to-gray-800 border-none shadow-md hover:shadow-lg transition-all duration-300">
-          <div className="absolute top-0 right-0 w-16 h-16 bg-indigo-100 dark:bg-indigo-900/30 rounded-bl-3xl flex items-center justify-center">
-            <Dumbbell className="h-6 w-6 text-indigo-500" />
-          </div>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">총 잔여 PT 횟수</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{trainerData.totalRemainingPT}회</div>
-          </CardContent>
-        </Card>
-
-        <Card className="overflow-hidden relative bg-gradient-to-br from-white to-purple-50 dark:from-gray-900 dark:to-gray-800 border-none shadow-md hover:shadow-lg transition-all duration-300">
-          <div className="absolute top-0 right-0 w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-bl-3xl flex items-center justify-center">
-            <Calendar className="h-6 w-6 text-purple-500" />
-          </div>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">오늘 예약된 PT</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{trainerData.todayScheduledPT}회</div>
-          </CardContent>
-        </Card>
-
-        <Card className="overflow-hidden relative bg-gradient-to-br from-white to-pink-50 dark:from-gray-900 dark:to-gray-800 border-none shadow-md hover:shadow-lg transition-all duration-300">
-          <div className="absolute top-0 right-0 w-16 h-16 bg-pink-100 dark:bg-pink-900/30 rounded-bl-3xl flex items-center justify-center">
-            <MessageSquare className="h-6 w-6 text-pink-500" />
-          </div>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">오늘 예약된 상담</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{trainerData.todayScheduledConsultations}회</div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* 대시보드 주요 컨텐츠 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* 회원 목록 - 왼쪽 영역 */}
-        <Card className="border-none shadow-md hover:shadow-lg transition-all duration-300">
-          <CardHeader className="pb-2">
-            <div className="flex flex-row justify-between items-center">
-              <div>
-                <CardTitle className="text-lg font-semibold">회원 목록</CardTitle>
-                <CardDescription>관리 중인 회원들의 상세 정보</CardDescription>
-              </div>
-              <div className="flex gap-2">
-                <Input
-                  placeholder="회원명 검색..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-32 h-8"
-                />
-                <Select value={sortField} onValueChange={setSortField}>
-                  <SelectTrigger className="w-24 h-8">
-                    <SelectValue placeholder="정렬" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="name">이름</SelectItem>
-                    <SelectItem value="attendanceRate">출석률</SelectItem>
-                    <SelectItem value="ptRemaining">남은 PT</SelectItem>
-                    <SelectItem value="membershipDaysLeft">잔여 헬스권</SelectItem>
-                  </SelectContent>
-                </Select>
+      {/* 회원 통계 카드 */}
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+        {/* Total Members */}
+        <Card className="border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 bg-white dark:bg-gray-800">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">총 회원 수</CardTitle>
+              <div className="p-2 rounded-lg bg-purple-50 dark:bg-purple-900/20">
+                <Users className="h-4 w-4 text-purple-600 dark:text-purple-400" />
               </div>
             </div>
-          </CardHeader>
-          <CardContent>
-            <div className="max-h-[400px] overflow-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="cursor-pointer text-center w-[150px] pl-10" onClick={() => handleSort("id")}>
-                      회원정보 {sortField === "id" && (sortDirection === "asc" ? "↑" : "↓")}
-                    </TableHead>
-                    <TableHead className="cursor-pointer text-center pl-4" onClick={() => handleSort("ptRemaining")}>
-                      남은 PT {sortField === "ptRemaining" && (sortDirection === "asc" ? "↑" : "↓")}
-                    </TableHead>
-                    <TableHead className="cursor-pointer text-center pl-4" onClick={() => handleSort("membershipDaysLeft")}>
-                      잔여 헬스권 {sortField === "membershipDaysLeft" && (sortDirection === "asc" ? "↑" : "↓")}
-                    </TableHead>
-                    <TableHead className="cursor-pointer text-center pr-4" onClick={() => handleSort("attendanceRate")}>
-                      출석률 {sortField === "attendanceRate" && (sortDirection === "asc" ? "↑" : "↓")}
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredAndSortedMembers.map((member) => {
-                    return (
-                      <TableRow 
-                        key={member.id}
-                        className="cursor-pointer hover:bg-muted/50"
-                        onClick={() => setSelectedMemberId(member.id)}
-                      >
-                        {/* 회원 정보 (프로필 사진, 이름, 회원번호) */}
-                        <TableCell className="w-[150px] pl-10">
-                          <div className="flex items-center space-x-3">
-                            {/* 프로필 사진 */}
-                            <div>
-                              {/* 프로필 이미지 없음 - 이니셜 표시 */}
-                                <div className={`h-10 w-10 rounded-full flex items-center justify-center text-white bg-gym-primary`}>
-                                  {member.name.charAt(0)}
-                                </div>
-                            </div>
-                            {/* 이름 및 회원번호 */}
-                            <div className="flex flex-col">
-                              <span className="font-medium">{member.name}</span>
-                              <span className="text-xs text-muted-foreground font-mono">{member.id}</span>
-                            </div>
-                          </div>
-                        </TableCell>
-                        
-                        {/* 남은 PT */}
-                        <TableCell className="text-center pl-4">
-                          <div className="flex flex-col items-center">
-                            <span className="text-sm font-medium">{member.ptRemaining || 0}회</span>
-                            {member.ptExpiryDate && (
-                              <span className="text-xs text-muted-foreground">만료: {formatDate(member.ptExpiryDate)}</span>
-                            )}
-                          </div>
-                        </TableCell>
-                        
-                        {/* 잔여 헬스권 */}
-                        <TableCell className="text-center pl-4">
-                          <div className="flex flex-col items-center">
-                            {member.gymMembershipExpiryDate ? (
-                              <>
-                                <span className="text-sm font-medium">
-                                  {isValid(parseISO(member.gymMembershipExpiryDate)) ? 
-                                    `${Math.max(0, differenceInDays(parseISO(member.gymMembershipExpiryDate), new Date()))}일` : 
-                                    "-"}
-                                </span>
-                                <span className="text-xs text-muted-foreground">만료: {formatDate(member.gymMembershipExpiryDate)}</span>
-                              </>
-                            ) : (
-                              <span className="text-sm">-</span>
-                            )}
-                          </div>
-                        </TableCell>
-                        
-                        {/* 출석률 */}
-                        <TableCell className="text-center pr-4">
-                          <div className="flex flex-col items-center gap-1">
-                            <div className="w-20">
-                              <div className="w-full bg-muted rounded-full h-2.5">
-                                <div 
-                                  className="bg-gym-primary h-2.5 rounded-full" 
-                                  style={{ width: `${member.attendanceRate || 0}%` }}
-                                ></div>
-                              </div>
-                            </div>
-                            <span className="text-xs font-medium">{member.attendanceRate || 0}%</span>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
+            <div className="text-2xl font-semibold text-gray-900 dark:text-white">
+              {getTotalMembers()}명
             </div>
-          </CardContent>
-        </Card>
-
-        {/* 공지사항 - 오른쪽 영역 */}
-        <Card className="border-none shadow-md hover:shadow-lg transition-all duration-300">
-          <CardHeader className="pb-2">
-            <div className="flex justify-between items-center">
-              <div className="flex items-center gap-2">
-                <Bell className="h-5 w-5 text-gym-primary" />
-                <CardTitle className="text-lg font-semibold">공지사항</CardTitle>
-              </div>
-              <Badge variant="outline" className="bg-gym-primary/10 text-gym-primary hover:bg-gym-primary/20">
-                최근 업데이트
-              </Badge>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4 max-h-[400px] overflow-auto">
-              {selectedNoticeId ? (
-                // 선택된 공지사항 상세 보기
-                <div className="space-y-4">
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="flex items-center text-muted-foreground" 
-                    onClick={() => setSelectedNoticeId(null)}
-                  >
-                    <ChevronRight className="h-4 w-4 rotate-180 mr-1" />
-                    목록으로 돌아가기
-                  </Button>
-                  
-                  {mockNotices.filter(notice => notice.id === selectedNoticeId).map(notice => (
-                    <div key={notice.id} className="space-y-3">
-                      <div className="flex justify-between items-start">
-                        <h3 className="text-xl font-bold">{notice.title}</h3>
-                        {notice.isImportant && (
-                          <Badge className="bg-red-100 text-red-700 hover:bg-red-200">중요</Badge>
-                        )}
-                      </div>
-                      
-                      <div className="flex items-center text-sm text-muted-foreground">
-                        <span className="font-medium">{notice.author}</span>
-                        <span className="mx-2">|</span>
-                        <span>{format(new Date(notice.date), 'yyyy년 MM월 dd일 HH:mm')}</span>
-                      </div>
-                      
-                      <div className="bg-muted/50 p-4 rounded-md whitespace-pre-line">
-                        {notice.content}
-                      </div>
-                    </div>
-                  ))}
+            <div className="flex items-center mt-1">
+              {getChangePercentage('members') >= 0 ? (
+                <div className="flex items-center text-green-600 dark:text-green-400 gap-1">
+                  <TrendingUp className="h-3 w-3" />
+                  <span className="text-xs font-medium">+{getChangePercentage('members').toFixed(1)}%</span>
                 </div>
               ) : (
-                // 공지사항 목록
-                mockNotices.map(notice => (
-                  <div 
-                    key={notice.id}
-                    className="p-3 border rounded-md hover:bg-muted/50 cursor-pointer transition-colors"
-                    onClick={() => setSelectedNoticeId(notice.id)}
-                  >
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-medium flex items-center gap-2">
-                        {notice.isImportant && (
-                          <Badge className="bg-red-100 text-red-700 hover:bg-red-200">중요</Badge>
-                        )}
-                        {notice.title}
-                      </h3>
-                      <span className="text-xs text-muted-foreground">
-                        {format(new Date(notice.date), 'MM/dd')}
-                      </span>
-                    </div>
-                    <p className="text-sm text-muted-foreground truncate">{notice.content}</p>
-                  </div>
-                ))
+                <div className="flex items-center text-red-600 dark:text-red-400 gap-1">
+                  <TrendingDown className="h-3 w-3" />
+                  <span className="text-xs font-medium">{getChangePercentage('members').toFixed(1)}%</span>
+                </div>
               )}
+              <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">지난달 대비</span>
             </div>
-          </CardContent>
+          </CardHeader>
+        </Card>
+        
+        {/* Expiring Memberships */}
+        <Card className="border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 bg-white dark:bg-gray-800">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">만료 임박 회원권 수</CardTitle>
+              <div className="p-2 rounded-lg bg-orange-50 dark:bg-orange-900/20">
+                <Clock className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+              </div>
+            </div>
+            <div className="text-2xl font-semibold text-gray-900 dark:text-white">
+              {getExpiringMemberships()}명
+            </div>
+            <div className="flex items-center mt-1">
+              {getChangePercentage('membership') >= 0 ? (
+                <div className="flex items-center text-green-600 dark:text-green-400 gap-1">
+                  <TrendingUp className="h-3 w-3" />
+                  <span className="text-xs font-medium">+{getChangePercentage('membership').toFixed(1)}%</span>
+                </div>
+              ) : (
+                <div className="flex items-center text-red-600 dark:text-red-400 gap-1">
+                  <TrendingDown className="h-3 w-3" />
+                  <span className="text-xs font-medium">{getChangePercentage('membership').toFixed(1)}%</span>
+                </div>
+              )}
+              <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">지난달 대비</span>
+            </div>
+          </CardHeader>
+        </Card>
+
+        {/* Expiring PT Members */}
+        <Card className="border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 bg-white dark:bg-gray-800">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">만료임박 PT 회원 수</CardTitle>
+              <div className="p-2 rounded-lg bg-green-50 dark:bg-green-900/20">
+                <Dumbbell className="h-4 w-4 text-green-600 dark:text-green-400" />
+              </div>
+            </div>
+            <div className="text-2xl font-semibold text-gray-900 dark:text-white">
+              {getExpiringPTMembers()}명
+            </div>
+            <div className="flex items-center mt-1">
+              {getChangePercentage('pt') >= 0 ? (
+                <div className="flex items-center text-green-600 dark:text-green-400 gap-1">
+                  <TrendingUp className="h-3 w-3" />
+                  <span className="text-xs font-medium">+{getChangePercentage('pt').toFixed(1)}%</span>
+                </div>
+              ) : (
+                <div className="flex items-center text-red-600 dark:text-red-400 gap-1">
+                  <TrendingDown className="h-3 w-3" />
+                  <span className="text-xs font-medium">{getChangePercentage('pt').toFixed(1)}%</span>
+                </div>
+              )}
+              <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">지난달 대비</span>
+            </div>
+          </CardHeader>
         </Card>
       </div>
 
-      {/* 회원 상세 정보 모달 */}
-      <Dialog open={selectedMemberId !== null} onOpenChange={(open) => !open && setSelectedMemberId(null)}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-auto">
-          {selectedMemberId && <MemberDetail id={selectedMemberId} />}
-        </DialogContent>
-      </Dialog>
+      {/* 메인 컨텐츠 */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* 방문자 통계 그래프 */}
+        <Card className="col-span-1 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 bg-white dark:bg-gray-800">
+          <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-4 border-b border-gray-200 dark:border-gray-700">
+            <div>
+              <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">방문자 요약</CardTitle>
+            </div>
+            <Tabs defaultValue="daily" value={visitorTab} onValueChange={setVisitorTab} className="mt-2 sm:mt-0">
+              <TabsList className="h-5 bg-blue-50 dark:bg-blue-950/30">
+                <TabsTrigger value="daily" className="text-xs px-3 py-1 text-blue-600 dark:text-blue-400 data-[state=active]:bg-blue-600 data-[state=active]:text-white dark:data-[state=active]:bg-blue-500 dark:data-[state=active]:text-white">일일</TabsTrigger>
+                <TabsTrigger value="weekly" className="text-xs px-3 py-1 text-blue-600 dark:text-blue-400 data-[state=active]:bg-blue-600 data-[state=active]:text-white dark:data-[state=active]:bg-blue-500 dark:data-[state=active]:text-white">주간</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </CardHeader>
+          <CardContent className="pt-6">
+            <div className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                {visitorTab === "daily" ? (
+                  <AreaChart
+                    data={dailyVisitorData}
+                    margin={{ top: 10, right: 10, left: 0, bottom: 20 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                    <XAxis dataKey="date" tick={{ fontSize: 12 }} dy={10} />
+                    <YAxis
+                      tickFormatter={(value) => `${value}명`}
+                      tick={{ fontSize: 12 }}
+                      width={50}
+                    />
+                    <Tooltip
+                      formatter={(value) => `${value}명`}
+                      contentStyle={{ 
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+                        borderRadius: '8px', 
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)', 
+                        border: '1px solid #f0f0f0' 
+                      }}
+                    />
+                    <defs>
+                      <linearGradient id="colorVisitor" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#4EA8DE" stopOpacity={0.8}/>
+                        <stop offset="95%" stopColor="#4EA8DE" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <Area 
+                      type="monotone" 
+                      dataKey="방문자" 
+                      stroke="#4EA8DE" 
+                      strokeWidth={2}
+                      fill="url(#colorVisitor)" 
+                      activeDot={{ r: 6, strokeWidth: 0 }} 
+                    />
+                  </AreaChart>
+                ) : (
+                  <LineChart
+                    data={weeklyVisitorData}
+                    margin={{ top: 10, right: 10, left: 0, bottom: 20 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                    <XAxis dataKey="date" tick={{ fontSize: 12 }} dy={10} />
+                    <YAxis
+                      tickFormatter={(value) => `${value}명`}
+                      tick={{ fontSize: 12 }}
+                      width={50}
+                    />
+                    <Tooltip
+                      formatter={(value) => `${value}명`}
+                      contentStyle={{ 
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+                        borderRadius: '8px', 
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)', 
+                        border: '1px solid #f0f0f0' 
+                      }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="방문자"
+                      stroke="#8FB4FF"
+                      strokeWidth={3}
+                      dot={{ r: 4, strokeWidth: 2, fill: "#fff" }}
+                      activeDot={{ r: 6, strokeWidth: 0 }}
+                    />
+                  </LineChart>
+                )}
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 캘린더 */}
+        <Card className="border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 bg-white dark:bg-gray-800">
+          <CardContent className="pt-6">
+            <SimpleCalendar />
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };

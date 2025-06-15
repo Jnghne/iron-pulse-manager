@@ -27,50 +27,8 @@ import {
   MapPin,
   Filter
 } from "lucide-react";
-
-// Mock 이벤트 데이터
-const mockEvents = [
-  {
-    id: "1",
-    title: "김영희 PT 세션",
-    date: new Date(),
-    time: "09:00",
-    duration: "1시간",
-    type: "pt",
-    trainer: "이트레이너",
-    assignedTo: "이트레이너",
-    color: "bg-blue-500"
-  },
-  {
-    id: "2", 
-    title: "그룹 필라테스",
-    date: new Date(),
-    time: "19:00",
-    duration: "1시간",
-    type: "group",
-    trainer: "박트레이너",
-    assignedTo: "박트레이너",
-    color: "bg-purple-500"
-  },
-  {
-    id: "3",
-    title: "헬스장 정기 점검",
-    date: new Date(Date.now() + 86400000), // tomorrow
-    time: "14:00", 
-    duration: "2시간",
-    type: "maintenance",
-    assignedTo: "사장님",
-    color: "bg-orange-500"
-  }
-];
-
-// Mock 직원 데이터
-const mockStaff = [
-  { id: "owner", name: "사장님", role: "owner" },
-  { id: "trainer1", name: "이트레이너", role: "trainer" },
-  { id: "trainer2", name: "박트레이너", role: "trainer" },
-  { id: "trainer3", name: "김트레이너", role: "trainer" }
-];
+import { ScheduleAddDialog } from "./Calendar/components/ScheduleAddDialog";
+import { mockStaff, getMockEvents, addMockEvent, Event } from "@/data/mockData";
 
 const Calendar = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -78,6 +36,8 @@ const Calendar = () => {
   const [viewMode, setViewMode] = useState<"month" | "week" | "day">("month");
   const [branch, setBranch] = useState("main");
   const [selectedStaff, setSelectedStaff] = useState<string[]>(mockStaff.map(s => s.id));
+  const [isScheduleAddOpen, setIsScheduleAddOpen] = useState(false);
+  const [events, setEvents] = useState(getMockEvents());
 
   // 현재 월의 이름 가져오기
   const getMonthName = (date: Date) => {
@@ -97,10 +57,26 @@ const Calendar = () => {
 
   // 선택된 날짜의 이벤트 필터링 (직원 필터 적용)
   const getEventsForDate = (date: Date) => {
-    return mockEvents.filter(event => 
-      event.date.toDateString() === date.toDateString() &&
-      selectedStaff.includes(event.assignedTo)
-    );
+    return events.filter(event => {
+      // Date 객체를 YYYY-MM-DD 형식으로 비교
+      const eventDateStr = event.date.toISOString().split('T')[0];
+      const targetDateStr = date.toISOString().split('T')[0];
+      const eventDate = eventDateStr === targetDateStr;
+      
+      // assignedTo가 직원 이름인 경우, 해당 이름을 가진 직원의 ID 찾기
+      const staffMember = mockStaff.find(staff => staff.name === event.assignedTo);
+      const staffId = staffMember ? staffMember.id : event.assignedTo;
+      
+      return eventDate && selectedStaff.includes(staffId);
+    });
+  };
+
+  // 새 이벤트 추가 핸들러
+  const handleEventAdd = (newEvent: Event) => {
+    // mockData에 이벤트 추가
+    addMockEvent(newEvent);
+    // 상태 업데이트
+    setEvents(getMockEvents());
   };
 
   // 이벤트 타입별 라벨
@@ -109,6 +85,9 @@ const Calendar = () => {
       case 'pt': return 'PT';
       case 'group': return '그룹수업';
       case 'maintenance': return '시설관리';
+      case 'event': return '이벤트';
+      case 'meeting': return '회의';
+      case 'other': return '기타';
       default: return '기타';
     }
   };
@@ -191,7 +170,10 @@ const Calendar = () => {
             </SelectContent>
           </Select>
           
-          <Button className="bg-gym-primary hover:bg-gym-primary/90">
+          <Button 
+            className="bg-gym-primary hover:bg-gym-primary/90"
+            onClick={() => setIsScheduleAddOpen(true)}
+          >
             <Plus className="h-4 w-4 mr-2" />
             일정 추가
           </Button>
@@ -329,8 +311,8 @@ const Calendar = () => {
         </div>
 
         {/* 오른쪽: 선택된 날짜의 일정 */}
-        <div className="space-y-4">
-          <Card>
+        <div className="space-y-4 h-full flex flex-col">
+          <Card className="flex-1 flex flex-col">
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-lg">
                 <CalendarIcon className="h-5 w-5" />
@@ -341,7 +323,7 @@ const Calendar = () => {
                 }) : '날짜를 선택하세요'}
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-3 flex-1 overflow-y-auto">
               {selectedDateEvents.length > 0 ? (
                 selectedDateEvents.map((event) => (
                   <div key={event.id} className="p-3 border rounded-lg hover:bg-gray-50 transition-colors">
@@ -355,7 +337,7 @@ const Calendar = () => {
                     <div className="space-y-1 text-sm text-muted-foreground">
                       <div className="flex items-center gap-2">
                         <Clock className="h-3 w-3" />
-                        <span>{event.time} ({event.duration})</span>
+                        <span>{event.time} {event.duration && `(${event.duration})`}</span>
                       </div>
                       
                       {event.trainer && (
@@ -369,6 +351,13 @@ const Calendar = () => {
                         <MapPin className="h-3 w-3" />
                         <span>본점</span>
                       </div>
+                      
+                      {event.notes && (
+                        <div className="mt-2 p-2 bg-gray-50 rounded text-xs">
+                          <span className="font-medium text-gray-700">메모: </span>
+                          <span className="text-gray-600">{event.notes}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))
@@ -384,28 +373,15 @@ const Calendar = () => {
             </CardContent>
           </Card>
 
-          {/* 빠른 일정 추가 */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg">빠른 일정 추가</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Button variant="outline" className="w-full justify-start">
-                <Plus className="h-4 w-4 mr-2" />
-                PT 세션 예약
-              </Button>
-              <Button variant="outline" className="w-full justify-start">
-                <Plus className="h-4 w-4 mr-2" />
-                그룹 수업 등록
-              </Button>
-              <Button variant="outline" className="w-full justify-start">
-                <Plus className="h-4 w-4 mr-2" />
-                시설 점검 일정
-              </Button>
-            </CardContent>
-          </Card>
         </div>
       </div>
+      
+      {/* 일정 추가 다이얼로그 */}
+      <ScheduleAddDialog 
+        open={isScheduleAddOpen}
+        onOpenChange={setIsScheduleAddOpen}
+        onEventAdd={handleEventAdd}
+      />
     </div>
   );
 };

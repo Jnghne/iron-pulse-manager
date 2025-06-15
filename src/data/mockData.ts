@@ -616,3 +616,71 @@ export const getMockAttendance = (memberId: string, days: number = 90): Attendan
   
   return records.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 };
+
+// 이벤트 타입 정의
+export interface Event {
+  id: string;
+  title: string;
+  date: Date;
+  time: string;
+  duration?: string;
+  type: string;
+  trainer?: string;
+  assignedTo: string;
+  color: string;
+  notes?: string;
+}
+
+// 직원 데이터
+export const mockStaff = [
+  { id: "owner", name: "사장님", role: "owner" },
+  { id: "trainer1", name: "이트레이너", role: "trainer" },
+  { id: "trainer2", name: "박트레이너", role: "trainer" },
+  { id: "trainer3", name: "김트레이너", role: "trainer" }
+];
+
+// 이벤트 데이터 (내부 변수)
+const _mockEvents: Event[] = [
+  {
+    id: "1",
+    title: "김영희 PT 세션",
+    date: new Date(),
+    time: "09:00",
+    duration: "1시간",
+    type: "pt",
+    trainer: "이트레이너",
+    assignedTo: "이트레이너",
+    color: "bg-blue-500"
+  },
+  {
+    id: "2", 
+    title: "그룹 필라테스",
+    date: new Date(),
+    time: "19:00",
+    duration: "1시간",
+    type: "group",
+    trainer: "박트레이너",
+    assignedTo: "박트레이너",
+    color: "bg-purple-500"
+  },
+  {
+    id: "3",
+    title: "헬스장 정기 점검",
+    date: new Date(Date.now() + 86400000), // tomorrow
+    time: "14:00", 
+    duration: "2시간",
+    type: "maintenance",
+    assignedTo: "사장님",
+    color: "bg-orange-500"
+  }
+];
+
+// 이벤트 추가 함수
+export const addMockEvent = (event: Event) => {
+  _mockEvents.push(event);
+};
+
+// 모든 이벤트 가져오기 함수
+export const getMockEvents = () => {
+  return [..._mockEvents];
+};

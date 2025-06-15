@@ -13,6 +13,7 @@ import { Member } from "@/data/mockData";
 import { formatDate, cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
+import { LockerSelector } from '@/components/features/locker/LockerSelector';
 
 // Define the structure for payment data
 export interface PaymentData {
@@ -82,6 +83,7 @@ export const PaymentRegistrationDialog = ({
   const [selectedStaff, setSelectedStaff] = useState<string>("");
   const [marketingSource, setMarketingSource] = useState<string>("");
   const [lockerNumber, setLockerNumber] = useState<string>("");
+  const [selectedLockerNumber, setSelectedLockerNumber] = useState<number | null>(null);
   const [memo, setMemo] = useState<string>("");
   const [lockerEndDate, setLockerEndDate] = useState<Date | undefined>(undefined);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -145,7 +147,7 @@ export const PaymentRegistrationDialog = ({
       return;
     }
 
-    if (selectedCategory === 'locker' && !lockerNumber) {
+    if (selectedCategory === 'locker' && !selectedLockerNumber) {
       alert("락커 번호를 선택해주세요.");
       return;
     }
@@ -171,7 +173,7 @@ export const PaymentRegistrationDialog = ({
       purchasePurpose,
       consultant: consultant || selectedStaff,
       instructor: selectedCategory === 'pt' ? (instructor || selectedTrainer) : undefined,
-      lockerNumber: selectedCategory === 'locker' ? lockerNumber : undefined,
+      lockerNumber: selectedCategory === 'locker' ? selectedLockerNumber?.toString() : undefined,
       lockerEndDate: selectedCategory === 'locker' && lockerEndDate ? format(lockerEndDate, 'yyyy-MM-dd') : undefined,
       // marketingSource, // PaymentData에 없으므로 제거 또는 인터페이스에 추가 필요
       memo
@@ -204,6 +206,7 @@ export const PaymentRegistrationDialog = ({
     setUnpaidOrPerformanceShare("0");
     setMarketingSource("");
     setLockerNumber("");
+    setSelectedLockerNumber(null);
     setLockerEndDate(undefined);
     setMemo("");
     setSelectedDate(new Date());
@@ -220,7 +223,7 @@ export const PaymentRegistrationDialog = ({
       if (!isOpen) resetForm();
       onOpenChange(isOpen);
     }}>
-      <DialogContent className="lg:max-w-[960px] p-0 border-none shadow-lg">
+      <DialogContent className={selectedCategory === 'locker' ? "lg:max-w-[1200px] p-0 border-none shadow-lg" : "lg:max-w-[960px] p-0 border-none shadow-lg"}>
         <TooltipProvider>
           <div className="flex h-[600px] border rounded-lg overflow-hidden"> {/* Fixed height for scrollable content */}
             {/* Sidebar */}
@@ -526,17 +529,11 @@ export const PaymentRegistrationDialog = ({
                       </div>
                     </div>
                     <div className="space-y-1.5">
-                      <Label htmlFor="lockerNumber">락커 번호</Label>
-                      <Select value={lockerNumber} onValueChange={setLockerNumber}>
-                        <SelectTrigger id="lockerNumber">
-                          <SelectValue placeholder="락커 번호 선택" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {lockers.map((lockerItem) => (
-                            <SelectItem key={lockerItem} value={lockerItem}>{lockerItem}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <Label>락커 선택</Label>
+                      <LockerSelector
+                        selectedLocker={selectedLockerNumber}
+                        onLockerSelect={setSelectedLockerNumber}
+                      />
                     </div>
                     <div className="space-y-1.5">
                        <Label htmlFor="memo-locker">메모</Label>

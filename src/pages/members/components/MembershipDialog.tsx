@@ -19,6 +19,7 @@ import { formatDate } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import { mockProducts } from '@/data/mockProducts';
 import { ProductType } from '@/types/product';
+import { LockerSelector } from '@/components/features/locker/LockerSelector';
 
 export type MembershipType = 'gym' | 'pt' | 'locker' | 'other';
 
@@ -62,6 +63,9 @@ export const MembershipDialog: React.FC<MembershipDialogProps> = ({
   const [endDate, setEndDate] = React.useState<Date | undefined>(currentData?.endDate);
   const [price, setPrice] = React.useState<string>(currentData?.price?.toString() || '');
   const [lockerNumber, setLockerNumber] = React.useState<string>(currentData?.lockerNumber || '');
+  const [selectedLockerNumber, setSelectedLockerNumber] = React.useState<number | null>(
+    currentData?.lockerNumber ? parseInt(currentData.lockerNumber) : null
+  );
   const [notes, setNotes] = React.useState<string>(currentData?.notes || '');
   const [hasProducts, setHasProducts] = React.useState<boolean>(true); // 상품 존재 여부
 
@@ -101,7 +105,7 @@ export const MembershipDialog: React.FC<MembershipDialogProps> = ({
       startDate,
       endDate,
       price: parseInt(price),
-      lockerNumber: type === 'locker' ? lockerNumber : undefined,
+      lockerNumber: type === 'locker' ? (selectedLockerNumber?.toString() || lockerNumber) : undefined,
       notes,
     };
     
@@ -166,7 +170,7 @@ export const MembershipDialog: React.FC<MembershipDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className={type === 'locker' ? "sm:max-w-[700px] max-h-[90vh] overflow-y-auto" : "sm:max-w-[500px]"}>
         <DialogHeader>
           <DialogTitle>{getTitle()}</DialogTitle>
           <DialogDescription>
@@ -286,15 +290,14 @@ export const MembershipDialog: React.FC<MembershipDialogProps> = ({
             </div>
             
             {type === 'locker' && (
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="lockerNumber" className="text-right">
-                  락커 번호
+              <div className="grid grid-cols-4 items-start gap-4">
+                <Label className="text-right mt-2">
+                  락커 선택
                 </Label>
                 <div className="col-span-3">
-                  <Input
-                    id="lockerNumber"
-                    value={lockerNumber}
-                    onChange={(e) => setLockerNumber(e.target.value)}
+                  <LockerSelector
+                    selectedLocker={selectedLockerNumber}
+                    onLockerSelect={setSelectedLockerNumber}
                   />
                 </div>
               </div>
@@ -334,7 +337,13 @@ export const MembershipDialog: React.FC<MembershipDialogProps> = ({
             </DialogClose>
             <Button 
               onClick={handleSave} 
-              disabled={!hasProducts || !selectedProduct || !startDate || !endDate}
+              disabled={
+                !hasProducts || 
+                !selectedProduct || 
+                !startDate || 
+                !endDate || 
+                (type === 'locker' && !selectedLockerNumber)
+              }
             >
               저장
             </Button>

@@ -102,6 +102,7 @@ const LockerAssign = ({ locker, onClose }: LockerAssignProps) => {
   const [endDate, setEndDate] = useState(
     new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString().split('T')[0]
   );
+  const [fee, setFee] = useState("");
   const [notes, setNotes] = useState("");
   
   const handleAssign = () => {
@@ -110,17 +111,36 @@ const LockerAssign = ({ locker, onClose }: LockerAssignProps) => {
       return;
     }
     
+    if (!fee || parseInt(fee.replace(/,/g, '')) <= 0) {
+      toast.error("결제 금액을 입력해주세요.");
+      return;
+    }
+    
     const member = mockMembers.find(m => m.id === selectedMember);
     
     if (member) {
-      toast.success(`${locker.number}번 락커가 ${member.name} 회원에게 배정되었습니다.`);
+      toast.success(`${locker.number}번 락커가 ${member.name} 회원에게 배정되었습니다. (결제 금액: ${fee}원)`);
       onClose();
     }
   };
   
   return (
-    <div className="space-y-4">
-      <div className="grid gap-4">
+    <div className="space-y-6">
+      <div className="grid gap-6">
+        {/* 선택된 락커 번호 표시 */}
+        <div className="space-y-3">
+          <Label>선택된 락커</Label>
+          <div className="p-3 bg-muted/20 rounded-lg border">
+            <div className="flex items-center justify-center">
+              <div className="flex items-center space-x-2">
+                <Lock className="h-5 w-5 text-primary" />
+                <span className="text-lg font-semibold">{locker.number}번 락커</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* 회원 선택 */}
         <div className="space-y-2">
           <Label htmlFor="member">회원 선택</Label>
           <Select value={selectedMember} onValueChange={setSelectedMember}>
@@ -129,7 +149,7 @@ const LockerAssign = ({ locker, onClose }: LockerAssignProps) => {
             </SelectTrigger>
             <SelectContent>
               {mockMembers
-                .filter(m => !m.lockerId || m.lockerId === locker.number.toString())
+                .filter(m => !m.lockerId)
                 .map(member => (
                   <SelectItem key={member.id} value={member.id}>
                     {member.name} ({member.id})
@@ -161,6 +181,25 @@ const LockerAssign = ({ locker, onClose }: LockerAssignProps) => {
         </div>
         
         <div className="space-y-2">
+          <Label htmlFor="fee">결제 금액</Label>
+          <div className="relative">
+            <Input
+              id="fee"
+              placeholder="결제 금액을 입력하세요"
+              value={fee}
+              onChange={(e) => {
+                const value = e.target.value.replace(/[^\d]/g, '');
+                const formattedValue = value ? parseInt(value).toLocaleString() : '';
+                setFee(formattedValue);
+              }}
+            />
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+              원
+            </span>
+          </div>
+        </div>
+        
+        <div className="space-y-2">
           <Label htmlFor="notes">메모</Label>
           <Input
             id="notes"
@@ -171,7 +210,7 @@ const LockerAssign = ({ locker, onClose }: LockerAssignProps) => {
         </div>
       </div>
       
-      <div className="flex space-x-2 justify-end mt-4">
+      <div className="flex space-x-2 justify-end mt-6">
         <Button variant="outline" onClick={onClose}>
           취소
         </Button>
@@ -286,9 +325,7 @@ const LockerRoom = () => {
     if (locker.isOccupied) {
       setIsDetailOpen(true);
     } else {
-      if (window.confirm(`${locker.number}번 락커를 배정하시겠습니까?`)) {
-        setIsAssignOpen(true);
-      }
+      setIsAssignOpen(true);
     }
   };
   
@@ -457,7 +494,7 @@ const LockerRoom = () => {
       
       {/* Locker Assign Dialog */}
       <Dialog open={isAssignOpen} onOpenChange={setIsAssignOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle>락커 배정</DialogTitle>
             <DialogDescription>

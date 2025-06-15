@@ -2,7 +2,6 @@
 // 락커 타입 정의
 export interface Locker {
   id: string;
-  zone: string;
   number: number;
   isOccupied: boolean;
   memberId?: string;
@@ -11,7 +10,7 @@ export interface Locker {
   endDate?: string;
   fee?: number;
   isPaid?: boolean;
-  notes?: string; // Added missing notes property
+  notes?: string;
 }
 
 // 출석 기록 타입 정의
@@ -555,123 +554,77 @@ export const mockVisitorsData = [
   { name: '3일전', total: 40, male: 21, female: 19 },
 ];
 
-// 락커 데이터
-export const mockLockers: Locker[] = [
-{
-id: 'L001',
-zone: 'A',
-number: 1,
-isOccupied: true,
-memberId: 'M00001',
-memberName: '김지원',
-startDate: '2024-01-15',
-endDate: '2025-01-14',
-fee: 120000,
-isPaid: true
-},
-{
-id: 'L002',
-zone: 'A',
-number: 2,
-isOccupied: false
-},
-{
-id: 'L003',
-zone: 'A',
-number: 3,
-isOccupied: true,
-memberId: 'M00005',
-memberName: '김영희',
-startDate: '2024-01-02',
-endDate: '2025-01-01',
-fee: 120000,
-isPaid: true
-},
-{
-id: 'L004',
-zone: 'A',
-number: 4,
-isOccupied: false
-},
-{
-id: 'L005',
-zone: 'A',
-number: 5,
-isOccupied: false
-},
-{
-id: 'L006',
-zone: 'B',
-number: 1,
-isOccupied: true,
-memberId: 'M00002',
-memberName: '이지훈',
-startDate: '2024-02-10',
-endDate: '2024-08-09',
-fee: 80000,
-isPaid: true
-},
-{
-id: 'L007',
-zone: 'B',
-number: 2,
-isOccupied: true,
-memberId: 'M00003',
-memberName: '박수진',
-startDate: '2024-03-20',
-endDate: '2024-09-19',
-fee: 80000,
-isPaid: true
-},
-{
-id: 'L008',
-zone: 'B',
-number: 3,
-isOccupied: false
-},
-{
-id: 'L009',
-zone: 'B',
-number: 4,
-isOccupied: false
-},
-{
-id: 'L010',
-zone: 'B',
-number: 5,
-isOccupied: false
-},
-{
-id: 'L011',
-zone: 'C',
-number: 1,
-isOccupied: false
-},
-{
-id: 'L012',
-zone: 'C',
-number: 2,
-isOccupied: false
-},
-{
-id: 'L013',
-zone: 'C',
-number: 3,
-isOccupied: false
-},
-{
-id: 'L014',
-zone: 'C',
-number: 4,
-isOccupied: false
-},
-{
-id: 'L015',
-zone: 'C',
-number: 5,
-isOccupied: false
-}
-];
+// 락커 데이터 (1-200번)
+export const mockLockers: Locker[] = (() => {
+  const lockers: Locker[] = [];
+  const currentDate = new Date();
+  
+  for (let i = 1; i <= 200; i++) {
+    const lockerId = `L${i.toString().padStart(3, '0')}`;
+    
+    // 약 40%의 락커를 사용중으로 설정
+    const isOccupied = Math.random() < 0.4;
+    
+    if (isOccupied) {
+      // 사용중인 락커에 대해 다양한 상태 생성
+      const random = Math.random();
+      let startDate: Date;
+      let endDate: Date;
+      
+      if (random < 0.1) {
+        // 10% - 만료된 락커
+        startDate = new Date(currentDate.getTime() - 180 * 24 * 60 * 60 * 1000); // 6개월 전 시작
+        endDate = new Date(currentDate.getTime() - 10 * 24 * 60 * 60 * 1000); // 10일 전 만료
+      } else if (random < 0.2) {
+        // 10% - 만료 임박 락커 (30일 이내)
+        startDate = new Date(currentDate.getTime() - 150 * 24 * 60 * 60 * 1000); // 5개월 전 시작
+        endDate = new Date(currentDate.getTime() + Math.floor(Math.random() * 30) * 24 * 60 * 60 * 1000); // 0-30일 후 만료
+      } else {
+        // 80% - 정상 사용중
+        startDate = new Date(currentDate.getTime() - Math.floor(Math.random() * 90) * 24 * 60 * 60 * 1000); // 0-3개월 전 시작
+        endDate = new Date(currentDate.getTime() + (30 + Math.floor(Math.random() * 330)) * 24 * 60 * 60 * 1000); // 30-360일 후 만료
+      }
+      
+      // 샘플 회원 정보
+      const sampleMembers = [
+        { id: 'M00001', name: '김지원' },
+        { id: 'M00002', name: '이지훈' },
+        { id: 'M00003', name: '박수진' },
+        { id: 'M00004', name: '정동현' },
+        { id: 'M00005', name: '김영희' },
+        { id: 'M00006', name: '최지원' },
+        { id: 'M00007', name: '이지영' },
+        { id: 'M00008', name: '박진수' },
+        { id: 'M00009', name: '이서연' },
+        { id: 'M00010', name: '김태호' },
+      ];
+      
+      const memberIndex = Math.floor(Math.random() * sampleMembers.length);
+      const member = sampleMembers[memberIndex];
+      
+      lockers.push({
+        id: lockerId,
+        number: i,
+        isOccupied: true,
+        memberId: member.id,
+        memberName: member.name,
+        startDate: startDate.toISOString().split('T')[0],
+        endDate: endDate.toISOString().split('T')[0],
+        fee: 60000 + Math.floor(Math.random() * 40000), // 60,000 ~ 100,000원
+        isPaid: Math.random() < 0.9 // 90% 결제 완료
+      });
+    } else {
+      // 비어있는 락커
+      lockers.push({
+        id: lockerId,
+        number: i,
+        isOccupied: false
+      });
+    }
+  }
+  
+  return lockers;
+})();
 
 // 출석 기록 생성 함수
 export const getMockAttendance = (memberId: string, days: number = 90): AttendanceRecord[] => {

@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
   Table, 
@@ -55,11 +55,66 @@ const MemberList = () => {
   const [sortFilter, setSortFilter] = useState<SortOption>("name");
   const navigate = useNavigate();
   
+  // 회원 상태 판별 함수 (active, expired 만 존재)
+  const getMembershipStatus = useCallback((member: Member) => {
+    // 회원권이 비활성화되었거나 만료일이 지난 경우
+    if (!member.membershipActive) return "expired";
+    
+    // 만료일 확인
+    if (member.membershipEndDate || member.expiryDate) {
+      try {
+        // membershipEndDate나 expiryDate 중 존재하는 것 사용
+        const dateStr = member.membershipEndDate || member.expiryDate;
+        if (!dateStr) return "active";
+        
+        const endDate = parseISO(dateStr);
+        if (isValid(endDate)) {
+          const today = new Date();
+          const daysLeft = differenceInDays(endDate, today);
+          
+          // 만료일이 지난 경우
+          if (daysLeft < 0) {
+            return "expired";
+          }
+        }
+      } catch (error) {
+        console.error("날짜 파싱 오류:", error);
+      }
+    }
+    
+    return "active";
+  }, []);
+  
+  // 만료 임박 여부 확인 함수 (만료일이 30일 이하로 남은 활성 회원)
+  const isExpirationImminent = useCallback((member: Member) => {
+    if (getMembershipStatus(member) !== "active") return false;
+    
+    if (member.membershipEndDate || member.expiryDate) {
+      try {
+        const dateStr = member.membershipEndDate || member.expiryDate;
+        if (!dateStr) return false;
+        
+        const endDate = parseISO(dateStr);
+        if (isValid(endDate)) {
+          const today = new Date();
+          const daysLeft = differenceInDays(endDate, today);
+          
+          // 만료일이 30일 이하로 남은 경우
+          return daysLeft <= 30 && daysLeft >= 0;
+        }
+      } catch (error) {
+        console.error("날짜 파싱 오류:", error);
+      }
+    }
+    
+    return false;
+  }, [getMembershipStatus]);
+  
   // Filter members based on search query and filters
   useEffect(() => {
     let filtered = [...mockMembers];
     
-    // 검색어 필터링
+    // 검색 필터링
     if (searchQuery.trim()) {
       const lowercaseQuery = searchQuery.toLowerCase();
       filtered = filtered.filter(
@@ -74,9 +129,11 @@ const MemberList = () => {
     if (statusFilter !== "all") {
       filtered = filtered.filter(member => {
         const status = getMembershipStatus(member);
-        if (statusFilter === "active" && status === "active") return true;
+        const isImminent = isExpirationImminent(member);
+        
+        if (statusFilter === "active" && status === "active" && !isImminent) return true;
         if (statusFilter === "expired" && status === "expired") return true;
-        if (statusFilter === "pending" && status === "expiring") return true;
+        if (statusFilter === "pending" && status === "active" && isImminent) return true;
         return false;
       });
     }
@@ -84,10 +141,10 @@ const MemberList = () => {
     // 회원권 유형 필터링
     if (membershipFilter !== "all") {
       filtered = filtered.filter(member => {
-        if (membershipFilter === "regular" && member.memberType === "정회원") return true;
+        if (membershipFilter === "regular" && member.memberType.includes("정회원")) return true;
         if (membershipFilter === "pt" && member.hasPT) return true;
-        if (membershipFilter === "vip" && member.memberType === "VIP 회원") return true;
-        if (membershipFilter === "student" && member.memberType === "학생 회원") return true;
+        if (membershipFilter === "vip" && member.memberType.includes("VIP")) return true;
+        if (membershipFilter === "student" && member.memberType.includes("학생")) return true;
         return false;
       });
     }
@@ -115,7 +172,7 @@ const MemberList = () => {
 
     setFilteredMembers(filtered);
     setCurrentPage(1); // 필터링 시 첫 페이지로 이동
-  }, [searchQuery, statusFilter, membershipFilter, sortFilter]);  
+  }, [searchQuery, statusFilter, membershipFilter, sortFilter, getMembershipStatus, isExpirationImminent]);  
 
   const handleRowClick = (memberId: string) => {
     navigate(`/members/${memberId}`);
@@ -159,29 +216,11 @@ const MemberList = () => {
     
     return pageNumbers;
   };
-  
-  // 회원권 상태 판별 함수
-  const getMembershipStatus = (member: Member) => {
-    if (!member.membershipActive) return "expired";
-    if (member.membershipEndDate) {
-      try {
-        const endDate = parseISO(member.membershipEndDate);
-        if (isValid(endDate)) {
-          const daysLeft = differenceInDays(endDate, new Date());
-          if (daysLeft <= 7 && daysLeft >= 0) return "expiring";
-        }
-      } catch (error) {
-        console.error("날짜 파싱 오류:", error);
-      }
-    }
-    return "active";
-  };
-
   // 통계 계산
-  const totalMembers = mockMembers.length;
-  const activeMembers = mockMembers.filter(m => getMembershipStatus(m) === "active").length;
-  const expiringMembers = mockMembers.filter(m => getMembershipStatus(m) === "expiring").length;
-  const expiredMembers = mockMembers.filter(m => getMembershipStatus(m) === "expired").length;
+  const totalMembers = useMemo(() => mockMembers.length, []);
+  const activeMembers = useMemo(() => mockMembers.filter(m => getMembershipStatus(m) === "active").length, [getMembershipStatus]);
+  const expiringMembers = useMemo(() => mockMembers.filter(m => isExpirationImminent(m)).length, [isExpirationImminent]);
+  const expiredMembers = useMemo(() => mockMembers.filter(m => getMembershipStatus(m) === "expired").length, [getMembershipStatus]);
 
   return (
     <div className="space-y-6">
@@ -413,29 +452,31 @@ const MemberList = () => {
                         <TableCell className="text-center">
                           {(() => {
                             const status = getMembershipStatus(member);
-                            if (status === "active") {
+                            const isImminent = isExpirationImminent(member);
+                            
+                            if (status === "active" && isImminent) {
                               return (
-                                <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                                  <span className="h-1.5 w-1.5 rounded-full bg-green-600"></span>
+                                <Badge className="bg-yellow-100 text-yellow-800">
+                                  <AlertTriangle className="mr-1 h-3 w-3" />
+                                  만료 임박
+                                </Badge>
+                              );
+                            } else if (status === "active") {
+                              return (
+                                <Badge className="bg-green-100 text-green-800">
+                                  <CheckCircle className="mr-1 h-3 w-3" />
                                   활성
-                                </span>
+                                </Badge>
                               );
-                            }
-                            if (status === "expiring") {
+                            } else {
                               return (
-                                <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700">
-                                  <span className="h-1.5 w-1.5 rounded-full bg-yellow-600"></span>
-                                  만료임박
-                                </span>
+                                <Badge variant="outline" className="text-gray-500 bg-gray-100">
+                                  <XCircle className="mr-1 h-3 w-3" />
+                                  만료
+                                </Badge>
                               );
                             }
-                            return (
-                              <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
-                                <span className="h-1.5 w-1.5 rounded-full bg-gray-600"></span>
-                                만료
-                              </span>
-                            );
-                          })()}
+                          })()} 
                         </TableCell>
                         
                         {/* 출석률 */}

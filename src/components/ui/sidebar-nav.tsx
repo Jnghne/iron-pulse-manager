@@ -14,7 +14,6 @@ import {
   UserPlus,
   Package,
   Users2, // 커뮤니티 아이콘 추가
-  Smartphone, // 앱 가입 관리 아이콘 추가
 } from "lucide-react"
 import { SidebarItem } from "./sidebar"
 import { cn } from "@/lib/utils"
@@ -28,14 +27,12 @@ interface SidebarNavProps extends React.HTMLAttributes<HTMLElement> {
 export function SidebarNav({ className, ...props }: SidebarNavProps) {
   const location = useLocation()
   const pathname = location.pathname
-  const userRole = localStorage.getItem("userRole") || "trainer"
-  const isOwner = userRole === "owner"
   const { collapsed } = useSidebar()
 
   const defaultItems = [
     {
       title: "대시보드",
-      href: isOwner ? "/dashboard" : "/trainer-dashboard",
+      href: "/dashboard",
       icon: <LayoutDashboard className="h-5 w-5" />,
     },
     {
@@ -51,11 +48,6 @@ export function SidebarNav({ className, ...props }: SidebarNavProps) {
   ]
 
   const ownerOnlyItems = [
-    {
-      title: "앱 가입 관리",
-      href: "/app-registrations",
-      icon: <Smartphone className="h-5 w-5" />,
-    },
     {
       title: "문자 메시지",
       href: "/messages",
@@ -93,12 +85,12 @@ export function SidebarNav({ className, ...props }: SidebarNavProps) {
     },
   ]
 
-  const items = [...defaultItems, ...(isOwner ? ownerOnlyItems : [])]
+  const items = [...defaultItems, ...ownerOnlyItems]
 
   // 현재 경로가 특정 메뉴의 하위 경로인지 확인하는 함수
   const isPathActive = (itemPath: string) => {
     // 루트 경로는 정확히 일치할 때만 활성화
-    if (itemPath === "/" || itemPath === "/dashboard" || itemPath === "/trainer-dashboard") {
+    if (itemPath === "/" || itemPath === "/dashboard") {
       return pathname === itemPath;
     }
     

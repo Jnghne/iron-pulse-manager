@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/components/ui/use-toast";
-import { Eye, EyeOff, Building2, User } from "lucide-react";
+import { Eye, EyeOff, Building2 } from "lucide-react";
 import Logo from "@/components/ui/logo";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -34,17 +34,6 @@ const Login = () => {
           description: "사장님 계정으로 로그인되었습니다."
         });
         navigate("/");
-      } else if (email === "trainer@test.com" && password === "trainer123") {
-        localStorage.setItem("isAuthenticated", "true");
-        localStorage.setItem("userRole", "trainer");
-        localStorage.setItem("userEmail", email);
-        localStorage.setItem("selectedGym", "seoul-gangnam");
-        localStorage.setItem("selectedGymName", "강남 피트니스 센터");
-        toast({
-          title: "로그인 성공",
-          description: "트레이너 계정으로 로그인되었습니다."
-        });
-        navigate("/");
       } else {
         toast({
           title: "로그인 실패",
@@ -56,19 +45,19 @@ const Login = () => {
     }, 1000);
   };
 
-  const handleTestLogin = (role: 'owner' | 'trainer') => {
+  const handleTestLogin = () => {
     setIsLoading(true);
     
     setTimeout(() => {
       localStorage.setItem("isAuthenticated", "true");
-      localStorage.setItem("userRole", role);
-      localStorage.setItem("userEmail", role === 'owner' ? "owner@test.com" : "trainer@test.com");
+      localStorage.setItem("userRole", "owner");
+      localStorage.setItem("userEmail", "owner@test.com");
       localStorage.setItem("selectedGym", "seoul-gangnam");
       localStorage.setItem("selectedGymName", "강남 피트니스 센터");
       
       toast({
         title: "테스트 로그인 성공",
-        description: `${role === 'owner' ? '사장님' : '트레이너'} 계정으로 로그인되었습니다.`
+        description: "사장님 계정으로 로그인되었습니다."
       });
       navigate("/");
       setIsLoading(false);
@@ -143,26 +132,16 @@ const Login = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="flex justify-center">
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => handleTestLogin('owner')}
+                onClick={handleTestLogin}
                 disabled={isLoading}
                 className="flex items-center gap-2"
               >
                 <Building2 className="h-4 w-4" />
-                사장님
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => handleTestLogin('trainer')}
-                disabled={isLoading}
-                className="flex items-center gap-2"
-              >
-                <User className="h-4 w-4" />
-                트레이너
+                사장님 계정으로 로그인
               </Button>
             </div>
           </div>

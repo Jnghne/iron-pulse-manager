@@ -46,7 +46,7 @@ export const MemberEditDialog = ({ member, open, onOpenChange, onSave }: MemberE
     gender: member.gender,
     smsConsent: member.smsConsent,
     trainerAssigned: member.trainerAssigned || '',
-    memberNotes: member.memberNotes || '', // trainerNotes -> memberNotes
+    trainerNotes: member.trainerNotes || '',
     // 주소 관련 필드 추가
     postalCode: '',
     address1: '',
@@ -80,7 +80,7 @@ export const MemberEditDialog = ({ member, open, onOpenChange, onSave }: MemberE
         gender: member.gender,
         smsConsent: member.smsConsent,
         trainerAssigned: member.trainerAssigned || '',
-        memberNotes: member.memberNotes || '', // trainerNotes -> memberNotes
+        trainerNotes: member.trainerNotes || '',
         postalCode: '', // 초기에는 비워둠
         address1: member.address || '', // 기존 주소를 address1에 할당
         address2: '', // 초기에는 비워둠
@@ -131,7 +131,7 @@ export const MemberEditDialog = ({ member, open, onOpenChange, onSave }: MemberE
       gender: formData.gender,
       smsConsent: formData.smsConsent,
       trainerAssigned: formData.trainerAssigned,
-      memberNotes: formData.memberNotes, // trainerNotes -> memberNotes
+      trainerNotes: formData.trainerNotes,
     };
     
     onSave(updatedMember);
@@ -189,13 +189,13 @@ export const MemberEditDialog = ({ member, open, onOpenChange, onSave }: MemberE
             </div>
             <div className="space-y-2">
               <Label htmlFor="trainer">담당 트레이너</Label>
-              <Select value={formData.trainerAssigned} onValueChange={(value) => handleInputChange('trainerAssigned', value)}>
+              <Select value={formData.trainerAssigned || "NONE"} onValueChange={(value) => handleInputChange('trainerAssigned', value === "NONE" ? "" : value)}>
                 <SelectTrigger><SelectValue placeholder="트레이너 선택" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="NONE">선택 안함</SelectItem>
                   <SelectItem value="박지훈">박지훈</SelectItem>
-                  <SelectItem value="김태양">김태양</SelectItem>
-                  <SelectItem value="최수진">최수진</SelectItem>
+                  <SelectItem value="김지원">김지원</SelectItem>
+                  <SelectItem value="이민수">이민수</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -240,10 +240,10 @@ export const MemberEditDialog = ({ member, open, onOpenChange, onSave }: MemberE
           {/* --- 주소 UI 끝 --- */}
 
 
-          {/* 특이사항 메모 및 기타 설정 */}
+          {/* 트레이너 메모 및 기타 설정 */}
           <div className="space-y-2">
-            <Label htmlFor="memberNotes">특이사항 메모</Label>
-            <Textarea id="memberNotes" value={formData.memberNotes} onChange={(e) => handleInputChange('memberNotes', e.target.value)} placeholder="회원 관련 특이사항을 입력하세요." rows={4} />
+            <Label htmlFor="trainerNotes">트레이너 메모</Label>
+            <Textarea id="trainerNotes" value={formData.trainerNotes} onChange={(e) => handleInputChange('trainerNotes', e.target.value)} placeholder="트레이너 관련 메모를 입력하세요." rows={4} />
           </div>
 
           <div className="flex items-center space-x-2">

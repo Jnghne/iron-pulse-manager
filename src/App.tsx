@@ -13,9 +13,7 @@ import DashboardLayout from "./layouts/DashboardLayout";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import SignupOwner from "./pages/SignupOwner";
-import SignupTrainer from "./pages/SignupTrainer";
 import Dashboard from "./pages/Dashboard";
-import TrainerDashboard from "./pages/TrainerDashboard";
 import MemberList from "./pages/members/MemberList";
 import MemberDetail from "./pages/members/MemberDetail";
 import MemberCreate from "./pages/members/MemberCreate";
@@ -27,11 +25,9 @@ import Attendance from "./pages/Attendance";
 import MessageSystem from "./pages/MessageSystem";
 import Calendar from "./pages/Calendar";
 import Statistics from "./pages/Statistics";
-import TrainerManagement from "./pages/TrainerManagement";
 import StaffManagement from "./pages/staff/Staff";
 import StaffDetail from "./pages/staff/StaffDetail";
 import ProductListPage from "./pages/products/ProductListPage";
-import AppRegistrations from "./pages/AppRegistrations";
 import Community from "./pages/Community";
 import CommunityBoard from "./pages/community/CommunityBoard";
 import PostDetail from "./pages/community/PostDetail";
@@ -54,13 +50,11 @@ const App = () => (
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/signup/owner" element={<SignupOwner />} />
-          <Route path="/signup/trainer" element={<SignupTrainer />} />
           
           {/* Protected Routes */}
           <Route path="/" element={<DashboardLayout />}>
             <Route index element={<RoleBasedRedirect />} />
             <Route path="dashboard" element={<Dashboard />} />
-            <Route path="trainer-dashboard" element={<TrainerDashboard />} />
             <Route path="members" element={<MemberList />} />
             <Route path="members/:id" element={<MemberDetail />} />
             <Route path="members/new" element={<MemberCreate />} />
@@ -71,10 +65,8 @@ const App = () => (
             <Route path="messages" element={<MessageSystem />} />
             <Route path="calendar" element={<Calendar />} />
             <Route path="statistics" element={<Statistics />} />
-            <Route path="trainers" element={<TrainerManagement />} />
             <Route path="staff" element={<StaffManagement />} />
             <Route path="staff/:id" element={<StaffDetail />} />
-            <Route path="app-registrations" element={<AppRegistrations />} />
             <Route path="my-page" element={<MyPage />} />
             <Route path="community" element={<Community />} />
             <Route path="community/board" element={<CommunityBoard />} />

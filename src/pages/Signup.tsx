@@ -4,12 +4,12 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { UserPlus, Crown } from "lucide-react";
+import { Crown } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 
 const Signup = () => {
   const navigate = useNavigate();
-  const [selectedRole, setSelectedRole] = useState<"owner" | "trainer" | null>(null);
+  const [selectedRole, setSelectedRole] = useState<"owner" | null>("owner");
   const [agreements, setAgreements] = useState({
     age: false,
     terms: false,
@@ -52,14 +52,9 @@ const Signup = () => {
 
         {/* 역할 선택 */}
         <div className="space-y-4">
-          <h2 className="text-xl font-semibold text-center">회원가입 유형을 선택해주세요</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card 
-              className={`cursor-pointer transition-all hover:shadow-lg ${
-                selectedRole === 'owner' ? 'ring-2 ring-gym-primary bg-gym-primary/5' : ''
-              }`}
-              onClick={() => setSelectedRole('owner')}
-            >
+          <h2 className="text-xl font-semibold text-center">사장님 전용 회원가입</h2>
+          <div className="flex justify-center">
+            <Card className="w-full max-w-md ring-2 ring-gym-primary bg-gym-primary/5">
               <CardHeader className="text-center">
                 <Crown className="h-12 w-12 mx-auto text-gym-primary" />
                 <CardTitle>사장님 회원가입</CardTitle>
@@ -68,24 +63,6 @@ const Signup = () => {
                 <p className="text-center text-muted-foreground">
                   헬스장을 운영하시는 사장님을 위한 회원가입입니다. 
                   모든 관리 기능을 이용하실 수 있습니다.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card 
-              className={`cursor-pointer transition-all hover:shadow-lg ${
-                selectedRole === 'trainer' ? 'ring-2 ring-gym-primary bg-gym-primary/5' : ''
-              }`}
-              onClick={() => setSelectedRole('trainer')}
-            >
-              <CardHeader className="text-center">
-                <UserPlus className="h-12 w-12 mx-auto text-gym-primary" />
-                <CardTitle>트레이너 회원가입</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-center text-muted-foreground">
-                  헬스장에서 근무하시는 트레이너를 위한 회원가입입니다. 
-                  회원 관리 등의 기능을 이용하실 수 있습니다.
                 </p>
               </CardContent>
             </Card>

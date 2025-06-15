@@ -12,7 +12,7 @@ import StaffManagement from "@/pages/StaffManagement";
 const useAuth = () => {
   // In a real app, check if user is logged in
   const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
-  const userRole = localStorage.getItem("userRole") || "trainer"; // 'owner' or 'trainer'
+  const userRole = "owner"; // Only owner role supported
   const selectedGymName = localStorage.getItem("selectedGymName") || "";
   
   return {
@@ -40,8 +40,8 @@ const SidebarContent = () => {
   // Mock affiliated gyms data - in real app, this would come from API
   const affiliatedGyms = [
     { id: "seoul-gangnam", name: "강남 피트니스 센터", role: "owner" as const, status: "active" as const },
-    { id: "seoul-hongdae", name: "홍대 스포츠 클럽", role: "trainer" as const, status: "active" as const },
-    { id: "busan-haeundae", name: "해운대 헬스 파크", role: "trainer" as const, status: "pending" as const }
+    { id: "seoul-songpa", name: "송파 헬스클럽", role: "owner" as const, status: "active" as const },
+    { id: "busan-haeundae", name: "해운대 헬스 파크", role: "owner" as const, status: "pending" as const }
   ];
 
   const currentGymId = localStorage.getItem("selectedGym") || "seoul-gangnam";
@@ -64,11 +64,11 @@ const SidebarContent = () => {
             <DropdownMenuTrigger asChild>
               <div className="flex items-center p-4 cursor-pointer hover:bg-gray-50 transition-colors rounded-md">
                 <div className="w-10 h-10 rounded-full bg-gym-primary flex items-center justify-center text-white">
-                  {userRole === "owner" ? "관" : "트"}
+                  관
                 </div>
                 {!collapsed && (
                   <div className="ml-3 flex-1">
-                    <p className="text-sm font-medium">{userRole === "owner" ? "관장님" : "트레이너"}</p>
+                    <p className="text-sm font-medium">관장님</p>
                     <p className="text-xs text-muted-foreground truncate">{selectedGymName}</p>
                   </div>
                 )}
@@ -80,19 +80,14 @@ const SidebarContent = () => {
                 <span>마이페이지</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              {/* 사장님만 사업장 변경 기능 표시 */}
-              {userRole === "owner" && (
-                <>
-                  <DropdownMenuItem 
-                    onClick={() => setShowGymSwitchDialog(true)} 
-                    className="cursor-pointer"
-                  >
-                    <RefreshCw className="mr-2 h-4 w-4" />
-                    <span>사업장 변경</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                </>
-              )}
+              <DropdownMenuItem 
+                onClick={() => setShowGymSwitchDialog(true)} 
+                className="cursor-pointer"
+              >
+                <RefreshCw className="mr-2 h-4 w-4" />
+                <span>사업장 변경</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
               <DropdownMenuItem onClick={logout} className="cursor-pointer text-red-600">
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>로그아웃</span>
@@ -102,16 +97,13 @@ const SidebarContent = () => {
         </div>
       </SidebarFooter>
 
-      {/* 사업장 변경 다이얼로그 - 사장님만 */}
-      {userRole === "owner" && (
-        <GymSwitchDialog
-          open={showGymSwitchDialog}
-          onClose={() => setShowGymSwitchDialog(false)}
-          currentGymId={currentGymId}
-          affiliatedGyms={affiliatedGyms}
-          onGymSwitch={handleGymSwitch}
-        />
-      )}
+      <GymSwitchDialog
+        open={showGymSwitchDialog}
+        onClose={() => setShowGymSwitchDialog(false)}
+        currentGymId={currentGymId}
+        affiliatedGyms={affiliatedGyms}
+        onGymSwitch={handleGymSwitch}
+      />
     </>
   );
 };

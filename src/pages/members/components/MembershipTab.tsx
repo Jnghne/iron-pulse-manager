@@ -28,9 +28,7 @@ import { ProductType } from '@/types/product';
 declare module "@/data/mockData" {
   interface Member {
     membershipId?: string;
-    membershipPrice?: number;
     ptId?: string;
-    ptPrice?: number;
   }
 }
 
@@ -201,10 +199,10 @@ export const MembershipTab = ({
         subCategory: '헬스',
         serviceStartDate: serviceStartDateStr,
         serviceEndDate: serviceEndDateStr,
-        productAmount: product?.price || specificData?.price || memberData.membershipPrice || 0,
+        productAmount: product?.price || specificData?.price || 0,
         instructor: memberData.trainerAssigned || commonDetails.instructor,
         ...commonDetails,
-        actualPaymentAmount: specificData?.price || memberData.membershipPrice || 0,
+        actualPaymentAmount: specificData?.price || 0,
       };
     } else if (type === 'pt') {
       serviceStartDateStr = formatDateForPass(specificData?.startDate || memberData.ptStartDate);
@@ -217,12 +215,12 @@ export const MembershipTab = ({
         subCategory: 'PT',
         serviceStartDate: serviceStartDateStr,
         serviceEndDate: serviceEndDateStr,
-        productAmount: product?.price || specificData?.price || memberData.ptPrice || 0,
+        productAmount: product?.price || specificData?.price || 0,
         ptTotalSessions: product?.totalSessions || specificData?.totalSessions || memberData.ptTotal || 0,
         ptRemainingSessions: specificData?.remainingSessions || memberData.ptRemaining || 0,
         instructor: memberData.trainerAssigned || commonDetails.instructor,
         ...commonDetails,
-        actualPaymentAmount: specificData?.price || memberData.ptPrice || 0,
+        actualPaymentAmount: specificData?.price || 0,
       };
     } else if (type === 'locker') {
       serviceStartDateStr = formatDateForPass(specificData?.startDate);
@@ -329,7 +327,6 @@ export const MembershipTab = ({
                 name: `헬스 이용권 ${member.memberType}`,
                 startDate: new Date(member.membershipStartDate || ''),
                 endDate: new Date(member.membershipEndDate || ''),
-                price: member.membershipPrice,
               });
               openPassDetailModalHandler(passDetailsData);
             }
@@ -417,7 +414,6 @@ export const MembershipTab = ({
                 name: `PT ${member.ptTotal}회권`,
                 startDate: new Date(member.ptStartDate || ''),
                 endDate: new Date(member.ptExpiryDate || ''),
-                price: member.ptPrice,
                 remainingSessions: member.ptRemaining,
                 totalSessions: member.ptTotal,
                 notes: `담당 트레이너: ${member.trainerAssigned || '미지정'}`

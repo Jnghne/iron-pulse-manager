@@ -1,6 +1,3 @@
-// ProductType enum import
-import { ProductType } from '@/types/product';
-import type { Product } from '@/types/product'; // Product interface import
 
 // 락커 타입 정의
 export interface Locker {
@@ -36,13 +33,11 @@ export interface Member {
   memberType: string;
   registrationDate: string;
   expiryDate?: string;
-  membershipStatus: 'active' | 'expired' | 'pending';
   ptRemaining?: number;
   ptExpiryDate?: string;
-  ptStartDate?: string; // Added missing property
-  ptTotal?: number; // Added missing property
+  ptStartDate?: string;
+  ptTotal?: number;
   gymMembershipDaysLeft?: number;
-  gymMembershipExpiryDate?: string;
   attendanceRate: number;
   trainerAssigned?: string;
   trainerNotes?: string;
@@ -50,15 +45,14 @@ export interface Member {
   photoUrl?: string;
   membershipActive?: boolean;
   hasPT?: boolean;
-  membershipId?: string; // 추가
-  ptId?: string; // 추가
-  lockerId?: string; // Lint 오류 수정을 위해 다시 추가 (선택적 필드)
+  membershipId?: string;
+  ptId?: string;
+  lockerId?: string;
   membershipStartDate?: string;
-  membershipEndDate?: string; // 추가: MemberList에서 사용하는 속성
-  phoneNumber?: string; // 추가: MemberList에서 사용하는 속성
+  membershipEndDate?: string;
+  phoneNumber?: string;
 
   // 회원 상세 페이지 리뉴얼에 필요한 추가 필드
-  availableBranches?: string[]; // 이용 가능 지점 목록
   appUsage?: boolean; // 앱 이용 여부
   unpaidAmount?: number; // 잔여 미수금
   registrationPath?: string; // 방문/가입 경로
@@ -91,81 +85,6 @@ export interface Member {
   }[];
 }
 
-// 이용권 데이터 샘플
-export const mockPasses = [
-  {
-    id: 'pass1',
-    productId: 'product1', // 헬스 3개월권
-    status: '사용중',
-    name: '헬스이용권 3개월권',
-    type: '회원권',
-    category: '기간제',
-    subCategory: '헬스',
-    serviceStartDate: '2025. 05. 27. 오후',
-    serviceEndDate: '2025. 08. 26. 오후',
-    consultant: '오정석',
-    instructor: '배정 예정',
-    paymentDate: '2025. 05. 27. 19:35',
-    paymentMethod: '카드 결제',
-    purchasePurpose: '다이어트',
-    productAmount: 358800,
-    actualPaymentAmount: 358800,
-    consultantSalesShare: 35880,
-    unpaidAmount: 0,
-    revenueDistributionNotes: '담당자 10% 지급',
-    contractImages: [
-      'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=2070&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1964&auto=format&fit=crop'
-    ]
-  },
-  {
-    id: 'pass2',
-    productId: 'product2', // 헬스 6개월권
-    status: '사용중',
-    name: '헬스이용권 6개월권',
-    type: '회원권',
-    category: '기간제',
-    subCategory: '헬스',
-    serviceStartDate: '2025. 04. 15. 오전',
-    serviceEndDate: '2025. 10. 14. 오전',
-    consultant: '김민수',
-    instructor: '배정 예정',
-    paymentDate: '2025. 04. 15. 10:22',
-    paymentMethod: '현금 결제',
-    purchasePurpose: '체력 증진',
-    productAmount: 598000,
-    actualPaymentAmount: 550000,
-    consultantSalesShare: 55000,
-    unpaidAmount: 0,
-    revenueDistributionNotes: '담당자 10% 지급, 할인 적용'
-  },
-  {
-    id: 'pass3',
-    productId: 'product5', // PT 10회권
-    status: '사용중',
-    name: 'PT 10회권',
-    type: 'PT',
-    category: '횟수제',
-    subCategory: 'PT',
-    serviceStartDate: '2025. 05. 10. 오전',
-    serviceEndDate: '2025. 08. 09. 오전',
-    consultant: '이지원',
-    instructor: '박지훈',
-    paymentDate: '2025. 05. 10. 11:15',
-    paymentMethod: '카드 결제',
-    purchasePurpose: '근력 강화',
-    productAmount: 550000,
-    actualPaymentAmount: 550000,
-    consultantSalesShare: 55000,
-    unpaidAmount: 0,
-    ptTotalSessions: 10,
-    ptRemainingSessions: 8,
-    revenueDistributionNotes: '담당자 10% 지급',
-    contractImages: [
-      'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?q=80&w=2070&auto=format&fit=crop'
-    ]
-  }
-];
 
 // 회원 데이터 샘플
 export const mockMembers: Member[] = [
@@ -181,22 +100,18 @@ export const mockMembers: Member[] = [
     memberType: '정회원',
     registrationDate: '2025-01-15',
     expiryDate: '2026-01-14',
-    membershipStatus: 'active',
     ptRemaining: 15,
     ptTotal: 30,
     ptExpiryDate: '2025-06-30',
     ptStartDate: '2024-01-15',
-    ptPrice: 700000,
     ptId: 'prod_002',
     gymMembershipDaysLeft: 230,
-    gymMembershipExpiryDate: '2025-01-14',
     attendanceRate: 85,
     trainerAssigned: '박지훈',
     trainerNotes: '운동 성장이 빠르고 열정적임. 사이클링 선호.',
     smsConsent: true,
     membershipActive: true,
     membershipId: 'prod_001',
-    membershipPrice: 50000,
     hasPT: true,
     membershipStartDate: '2023-01-15',
     appUsage: true,
@@ -213,22 +128,18 @@ export const mockMembers: Member[] = [
     memberType: '정회원',
     registrationDate: '2025-02-10',
     expiryDate: '2026-08-09',
-    membershipStatus: 'active',
     ptRemaining: 8,
     ptTotal: 10,
     ptStartDate: '2025-01-10',
-    ptPrice: 700000,
     ptId: 'prod_002',
     ptExpiryDate: '2024-09-30',
     gymMembershipDaysLeft: 75,
-    gymMembershipExpiryDate: '2024-08-09',
     attendanceRate: 92,
     trainerAssigned: '박지훈',
     trainerNotes: '근력 향상에 관심이 많음. 웨이트 트레이닝 위주로 진행.',
     smsConsent: true,
     membershipActive: true,
     membershipId: 'prod_001',
-    membershipPrice: 50000,
     hasPT: true,
     lockerId: 'prod_003',
     membershipStartDate: '2023-02-10',
@@ -245,7 +156,6 @@ export const mockMembers: Member[] = [
     memberType: 'PT 회원',
     registrationDate: '2024-03-20',
     expiryDate: '2024-08-09',
-    membershipStatus: 'active',
     ptRemaining: 22,
     ptExpiryDate: '2026-12-31',
     attendanceRate: 78,
@@ -267,9 +177,7 @@ export const mockMembers: Member[] = [
     memberType: '일반회원',
     registrationDate: '2024-05-05',
     expiryDate: '2025-05-04',
-    membershipStatus: 'expired',
     gymMembershipDaysLeft: 0,
-    gymMembershipExpiryDate: '2026-05-04',
     attendanceRate: 65,
     trainerAssigned: '김지원',
     smsConsent: true,
@@ -289,11 +197,9 @@ export const mockMembers: Member[] = [
     memberType: 'VIP 회원',
     registrationDate: '2025-01-02',
     expiryDate: '2026-01-01',
-    membershipStatus: 'active',
     ptRemaining: 30,
     ptExpiryDate: '2026-01-01',
     gymMembershipDaysLeft: 220,
-    gymMembershipExpiryDate: '2025-01-01',
     attendanceRate: 95,
     trainerAssigned: '박지훈',
     trainerNotes: '체중 감량과 근육량 증가가 목표. 다이어트 시작.',
@@ -317,10 +223,8 @@ export const mockMembers: Member[] = [
     memberType: '정회원',
     registrationDate: '2025-06-15',
     expiryDate: '2026-06-14',
-    membershipStatus: 'active',
     ptRemaining: 0,
     gymMembershipDaysLeft: 20,
-    gymMembershipExpiryDate: '2026-06-14',
     attendanceRate: 70,
     trainerAssigned: '김지원',
     smsConsent: true,
@@ -341,9 +245,7 @@ export const mockMembers: Member[] = [
     memberType: '학생 회원',
     registrationDate: '2025-01-10',
     expiryDate: '2025-07-09',
-    membershipStatus: 'active',
     gymMembershipDaysLeft: 45,
-    gymMembershipExpiryDate: '2025-07-09',
     attendanceRate: 60,
     smsConsent: true,
     membershipActive: true,
@@ -361,7 +263,6 @@ export const mockMembers: Member[] = [
     email: 'jinsoo@example.com',
     memberType: 'PT 회원',
     registrationDate: '2024-09-01',
-    membershipStatus: 'active',
     ptRemaining: 5,
     ptExpiryDate: '2026-06-30',
     expiryDate: '2025-04-30',
@@ -383,9 +284,7 @@ export const mockMembers: Member[] = [
     memberType: '월 회원',
     registrationDate: '2025-04-01',
     expiryDate: '2025-06-01',
-    membershipStatus: 'active',
     gymMembershipDaysLeft: 5,
-    gymMembershipExpiryDate: '2025-06-01',
     attendanceRate: 45,
     smsConsent: false,
     membershipActive: true,
@@ -405,11 +304,9 @@ export const mockMembers: Member[] = [
     memberType: 'VIP 회원',
     registrationDate: '2025-11-15',
     expiryDate: '2026-11-14',
-    membershipStatus: 'active',
     ptRemaining: 25,
     ptExpiryDate: '2026-12-31',
     gymMembershipDaysLeft: 170,
-    gymMembershipExpiryDate: '2026-11-14',
     attendanceRate: 90,
     trainerAssigned: '박지훈',
     trainerNotes: '개인 경기 준비 중. 근지구력 향상에 집중.',
@@ -433,11 +330,9 @@ export const mockMembers: Member[] = [
     memberType: '정회원',
     registrationDate: '2025-08-01',
     expiryDate: '2026-08-01',
-    membershipStatus: 'active',
     ptRemaining: 12,
     ptExpiryDate: '2026-10-31',
     gymMembershipDaysLeft: 65,
-    gymMembershipExpiryDate: '2026-08-01',
     attendanceRate: 75,
     trainerAssigned: '김지원',
     smsConsent: true,
@@ -459,24 +354,13 @@ export const mockMembers: Member[] = [
     memberType: '일반회원',
     registrationDate: '2024-12-01',
     expiryDate: '2025-05-31',
-    membershipStatus: 'expired',
     gymMembershipDaysLeft: 0,
-    gymMembershipExpiryDate: '2026-05-31',
     attendanceRate: 50,
     smsConsent: false,
     membershipActive: false,
     hasPT: false,
     appUsage: false,
   }
-];
-
-export const mockProducts: Product[] = [
-  { id: 'prod_001', name: '헬스 6개월', type: ProductType.MEMBERSHIP, price: 300000, durationDays: 180, isActive: true, createdAt: new Date(), updatedAt: new Date() },
-  { id: 'prod_002', name: 'PT 10회', type: ProductType.PT, price: 500000, totalSessions: 10, isActive: true, createdAt: new Date(), updatedAt: new Date() },
-  { id: 'prod_003', name: '개인 락커 1개월', type: ProductType.LOCKER, price: 10000, durationDays: 30, isActive: true, createdAt: new Date(), updatedAt: new Date() },
-  { id: 'prod_004', name: '헬스 12개월', type: ProductType.MEMBERSHIP, price: 550000, durationDays: 365, isActive: true, createdAt: new Date(), updatedAt: new Date() },
-  { id: 'prod_005', name: 'PT 30회', type: ProductType.PT, price: 1350000, totalSessions: 30, isActive: true, createdAt: new Date(), updatedAt: new Date() },
-  { id: 'prod_006', name: '학생 헬스 3개월', type: ProductType.MEMBERSHIP, price: 150000, durationDays: 90, isActive: false, createdAt: new Date(), updatedAt: new Date() }, // 비활성 상품 예시
 ];
 
 // 일일 매출 데이터
@@ -661,14 +545,6 @@ export const mockMonthlyRevenueData = [
     dailyTicket: 800000, 
     other: 400000 
   }
-];
-
-// 매출 항목별 데이터 (파이 차트용)
-export const mockRevenueBreakdownData = [
-  { name: '회원권', value: 2500000 },
-  { name: 'PT 이용권', value: 1800000 },
-  { name: '일일권', value: 500000 },
-  { name: '기타', value: 200000 },
 ];
 
 // 방문자 데이터

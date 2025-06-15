@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 
 export type MemberStatus = 'all' | 'active' | 'expired' | 'pending';
 export type MemberType = 'all' | 'regular' | 'pt' | 'vip' | 'student';
-export type SortOption = 'name' | 'registrationDate' | 'expiryDate' | 'attendanceRate';
+export type SortOption = 'name' | 'registrationDate' | 'expiryDate' | 'attendanceRate' | 'membershipStatus';
 
 interface FilterPopoverProps {
   onFilterChange: (filters: {
@@ -111,6 +111,7 @@ export const FilterPopover = ({ onFilterChange, className }: FilterPopoverProps)
                 <SelectItem value="registrationDate">등록일순</SelectItem>
                 <SelectItem value="expiryDate">만료일순</SelectItem>
                 <SelectItem value="attendanceRate">출석률순</SelectItem>
+                <SelectItem value="membershipStatus">회원 상태순</SelectItem>
               </SelectContent>
             </Select>
           </div>

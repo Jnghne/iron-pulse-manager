@@ -10,11 +10,9 @@ import {
   Calendar, 
   MapPin, 
   MessageSquare, 
-  Building, 
   CreditCard, 
   UserPlus, 
   FileText,
-  MapPinned,
   Smartphone
 } from "lucide-react";
 import { Member } from "@/data/mockData";

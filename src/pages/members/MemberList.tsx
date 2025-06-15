@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { 
   Search, 
@@ -24,24 +24,13 @@ import {
   Users,
   UserCheck,
   Clock,
-  Filter,
   Download,
   MoreHorizontal,
-  CalendarClock,
-  User
+  CalendarClock
 } from "lucide-react";
 import { mockMembers, Member } from "@/data/mockData";
-import { mockProducts } from "@/data/mockProducts";
-import { Product, ProductType } from "@/types/product";
-import { formatDate, formatPhoneNumber } from "@/lib/utils";
+import { formatDate } from "@/lib/utils";
 import { differenceInDays, parseISO, isValid } from "date-fns";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
 import { FilterPopover, MemberStatus, MemberType, SortOption } from "@/components/features/filter/FilterPopover";
 
 const ITEMS_PER_PAGE = 10;
@@ -151,20 +140,34 @@ const MemberList = () => {
     
     // 정렬 적용
     filtered.sort((a, b) => {
-      // 변수 미리 선언
-      let aExpiryDate, bExpiryDate;
-      
       switch (sortFilter) {
         case "name":
           return a.name.localeCompare(b.name);
         case "registrationDate":
           return new Date(b.registrationDate).getTime() - new Date(a.registrationDate).getTime();
-        case "expiryDate":
-          aExpiryDate = a.expiryDate ? new Date(a.expiryDate).getTime() : Infinity;
-          bExpiryDate = b.expiryDate ? new Date(b.expiryDate).getTime() : Infinity;
+        case "expiryDate": {
+          const aExpiryDate: number = a.expiryDate ? new Date(a.expiryDate).getTime() : Infinity;
+          const bExpiryDate: number = b.expiryDate ? new Date(b.expiryDate).getTime() : Infinity;
           return aExpiryDate - bExpiryDate;
+        }
         case "attendanceRate":
           return b.attendanceRate - a.attendanceRate;
+        case "membershipStatus": {
+          const aStatus = getMembershipStatus(a);
+          const bStatus = getMembershipStatus(b);
+          const aImminentStatus = isExpirationImminent(a);
+          const bImminentStatus = isExpirationImminent(b);
+          
+          // 우선순위: active (만료 임박 아님) > active (만료 임박) > expired
+          const getStatusPriority = (status: string, isImminent: boolean) => {
+            if (status === "active" && !isImminent) return 1;
+            if (status === "active" && isImminent) return 2;
+            if (status === "expired") return 3;
+            return 4;
+          };
+          
+          return getStatusPriority(aStatus, aImminentStatus) - getStatusPriority(bStatus, bImminentStatus);
+        }
         default:
           return 0;
       }
@@ -377,8 +380,8 @@ const MemberList = () => {
                             {(() => {
                               const badges: JSX.Element[] = [];
 
-                              const hasActivePT = member.ptId && mockProducts.find(p => p.id === member.ptId && p.type === ProductType.PT && p.isActive);
-                              if (hasActivePT) {
+                              // PT 이용권 확인 (간단한 방식)
+                              if (member.hasPT) {
                                 badges.push(
                                   <span key="pt" className={`px-2 py-1 text-xs bg-purple-50 text-purple-700 rounded-full font-medium`}>
                                     PT
@@ -386,16 +389,14 @@ const MemberList = () => {
                                 );
                               }
 
-                              const hasActiveMembership = member.membershipId && mockProducts.find(p => p.id === member.membershipId && p.type === ProductType.MEMBERSHIP && p.isActive);
-                              if (hasActiveMembership) {
+                              // 헬스 회원권 확인 (간단한 방식)
+                              if (member.membershipActive) {
                                 badges.push(
                                   <span key="membership" className={`px-2 py-1 text-xs bg-blue-50 text-blue-700 rounded-full font-medium`}>
                                     헬스
                                   </span>
                                 );
                               }
-
-                              // 락커 뱃지 관련 로직은 여기에 포함하지 않음
 
                               if (badges.length === 0) {
                                 return (

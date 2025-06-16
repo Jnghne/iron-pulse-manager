@@ -422,129 +422,32 @@ export const mockRevenueData = [
   }
 ];
 
-// 월별 매출 데이터
-export const mockMonthlyRevenueData = [
-  { 
-    name: '1월', 
-    date: '2024-01-01',
-    total: 3500000, 
-    revenue: 3500000, 
-    membership: 1500000, 
-    pt: 1200000, 
-    dailyTicket: 500000, 
-    other: 300000 
-  },
-  { 
-    name: '2월', 
-    date: '2024-02-01',
-    total: 3800000, 
-    revenue: 3800000, 
-    membership: 1600000, 
-    pt: 1400000, 
-    dailyTicket: 550000, 
-    other: 250000 
-  },
-  { 
-    name: '3월', 
-    date: '2024-03-01',
-    total: 4200000, 
-    revenue: 4200000, 
-    membership: 1800000, 
-    pt: 1600000, 
-    dailyTicket: 600000, 
-    other: 200000 
-  },
-  { 
-    name: '4월', 
-    date: '2024-04-01',
-    total: 4000000, 
-    revenue: 4000000, 
-    membership: 1700000, 
-    pt: 1500000, 
-    dailyTicket: 550000, 
-    other: 250000 
-  },
-  { 
-    name: '5월', 
-    date: '2024-05-01',
-    total: 4500000, 
-    revenue: 4500000, 
-    membership: 1900000, 
-    pt: 1700000, 
-    dailyTicket: 650000, 
-    other: 250000 
-  },
-  { 
-    name: '6월', 
-    date: '2024-06-01',
-    total: 5000000, 
-    revenue: 5000000, 
-    membership: 2100000, 
-    pt: 1900000, 
-    dailyTicket: 700000, 
-    other: 300000 
-  },
-  { 
-    name: '7월', 
-    date: '2024-07-01',
-    total: 4800000, 
-    revenue: 4800000, 
-    membership: 2000000, 
-    pt: 1800000, 
-    dailyTicket: 650000, 
-    other: 350000 
-  },
-  { 
-    name: '8월', 
-    date: '2024-08-01',
-    total: 4600000, 
-    revenue: 4600000, 
-    membership: 1950000, 
-    pt: 1750000, 
-    dailyTicket: 600000, 
-    other: 300000 
-  },
-  { 
-    name: '9월', 
-    date: '2024-09-01',
-    total: 4700000, 
-    revenue: 4700000, 
-    membership: 2000000, 
-    pt: 1800000, 
-    dailyTicket: 650000, 
-    other: 250000 
-  },
-  { 
-    name: '10월', 
-    date: '2024-10-01',
-    total: 5200000, 
-    revenue: 5200000, 
-    membership: 2200000, 
-    pt: 2000000, 
-    dailyTicket: 700000, 
-    other: 300000 
-  },
-  { 
-    name: '11월', 
-    date: '2024-11-01',
-    total: 5500000, 
-    revenue: 5500000, 
-    membership: 2300000, 
-    pt: 2100000, 
-    dailyTicket: 750000, 
-    other: 350000 
-  },
-  { 
-    name: '12월', 
-    date: '2024-12-01',
-    total: 5800000, 
-    revenue: 5800000, 
-    membership: 2400000, 
-    pt: 2200000, 
-    dailyTicket: 800000, 
-    other: 400000 
-  }
-];
+// 월별 매출 데이터 생성 함수
+const generateMonthlyRevenueData = () => {
+  const months = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
+  const baseRevenues = [3500000, 3800000, 4200000, 4000000, 4500000, 5000000, 4800000, 4600000, 4700000, 5200000, 5500000, 5800000];
+  
+  return months.map((name, index) => {
+    const total = baseRevenues[index];
+    const membership = Math.floor(total * 0.42);
+    const pt = Math.floor(total * 0.38);
+    const dailyTicket = Math.floor(total * 0.13);
+    const other = total - membership - pt - dailyTicket;
+    
+    return {
+      name,
+      date: `2024-${(index + 1).toString().padStart(2, '0')}-01`,
+      total,
+      revenue: total,
+      membership,
+      pt,
+      dailyTicket,
+      other
+    };
+  });
+};
+
+export const mockMonthlyRevenueData = generateMonthlyRevenueData();
 
 // 방문자 데이터
 export const mockVisitorsData = [
@@ -554,36 +457,35 @@ export const mockVisitorsData = [
   { name: '3일전', total: 40, male: 21, female: 19 },
 ];
 
-// 락커 데이터 (1-200번) - 고정 데이터
-export const mockLockers: Locker[] = [
-  // 사용중인 락커들 (다양한 상태)
-  { id: 'L001', number: 1, isOccupied: true, memberId: 'M00001', memberName: '김지원', startDate: '2024-01-15', endDate: '2025-01-14', fee: 80000, isPaid: true },
-  { id: 'L002', number: 2, isOccupied: false },
-  { id: 'L003', number: 3, isOccupied: true, memberId: 'M00002', memberName: '이지훈', startDate: '2024-02-10', endDate: '2024-08-09', fee: 70000, isPaid: true }, // 만료
-  { id: 'L004', number: 4, isOccupied: false },
-  { id: 'L005', number: 5, isOccupied: true, memberId: 'M00003', memberName: '박수진', startDate: '2024-11-01', endDate: '2025-01-30', fee: 90000, isPaid: true }, // 만료 임박
-  { id: 'L006', number: 6, isOccupied: false },
-  { id: 'L007', number: 7, isOccupied: true, memberId: 'M00004', memberName: '정동현', startDate: '2024-06-15', endDate: '2025-06-14', fee: 85000, isPaid: true },
-  { id: 'L008', number: 8, isOccupied: false },
-  { id: 'L009', number: 9, isOccupied: true, memberId: 'M00005', memberName: '김영희', startDate: '2024-03-20', endDate: '2024-09-19', fee: 75000, isPaid: false }, // 만료
-  { id: 'L010', number: 10, isOccupied: false },
-  { id: 'L011', number: 11, isOccupied: true, memberId: 'M00006', memberName: '최지원', startDate: '2024-12-01', endDate: '2025-01-15', fee: 95000, isPaid: true }, // 만료 임박
-  { id: 'L012', number: 12, isOccupied: false },
-  { id: 'L013', number: 13, isOccupied: true, memberId: 'M00007', memberName: '이지영', startDate: '2024-08-10', endDate: '2025-08-09', fee: 88000, isPaid: true },
-  { id: 'L014', number: 14, isOccupied: false },
-  { id: 'L015', number: 15, isOccupied: true, memberId: 'M00008', memberName: '박진수', startDate: '2024-01-05', endDate: '2024-07-04', fee: 65000, isPaid: true }, // 만료
-  { id: 'L016', number: 16, isOccupied: false },
-  { id: 'L017', number: 17, isOccupied: true, memberId: 'M00009', memberName: '이서연', startDate: '2024-11-15', endDate: '2025-02-14', fee: 82000, isPaid: true },
-  { id: 'L018', number: 18, isOccupied: false },
-  { id: 'L019', number: 19, isOccupied: true, memberId: 'M00010', memberName: '김태호', startDate: '2024-12-10', endDate: '2025-01-20', fee: 92000, isPaid: true }, // 만료 임박
-  { id: 'L020', number: 20, isOccupied: false },
-  // 나머지 락커들은 비어있음 (21-200번)
-  ...Array.from({ length: 180 }, (_, i) => ({
-    id: `L${(i + 21).toString().padStart(3, '0')}`,
-    number: i + 21,
-    isOccupied: false
-  }))
-];
+// 락커 데이터 생성 함수
+const generateMockLockers = (totalLockers: number = 200): Locker[] => {
+  const occupiedLockers = [
+    { number: 1, memberId: 'M00001', memberName: '김지원', startDate: '2024-01-15', endDate: '2025-01-14', fee: 80000, isPaid: true },
+    { number: 3, memberId: 'M00002', memberName: '이지훈', startDate: '2024-02-10', endDate: '2024-08-09', fee: 70000, isPaid: true },
+    { number: 5, memberId: 'M00003', memberName: '박수진', startDate: '2024-11-01', endDate: '2025-01-30', fee: 90000, isPaid: true },
+    { number: 7, memberId: 'M00004', memberName: '정동현', startDate: '2024-06-15', endDate: '2025-06-14', fee: 85000, isPaid: true },
+    { number: 9, memberId: 'M00005', memberName: '김영희', startDate: '2024-03-20', endDate: '2024-09-19', fee: 75000, isPaid: false },
+    { number: 11, memberId: 'M00006', memberName: '최지원', startDate: '2024-12-01', endDate: '2025-01-15', fee: 95000, isPaid: true },
+    { number: 13, memberId: 'M00007', memberName: '이지영', startDate: '2024-08-10', endDate: '2025-08-09', fee: 88000, isPaid: true },
+    { number: 15, memberId: 'M00008', memberName: '박진수', startDate: '2024-01-05', endDate: '2024-07-04', fee: 65000, isPaid: true },
+    { number: 17, memberId: 'M00009', memberName: '이서연', startDate: '2024-11-15', endDate: '2025-02-14', fee: 82000, isPaid: true },
+    { number: 19, memberId: 'M00010', memberName: '김태호', startDate: '2024-12-10', endDate: '2025-01-20', fee: 92000, isPaid: true },
+  ];
+
+  return Array.from({ length: totalLockers }, (_, i) => {
+    const number = i + 1;
+    const occupied = occupiedLockers.find(locker => locker.number === number);
+    
+    return {
+      id: `L${number.toString().padStart(3, '0')}`,
+      number,
+      isOccupied: !!occupied,
+      ...occupied
+    };
+  });
+};
+
+export const mockLockers: Locker[] = generateMockLockers();
 
 // 출석 기록 생성 함수
 export const getMockAttendance = (memberId: string, days: number = 90): AttendanceRecord[] => {

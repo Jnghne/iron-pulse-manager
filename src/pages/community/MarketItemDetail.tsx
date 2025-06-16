@@ -16,7 +16,7 @@ import {
   User,
   Store
 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import CommentSection from "@/components/features/community/CommentSection";
 
 const MarketItemDetail = () => {

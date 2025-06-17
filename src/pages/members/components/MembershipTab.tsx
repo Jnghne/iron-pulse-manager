@@ -164,7 +164,6 @@ export const MembershipTab = ({
       : (typeProducts.length > 0 ? typeProducts[0] : undefined);
 
     const commonDetails = {
-      consultant: '오정석', // 예시 데이터 (이미지 참조)
       instructor: memberData.trainerAssigned || '배정 예정',
       paymentDate: '2025. 05. 27. 19:35', // 예시 데이터 (이미지 참조)
       paymentMethod: '카드 결제', // 예시 데이터 (이미지 참조)

@@ -170,30 +170,19 @@ export const PassDetailModal = memo<PassDetailModalProps>(
               <div>
                 <h4 className="text-sm font-semibold mb-2 flex items-center">
                   상품 정보
-                  <InfoTooltip>상품명, 서비스 기간, 담당자 정보를 확인하거나 수정합니다.</InfoTooltip>
+                  <InfoTooltip>상품명, 서비스 기간, 상품 상담직원 정보를 확인하거나 수정합니다.</InfoTooltip>
                 </h4>
                 <div className="bg-gray-50 p-4 rounded-md space-y-4 text-sm">
                   {isEditing ? (
                     <>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-1">
-                          <Label htmlFor="passName">상품명</Label>
-                          <Input
-                            id="passName"
-                            value={editedPassDetails?.name || ''}
-                            onChange={(e) => handleInputChange('name', e.target.value)}
-                            placeholder="예: 헬스 6개월"
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <Label htmlFor="consultant">담당자</Label>
-                          <Input
-                            id="consultant"
-                            value={editedPassDetails?.consultant || ''}
-                            onChange={(e) => handleInputChange('consultant', e.target.value)}
-                            placeholder="담당자 이름"
-                          />
-                        </div>
+                      <div className="space-y-1">
+                        <Label htmlFor="passName">상품명</Label>
+                        <Input
+                          id="passName"
+                          value={editedPassDetails?.name || ''}
+                          onChange={(e) => handleInputChange('name', e.target.value)}
+                          placeholder="예: 헬스 6개월"
+                        />
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-1">
@@ -272,30 +261,21 @@ export const PassDetailModal = memo<PassDetailModalProps>(
                           </div>
                         </div>
                       )}
-                      {/* 강사 필드는 락커 이용권과 기타 이용권에서 제외 */}
-                      {!editedPassDetails?.type?.includes('락커') && !editedPassDetails?.type?.includes('기타') && (
-                        <div className="space-y-1">
-                          <Label htmlFor="instructor">강사</Label>
-                          <Input
-                            id="instructor"
-                            value={editedPassDetails?.instructor || ''}
-                            onChange={(e) => handleInputChange('instructor', e.target.value)}
-                            placeholder="강사 이름 (예: 배정 예정)"
-                          />
-                        </div>
-                      )}
+                      <div className="space-y-1">
+                        <Label htmlFor="instructor">상품 상담직원</Label>
+                        <Input
+                          id="instructor"
+                          value={editedPassDetails?.instructor || ''}
+                          onChange={(e) => handleInputChange('instructor', e.target.value)}
+                          placeholder="상품 상담직원 이름 (예: 배정 예정)"
+                        />
+                      </div>
                     </>
                   ) : (
                     <>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-1">
-                          <Label htmlFor="viewPassName">상품명</Label>
-                          <div id="viewPassName" className="p-2 border rounded-md bg-gray-100 min-h-[40px] flex items-center">{currentDisplayDetails.name}</div>
-                        </div>
-                        <div className="space-y-1">
-                          <Label htmlFor="viewConsultant">담당자</Label>
-                          <div id="viewConsultant" className="p-2 border rounded-md bg-gray-100 min-h-[40px] flex items-center">{currentDisplayDetails.consultant || 'N/A'}</div>
-                        </div>
+                      <div className="space-y-1">
+                        <Label htmlFor="viewPassName">상품명</Label>
+                        <div id="viewPassName" className="p-2 border rounded-md bg-gray-100 min-h-[40px] flex items-center">{currentDisplayDetails.name}</div>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-1">
@@ -325,17 +305,49 @@ export const PassDetailModal = memo<PassDetailModalProps>(
                           </div>
                         </div>
                       )}
-                      {/* 강사 필드는 락커 이용권과 기타 이용권에서 제외 */}
-                      {!currentDisplayDetails.type?.includes('락커') && !currentDisplayDetails.type?.includes('기타') && (
-                        <div className="space-y-1">
-                          <Label htmlFor="viewInstructor">강사</Label>
-                          <div id="viewInstructor" className="p-2 border rounded-md bg-gray-100 min-h-[40px] flex items-center">{currentDisplayDetails.instructor || 'N/A'}</div>
-                        </div>
-                      )}
+                      <div className="space-y-1">
+                        <Label htmlFor="viewInstructor">상품 상담직원</Label>
+                        <div id="viewInstructor" className="p-2 border rounded-md bg-gray-100 min-h-[40px] flex items-center">{currentDisplayDetails.instructor || 'N/A'}</div>
+                      </div>
                     </>
                   )}
                 </div>
               </div>
+
+              {/* 락커 정보 섹션 */}
+              {(currentDisplayDetails?.type?.includes('락커') || currentDisplayDetails?.lockerNumber) && (
+                <div>
+                  <h4 className="text-sm font-semibold mb-2 flex items-center">
+                    락커 정보
+                    <InfoTooltip>락커 선택 및 현황을 확인하거나 수정합니다.</InfoTooltip>
+                  </h4>
+                  <div className="bg-gray-50 p-4 rounded-md space-y-4 text-sm">
+                    {isEditing ? (
+                      <div className="space-y-1">
+                        <Label>락커 선택</Label>
+                        <LockerSelector
+                          selectedLocker={editedPassDetails?.lockerNumber ? parseInt(editedPassDetails.lockerNumber) : null}
+                          onLockerSelect={(lockerNumber) => handleInputChange('lockerNumber', lockerNumber.toString())}
+                          currentMemberId={member.id}
+                        />
+                      </div>
+                    ) : (
+                      <div className="space-y-1">
+                        <Label>락커 현황</Label>
+                        <LockerSelector
+                          selectedLocker={currentDisplayDetails.lockerNumber ? parseInt(currentDisplayDetails.lockerNumber) : null}
+                          onLockerSelect={() => {}} // 읽기 전용이므로 빈 함수
+                          currentMemberId={member.id}
+                          readOnly={true}
+                        />
+                        <div className="text-xs text-muted-foreground mt-2">
+                          * 읽기 전용 모드입니다. 락커 변경은 수정 모드에서 가능합니다.
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* 결제 정보 섹션 */}
               <div>
@@ -361,7 +373,7 @@ export const PassDetailModal = memo<PassDetailModalProps>(
                           />
                         </div>
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-1">
                           <Label htmlFor="productAmount">상품 금액</Label>
                           <Input
@@ -382,25 +394,6 @@ export const PassDetailModal = memo<PassDetailModalProps>(
                             placeholder="실 결제 금액"
                           />
                         </div>
-                        <div className="space-y-1">
-                          <Label htmlFor="unpaidAmount">미수금</Label>
-                          <Input
-                            id="unpaidAmount"
-                            type="number"
-                            value={editedPassDetails?.unpaidAmount ?? ''}
-                            onChange={(e) => handleInputChange('unpaidAmount', e.target.value ? parseFloat(e.target.value) : null)}
-                            placeholder="미수금"
-                          />
-                        </div>
-                      </div>
-                      <div className="space-y-1">
-                        <Label htmlFor="purchasePurpose">구매 목적</Label>
-                        <Input
-                          id="purchasePurpose"
-                          value={editedPassDetails?.purchasePurpose || ''}
-                          onChange={(e) => handleInputChange('purchasePurpose', e.target.value)}
-                          placeholder="예: 다이어트, 체력 증진"
-                        />
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-1">
@@ -414,37 +407,25 @@ export const PassDetailModal = memo<PassDetailModalProps>(
                           />
                         </div>
                         <div className="space-y-1">
-                          <Label htmlFor="unpaidOrPerformanceShare">미수금/실적배분</Label>
+                          <Label htmlFor="unpaidOrPerformanceShare">미수금</Label>
                           <Input
                             id="unpaidOrPerformanceShare"
                             type="number"
                             value={editedPassDetails?.unpaidOrPerformanceShare ?? ''}
                             onChange={(e) => handleInputChange('unpaidOrPerformanceShare', e.target.value ? parseFloat(e.target.value) : null)}
-                            placeholder="미수금/실적배분"
+                            placeholder="미수금"
                           />
                         </div>
                       </div>
-                      {(editedPassDetails?.type?.includes('락커') || editedPassDetails?.lockerNumber) && (
-                        <div className="space-y-4">
-                          <div className="space-y-1">
-                            <Label>락커 선택</Label>
-                            <LockerSelector
-                              selectedLocker={editedPassDetails?.lockerNumber ? parseInt(editedPassDetails.lockerNumber) : null}
-                              onLockerSelect={(lockerNumber) => handleInputChange('lockerNumber', lockerNumber.toString())}
-                              currentMemberId={member.id}
-                            />
-                          </div>
-                          <div className="space-y-1">
-                            <Label htmlFor="lockerEndDate">락커 종료일</Label>
-                            <Input
-                              id="lockerEndDate"
-                              value={editedPassDetails?.lockerEndDate || ''}
-                              onChange={(e) => handleInputChange('lockerEndDate', e.target.value)}
-                              placeholder="락커 종료일"
-                            />
-                          </div>
-                        </div>
-                      )}
+                      <div className="space-y-1">
+                        <Label htmlFor="purchasePurpose">구매 목적</Label>
+                        <Input
+                          id="purchasePurpose"
+                          value={editedPassDetails?.purchasePurpose || ''}
+                          onChange={(e) => handleInputChange('purchasePurpose', e.target.value)}
+                          placeholder="예: 다이어트, 체력 증진"
+                        />
+                      </div>
                       <div className="space-y-1">
                         <Label htmlFor="memo">메모</Label>
                         <Textarea
@@ -468,7 +449,7 @@ export const PassDetailModal = memo<PassDetailModalProps>(
                           <div id="viewPaymentMethod" className="p-2 border rounded-md bg-gray-100 min-h-[40px] flex items-center">{currentDisplayDetails.paymentMethod || 'N/A'}</div>
                         </div>
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-1">
                           <Label htmlFor="viewProductAmount">상품 금액</Label>
                           <div id="viewProductAmount" className="p-2 border rounded-md bg-gray-100 min-h-[40px] flex items-center">{typeof currentDisplayDetails.productAmount === 'number' ? `${currentDisplayDetails.productAmount.toLocaleString('ko-KR')}원` : 'N/A'}</div>
@@ -477,14 +458,6 @@ export const PassDetailModal = memo<PassDetailModalProps>(
                           <Label htmlFor="viewActualPaymentAmount">실 결제 금액</Label>
                           <div id="viewActualPaymentAmount" className="p-2 border rounded-md bg-gray-100 min-h-[40px] flex items-center">{typeof currentDisplayDetails.actualPaymentAmount === 'number' ? `${currentDisplayDetails.actualPaymentAmount.toLocaleString('ko-KR')}원` : 'N/A'}</div>
                         </div>
-                        <div className="space-y-1">
-                          <Label htmlFor="viewUnpaidAmount">미수금</Label>
-                          <div id="viewUnpaidAmount" className="p-2 border rounded-md bg-gray-100 min-h-[40px] flex items-center">{typeof currentDisplayDetails.unpaidAmount === 'number' ? `${currentDisplayDetails.unpaidAmount.toLocaleString('ko-KR')}원` : 'N/A'}</div>
-                        </div>
-                      </div>
-                      <div className="space-y-1">
-                        <Label htmlFor="viewPurchasePurpose">구매 목적</Label>
-                        <div id="viewPurchasePurpose" className="p-2 border rounded-md bg-gray-100 min-h-[40px] flex items-center">{currentDisplayDetails.purchasePurpose || 'N/A'}</div>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-1">
@@ -492,30 +465,14 @@ export const PassDetailModal = memo<PassDetailModalProps>(
                           <div id="viewConsultantSalesPerformance" className="p-2 border rounded-md bg-gray-100 min-h-[40px] flex items-center">{typeof currentDisplayDetails.consultantSalesPerformance === 'number' ? `${currentDisplayDetails.consultantSalesPerformance.toLocaleString('ko-KR')}원` : 'N/A'}</div>
                         </div>
                         <div className="space-y-1">
-                          <Label htmlFor="viewUnpaidOrPerformanceShare">미수금/실적배분</Label>
+                          <Label htmlFor="viewUnpaidOrPerformanceShare">미수금</Label>
                           <div id="viewUnpaidOrPerformanceShare" className="p-2 border rounded-md bg-gray-100 min-h-[40px] flex items-center">{typeof currentDisplayDetails.unpaidOrPerformanceShare === 'number' ? `${currentDisplayDetails.unpaidOrPerformanceShare.toLocaleString('ko-KR')}원` : 'N/A'}</div>
                         </div>
                       </div>
-                      {(currentDisplayDetails.type?.includes('락커') || currentDisplayDetails.lockerNumber) && (
-                        <div className="space-y-4">
-                          <div className="space-y-1">
-                            <Label>락커 현황</Label>
-                            <LockerSelector
-                              selectedLocker={currentDisplayDetails.lockerNumber ? parseInt(currentDisplayDetails.lockerNumber) : null}
-                              onLockerSelect={() => {}} // 읽기 전용이므로 빈 함수
-                              currentMemberId={member.id}
-                              readOnly={true}
-                            />
-                            <div className="text-xs text-muted-foreground mt-2">
-                              * 읽기 전용 모드입니다. 락커 변경은 수정 모드에서 가능합니다.
-                            </div>
-                          </div>
-                          <div className="space-y-1">
-                            <Label htmlFor="viewLockerEndDate">락커 종료일</Label>
-                            <div id="viewLockerEndDate" className="p-2 border rounded-md bg-gray-100 min-h-[40px] flex items-center">{currentDisplayDetails.lockerEndDate || 'N/A'}</div>
-                          </div>
-                        </div>
-                      )}
+                      <div className="space-y-1">
+                        <Label htmlFor="viewPurchasePurpose">구매 목적</Label>
+                        <div id="viewPurchasePurpose" className="p-2 border rounded-md bg-gray-100 min-h-[40px] flex items-center">{currentDisplayDetails.purchasePurpose || 'N/A'}</div>
+                      </div>
                       <div className="space-y-1">
                         <Label htmlFor="viewMemo">메모</Label>
                         <div id="viewMemo" className="p-2 border rounded-md bg-gray-100 min-h-[60px] whitespace-pre-wrap">{currentDisplayDetails.memo || 'N/A'}</div>

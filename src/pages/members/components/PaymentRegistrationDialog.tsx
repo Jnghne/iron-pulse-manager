@@ -73,9 +73,6 @@ export const PaymentRegistrationDialog = ({
   const [purchasePurpose, setPurchasePurpose] = useState<string>("");
   const [consultant, setConsultant] = useState<string>(""); // 상품 상담자 (기존 selectedStaff 대체 가능)
   const [instructor, setInstructor] = useState<string>(""); // 담당 강사 (기존 selectedTrainer 대체 가능)
-  // For PT: 담당 강사 2, 3 (추후 확장)
-  // const [instructor2, setInstructor2] = useState<string>("");
-  // const [instructor3, setInstructor3] = useState<string>("");
   const [consultantSalesPerformance, setConsultantSalesPerformance] = useState<string>("0");
   const [unpaidOrPerformanceShare, setUnpaidOrPerformanceShare] = useState<string>("0");
   const [paymentMethod, setPaymentMethod] = useState<string>("card");
@@ -179,7 +176,6 @@ export const PaymentRegistrationDialog = ({
       // marketingSource, // PaymentData에 없으므로 제거 또는 인터페이스에 추가 필요
       memo
     };
-    // TODO: 담당 강사 2, 3 (PT) 데이터 추가
     
     // 실제 구현에서는 API 호출 등의 로직이 들어갈 수 있음
     setTimeout(() => {
@@ -329,9 +325,9 @@ export const PaymentRegistrationDialog = ({
                     {/* 상담 및 강사 정보 */}
                     <div className="space-y-3">
                       <div className="flex items-center">
-                        <h3 className="text-md font-medium">{selectedCategory === 'gym' ? '상품 상담자 및 담당 강사' : '상품 상담자 및 담당 강사 (개인레슨)'}</h3>
+                        <h3 className="text-md font-medium">담당 직원</h3>
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 gap-4">
                         <div className="space-y-1.5">
                           <Label htmlFor="consultant">상품 상담자</Label>
                           <Select value={consultant} onValueChange={setConsultant}>
@@ -343,38 +339,21 @@ export const PaymentRegistrationDialog = ({
                             </SelectContent>
                           </Select>
                         </div>
-                        <div className="space-y-1.5">
-                          <Label htmlFor="instructor">담당 강사 {selectedCategory === 'lesson' ? '1' : ''}</Label>
-                          <Select value={instructor} onValueChange={setInstructor} disabled={selectedCategory === 'gym' && !product.toLowerCase().includes('lesson')}>
-                            <SelectTrigger id="instructor">
-                              <SelectValue placeholder="강사를 선택하세요" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {trainers.map(name => <SelectItem key={name} value={name}>{name}</SelectItem>)}
-                              <SelectItem value="배정 예정">배정 예정</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
+                        {selectedCategory === 'lesson' && (
+                          <div className="space-y-1.5">
+                            <Label htmlFor="instructor">담당 강사</Label>
+                            <Select value={instructor} onValueChange={setInstructor}>
+                              <SelectTrigger id="instructor">
+                                <SelectValue placeholder="강사를 선택하세요" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {trainers.map(name => <SelectItem key={name} value={name}>{name}</SelectItem>)}
+                                <SelectItem value="배정 예정">배정 예정</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        )}
                       </div>
-                      {selectedCategory === 'lesson' && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                           {/* 담당 강사 2, 3 - 추후 구현 */}
-                          <div className="space-y-1.5">
-                            <Label htmlFor="instructor2">담당 강사 2 (선택)</Label>
-                            <Select onValueChange={() => {}} >
-                              <SelectTrigger id="instructor2"><SelectValue placeholder="선택" /></SelectTrigger>
-                              <SelectContent>{trainers.map(name => <SelectItem key={name} value={name}>{name}</SelectItem>)}</SelectContent>
-                            </Select>
-                          </div>
-                          <div className="space-y-1.5">
-                            <Label htmlFor="instructor3">담당 강사 3 (선택)</Label>
-                            <Select onValueChange={() => {}} >
-                              <SelectTrigger id="instructor3"><SelectValue placeholder="선택" /></SelectTrigger>
-                              <SelectContent>{trainers.map(name => <SelectItem key={name} value={name}>{name}</SelectItem>)}</SelectContent>
-                            </Select>
-                          </div>
-                        </div>
-                      )}
                     </div>
 
                     {/* 결제 정보 */}

@@ -32,10 +32,10 @@ export interface Member {
   memberType: string;
   registrationDate: string;
   expiryDate?: string;
-  ptRemaining?: number;
-  ptExpiryDate?: string;
-  ptStartDate?: string;
-  ptTotal?: number;
+  ptRemaining?: number; // 개인레슨 잔여 횟수
+  ptExpiryDate?: string; // 개인레슨 만료일
+  ptStartDate?: string; // 개인레슨 시작일
+  ptTotal?: number; // 개인레슨 총 횟수
   gymMembershipDaysLeft?: number;
   attendanceRate: number;
   trainerAssigned?: string;
@@ -43,9 +43,9 @@ export interface Member {
   smsConsent: boolean;
   photoUrl?: string;
   membershipActive?: boolean;
-  hasPT?: boolean;
+  hasPT?: boolean; // 개인레슨 여부
   membershipId?: string;
-  ptId?: string;
+  ptId?: string; // 개인레슨 상품 ID
   lockerId?: string;
   membershipStartDate?: string;
   membershipEndDate?: string;
@@ -152,7 +152,7 @@ export const mockMembers: Member[] = [
     phone: '010-5555-7777',
     phoneNumber: '010-5555-7777',
     email: 'soojin@example.com',
-    memberType: 'PT 회원',
+    memberType: '개인레슨 회원',
     registrationDate: '2024-03-20',
     expiryDate: '2024-08-09',
     ptRemaining: 22,
@@ -162,7 +162,7 @@ export const mockMembers: Member[] = [
     smsConsent: false,
     membershipActive: false,
     hasPT: true,
-    ptId: 'prod_002', // PT 상품 ID 추가
+    ptId: 'prod_002', // 개인레슨 상품 ID 추가
     appUsage: true,
   },
   {
@@ -207,7 +207,7 @@ export const mockMembers: Member[] = [
     hasPT: true,
     lockerId: undefined, // 김영희 회원은 락커 미사용 (명시적으로 undefined 설정)
     membershipId: 'prod_001', // 헬스 6개월 상품 ID
-    ptId: 'prod_002', // PT 10회 상품 ID
+    ptId: 'prod_002', // 개인레슨 10회 상품 ID
     membershipStartDate: '2023-01-02',
     appUsage: true,
   },
@@ -260,7 +260,7 @@ export const mockMembers: Member[] = [
     phone: '010-9999-8888',
     phoneNumber: '010-9999-8888',
     email: 'jinsoo@example.com',
-    memberType: 'PT 회원',
+    memberType: '개인레슨 회원',
     registrationDate: '2024-09-01',
     ptRemaining: 5,
     ptExpiryDate: '2026-06-30',
@@ -314,7 +314,7 @@ export const mockMembers: Member[] = [
     hasPT: true,
     lockerId: 'B05',
     membershipId: 'prod_001', // 헬스 6개월 상품 ID
-    ptId: 'prod_002', // PT 10회 상품 ID
+    ptId: 'prod_002', // 개인레슨 10회 상품 ID
     membershipStartDate: '2023-11-15',
     appUsage: true,
   },
@@ -338,7 +338,7 @@ export const mockMembers: Member[] = [
     membershipActive: true,
     hasPT: true,
     membershipId: 'prod_001', // 헬스 6개월 상품 ID
-    ptId: 'prod_002', // PT 10회 상품 ID
+    ptId: 'prod_002', // 개인레슨 10회 상품 ID
     membershipStartDate: '2023-08-01',
     appUsage: true,
   },
@@ -545,7 +545,7 @@ export const mockStaff = [
 const _mockEvents: Event[] = [
   {
     id: "1",
-    title: "김영희 PT 세션",
+    title: "김영희 개인레슨 세션",
     date: new Date(),
     time: "09:00",
     duration: "1시간",

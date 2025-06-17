@@ -23,7 +23,7 @@ const getExpiringMemberships = () => {
   }).length;
 };
 
-// Get PT members with expiring sessions (within 30 days)
+// Get 개인레슨 members with expiring sessions (within 30 days)
 const getExpiringPTMembers = () => {
   const today = new Date();
   const thirtyDaysFromNow = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
@@ -129,7 +129,7 @@ const TrainerDashboard = () => {
         <Card className="border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 bg-white dark:bg-gray-800">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">만료임박 PT 회원 수</CardTitle>
+              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">만료임박 개인레슨 회원 수</CardTitle>
               <div className="p-2 rounded-lg bg-green-50 dark:bg-green-900/20">
                 <Dumbbell className="h-4 w-4 text-green-600 dark:text-green-400" />
               </div>

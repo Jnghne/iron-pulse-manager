@@ -82,7 +82,7 @@ const Calendar = () => {
   // 이벤트 타입별 라벨
   const getEventTypeLabel = (type: string) => {
     switch (type) {
-      case 'pt': return 'PT';
+      case 'pt': return '개인레슨';
       case 'group': return '그룹수업';
       case 'maintenance': return '시설관리';
       case 'event': return '이벤트';

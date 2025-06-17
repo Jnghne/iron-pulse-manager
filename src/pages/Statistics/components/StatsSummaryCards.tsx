@@ -32,7 +32,7 @@ export const StatsSummaryCards = ({ currentMonthData, businessName }: StatsSumma
           </div>
           <div className="text-center p-6 border border-amber-100 dark:border-amber-900/30 rounded-xl bg-white dark:bg-slate-800/20 shadow-md hover:shadow-lg transition-shadow">
             <div className="text-3xl font-bold text-amber-700 dark:text-amber-400 mb-2">{currentMonthData.pt}</div>
-            <div className="text-sm font-medium text-muted-foreground">PT 회원</div>
+            <div className="text-sm font-medium text-muted-foreground">개인레슨 회원</div>
           </div>
           <div className="text-center p-6 border border-slate-100 dark:border-slate-700/50 rounded-xl bg-white dark:bg-slate-800/20 shadow-md hover:shadow-lg transition-shadow">
             <div className="text-3xl font-bold text-slate-700 dark:text-slate-400 mb-2">{currentMonthData.inactive}</div>

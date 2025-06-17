@@ -45,7 +45,7 @@ export const ScheduleAddDialog = ({ open, onOpenChange, onEventAdd }: ScheduleAd
 
   // Mock 데이터
   const scheduleTypes = [
-    { value: "pt", label: "PT 세션" },
+    { value: "pt", label: "개인레슨 세션" },
     { value: "group", label: "그룹 수업" },
     { value: "maintenance", label: "시설 점검" },
     { value: "event", label: "이벤트" },

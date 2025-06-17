@@ -130,10 +130,12 @@ const MemberList = () => {
     // 회원권 유형 필터링
     if (membershipFilter !== "all") {
       filtered = filtered.filter(member => {
-        if (membershipFilter === "regular" && member.memberType.includes("정회원")) return true;
+        if (membershipFilter === "gym" && member.membershipActive && !member.hasLesson) return true;
         if (membershipFilter === "lesson" && member.hasLesson) return true;
-        if (membershipFilter === "vip" && member.memberType.includes("VIP")) return true;
-        if (membershipFilter === "student" && member.memberType.includes("학생")) return true;
+        if (membershipFilter === "pilates") {
+          // 필라테스 회원 판별 로직 - 추후 필요에 따라 수정
+          return member.memberType.includes("필라테스") || member.memberType.includes("pilates");
+        }
         return false;
       });
     }

@@ -7,7 +7,7 @@ import { SlidersHorizontal, Check, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export type MemberStatus = 'all' | 'active' | 'expired' | 'pending';
-export type MemberType = 'all' | 'regular' | 'lesson' | 'vip' | 'student';
+export type MemberType = 'all' | 'gym' | 'lesson' | 'pilates';
 export type SortOption = 'name' | 'registrationDate' | 'expiryDate' | 'attendanceRate' | 'membershipStatus';
 
 interface FilterPopoverProps {
@@ -69,29 +69,28 @@ export const FilterPopover = ({ onFilterChange, className }: FilterPopoverProps)
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">모든 상태</SelectItem>
-                <SelectItem value="active">이용중</SelectItem>
-                <SelectItem value="expired">만료됨</SelectItem>
-                <SelectItem value="pending">대기중</SelectItem>
+                <SelectItem value="active">활성</SelectItem>
+                <SelectItem value="pending">만료임박</SelectItem>
+                <SelectItem value="expired">만료</SelectItem>
               </SelectContent>
             </Select>
           </div>
           
           {/* 회원유형별 필터 */}
           <div className="space-y-2">
-            <label className="text-sm text-muted-foreground">회원 유형</label>
+            <label className="text-sm text-muted-foreground">회원 구분</label>
             <Select
               value={type}
               onValueChange={(value) => setType(value as MemberType)}
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="모든 유형" />
+                <SelectValue placeholder="모든 구분" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">모든 유형</SelectItem>
-                <SelectItem value="regular">정회원</SelectItem>
-                <SelectItem value="lesson">개인레슨 회원</SelectItem>
-                <SelectItem value="vip">VIP 회원</SelectItem>
-                <SelectItem value="student">학생 회원</SelectItem>
+                <SelectItem value="all">모든 구분</SelectItem>
+                <SelectItem value="gym">헬스</SelectItem>
+                <SelectItem value="lesson">개인레슨</SelectItem>
+                <SelectItem value="pilates">필라테스</SelectItem>
               </SelectContent>
             </Select>
           </div>

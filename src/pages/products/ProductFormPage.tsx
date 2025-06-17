@@ -167,7 +167,7 @@ const ProductFormPage: React.FC = () => {
               {Object.values(ProductType).map((type) => (
                 <SelectItem key={type} value={type}>
                   {type === ProductType.MEMBERSHIP && '회원권'}
-                  {type === ProductType.PT && 'PT'}
+                  {type === ProductType.LESSON && '개인레슨'}
                   {type === ProductType.LOCKER && '락커'}
                   {type === ProductType.OTHER && '기타'}
                 </SelectItem>
@@ -197,7 +197,7 @@ const ProductFormPage: React.FC = () => {
           </div>
         )}
 
-        {selectedProductType === ProductType.PT && (
+        {selectedProductType === ProductType.LESSON && (
           <div>
             <Label htmlFor="totalSessions">총 횟수</Label>
             <Input id="totalSessions" type="number" {...form.register('totalSessions')} placeholder="예: 10 (10회)" />

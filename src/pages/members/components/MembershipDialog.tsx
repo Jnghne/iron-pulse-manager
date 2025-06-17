@@ -21,7 +21,7 @@ import { mockProducts } from '@/data/mockProducts';
 import { ProductType } from '@/types/product';
 import { LockerSelector } from '@/components/features/locker/LockerSelector';
 
-export type MembershipType = 'gym' | 'pt' | 'locker' | 'other';
+export type MembershipType = 'gym' | 'lesson' | 'locker' | 'other';
 
 // MembershipDialog에서 사용하는 폼 데이터 타입을 정의하고 export 합니다.
 export interface MembershipFormDataType {
@@ -31,8 +31,8 @@ export interface MembershipFormDataType {
   startDate?: Date;
   endDate?: Date;
   price?: number;
-  totalSessions?: number; // PT 총 횟수
-  remainingSessions?: number; // PT 잔여 횟수
+  totalSessions?: number; // 개인레슨 총 횟수
+  remainingSessions?: number; // 개인레슨 잔여 횟수
   lockerNumber?: string;
   notes?: string;
 }
@@ -73,7 +73,7 @@ export const MembershipDialog: React.FC<MembershipDialogProps> = ({
   const getProductType = (membershipType: MembershipType): ProductType => {
     switch (membershipType) {
       case 'gym': return ProductType.MEMBERSHIP;
-      case 'pt': return ProductType.PT;
+      case 'lesson': return ProductType.LESSON;
       case 'locker': return ProductType.LOCKER;
       case 'other': return ProductType.OTHER;
       default: return ProductType.OTHER;
@@ -117,7 +117,7 @@ export const MembershipDialog: React.FC<MembershipDialogProps> = ({
     const action = mode === 'create' ? '등록' : '수정';
     switch(type) {
       case 'gym': return `헬스장 이용권 ${action}`;
-      case 'pt': return `PT 이용권 ${action}`;
+      case 'lesson': return `개인레슨 이용권 ${action}`;
       case 'locker': return `락커 이용권 ${action}`;
       case 'other': return `기타 상품 ${action}`;
     }

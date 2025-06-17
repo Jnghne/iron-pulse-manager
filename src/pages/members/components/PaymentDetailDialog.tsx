@@ -129,7 +129,7 @@ export const PaymentDetailDialog = ({
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="gym">헬스장 이용권</SelectItem>
-                        <SelectItem value="pt">PT 레슨권</SelectItem>
+                        <SelectItem value="lesson">개인레슨 이용권</SelectItem>
                         <SelectItem value="locker">락커 이용권</SelectItem>
                         <SelectItem value="other">기타 상품</SelectItem>
                       </SelectContent>
@@ -137,7 +137,7 @@ export const PaymentDetailDialog = ({
                   ) : (
                     <p className="font-medium">
                       {payment.type === 'gym' ? '헬스장 이용권' : 
-                       payment.type === 'pt' ? 'PT 레슨권' : 
+                       payment.type === 'lesson' ? '개인레슨 이용권' : 
                        payment.type === 'locker' ? '락커 이용권' : '기타 상품'}
                     </p>
                   )}
@@ -218,7 +218,7 @@ export const PaymentDetailDialog = ({
                   )}
                 </div>
                 
-                {payment.type === 'pt' && (
+                {payment.type === 'lesson' && (
                   <div className="space-y-1">
                     <Label className="text-sm text-muted-foreground">담당 트레이너</Label>
                     {isEditing ? (

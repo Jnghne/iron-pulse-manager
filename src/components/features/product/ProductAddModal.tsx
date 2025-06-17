@@ -53,7 +53,7 @@ const getProductTypeIcon = (type: ProductType) => {
   switch (type) {
     case ProductType.MEMBERSHIP:
       return <Calendar className="h-4 w-4" />;
-    case ProductType.PT:
+    case ProductType.LESSON:
       return <Dumbbell className="h-4 w-4" />;
     case ProductType.LOCKER:
       return <Settings className="h-4 w-4" />;
@@ -66,8 +66,8 @@ const getProductTypeName = (type: ProductType) => {
   switch (type) {
     case ProductType.MEMBERSHIP:
       return '회원권';
-    case ProductType.PT:
-      return 'PT';
+    case ProductType.LESSON:
+      return '개인레슨';
     case ProductType.LOCKER:
       return '락커';
     case ProductType.OTHER:
@@ -245,7 +245,7 @@ export const ProductAddModal: React.FC<ProductAddModalProps> = ({ isOpen, onClos
                 </div>
               )}
 
-              {selectedProductType === ProductType.PT && (
+              {selectedProductType === ProductType.LESSON && (
                 <div className="space-y-2">
                   <Label htmlFor="totalSessions" className="text-sm font-medium flex items-center gap-2">
                     <Dumbbell className="h-4 w-4" />

@@ -24,7 +24,7 @@ const Community = () => {
   const myCommentedPosts = {
     board: [
       { id: 4, title: "회원 관리 시스템 추천 부탁드립니다", author: "김관장", date: "2024-01-14", views: 198, comments: 27, myComment: "저희는 IronPulse 사용 중인데 만족도가 높습니다.", commentDate: "2024-01-14" },
-      { id: 5, title: "PT 가격 정책 어떻게 하시나요?", author: "이관장", date: "2024-01-12", views: 156, comments: 23, myComment: "지역별로 차이가 있겠지만 강남권은...", commentDate: "2024-01-13" },
+      { id: 5, title: "개인레슨 가격 정책 어떻게 하시나요?", author: "이관장", date: "2024-01-12", views: 156, comments: 23, myComment: "지역별로 차이가 있겠지만 강남권은...", commentDate: "2024-01-13" },
       { id: 6, title: "여름철 헬스장 에어컨 관리 팁", author: "박관장", date: "2024-01-10", views: 134, comments: 15, myComment: "습도 조절도 중요합니다. 제습기 추천드려요.", commentDate: "2024-01-11" },
     ],
     market: [

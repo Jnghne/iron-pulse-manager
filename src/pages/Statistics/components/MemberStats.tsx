@@ -66,9 +66,9 @@ export const MemberStats = ({
                     radius={[6, 6, 0, 0]}
                   />
                   <Bar 
-                    dataKey="pt" 
-                    name="PT 회원" 
-                    fill="var(--color-pt)"
+                    dataKey="lesson" 
+                    name="개인레슨 회원" 
+                    fill="var(--color-lesson)"
                     radius={[6, 6, 0, 0]}
                   />
                   <Bar 

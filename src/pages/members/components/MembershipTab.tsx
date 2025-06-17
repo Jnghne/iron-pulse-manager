@@ -38,6 +38,8 @@ export interface MembershipDetailData {
   name?: string;
   startDate?: Date;
   endDate?: Date;
+  lessonStartDate?: Date;
+  lessonEndDate?: Date;
   price?: number;
   remainingSessions?: number;
   totalSessions?: number;
@@ -47,7 +49,7 @@ export interface MembershipDetailData {
 
 interface MembershipTabProps {
   member: Member;
-  onPaymentRegister: (type: 'gym' | 'pt' | 'locker' | 'other' | 'merchandise') => void;
+  onPaymentRegister: (type: 'gym' | 'lesson' | 'locker' | 'other' | 'merchandise') => void;
   isOwner: boolean;
   onMembershipUpdate?: (type: MembershipType, data: MembershipDetailData) => void;
   onMembershipDelete?: (type: MembershipType, id?: string) => void;
@@ -76,7 +78,7 @@ export const MembershipTab = ({
   // 상품 존재 여부 확인 (실제로는 API에서 가져와야 함)
   const [productsExist, setProductsExist] = useState({
     gym: true,
-    pt: true,
+    lesson: true,
     locker: true,
     other: true
   });
@@ -129,7 +131,7 @@ export const MembershipTab = ({
 
   // PassDetails 객체로 변환하는 헬퍼 함수
   const mapToPassDetails = (
-    type: 'gym' | 'pt' | 'locker',
+    type: 'gym' | 'lesson' | 'locker' | 'other',
     memberData: Member,
     specificData?: MembershipDetailData
   ): PassDetails => {
@@ -139,11 +141,14 @@ export const MembershipTab = ({
       case 'gym':
         productType = ProductType.MEMBERSHIP;
         break;
-      case 'pt':
-        productType = ProductType.PT;
+      case 'lesson':
+        productType = ProductType.LESSON;
         break;
       case 'locker':
         productType = ProductType.LOCKER;
+        break;
+      case 'other':
+        productType = ProductType.OTHER;
         break;
       default:
         productType = ProductType.OTHER;
@@ -167,6 +172,9 @@ export const MembershipTab = ({
       actualPaymentAmount: specificData?.price || 0,
       consultantSalesShare: 0, // 예시 데이터
       unpaidAmount: 0, // 예시 데이터
+      consultantSalesPerformance: 150000, // 예시 데이터
+      unpaidOrPerformanceShare: 50000, // 예시 데이터
+      memo: '특별 할인 적용', // 예시 데이터
     };
 
     let serviceStartDateStr = 'N/A';
@@ -204,20 +212,20 @@ export const MembershipTab = ({
         ...commonDetails,
         actualPaymentAmount: specificData?.price || 0,
       };
-    } else if (type === 'pt') {
-      serviceStartDateStr = formatDateForPass(specificData?.startDate || memberData.ptStartDate);
-      serviceEndDateStr = formatDateForPass(specificData?.endDate || memberData.ptExpiryDate);
+    } else if (type === 'lesson') {
+      serviceStartDateStr = formatDateForPass(specificData?.startDate || memberData.lessonStartDate);
+      serviceEndDateStr = formatDateForPass(specificData?.endDate || memberData.lessonEndDate);
       return {
-        id: specificData?.id || memberData.id || 'pt-pass',
-        name: product?.name || specificData?.name || `PT 이용권 ${specificData?.totalSessions || memberData.ptTotal || ''}회`,
-        type: '회원권',
+        id: specificData?.id || memberData.id || 'lesson-pass',
+        name: product?.name || specificData?.name || `개인레슨 이용권 ${specificData?.totalSessions || memberData.lessonTotal || ''}회`,
+        type: '개인레슨 이용권',
         category: '횟수제',
-        subCategory: 'PT',
+        subCategory: '개인레슨',
         serviceStartDate: serviceStartDateStr,
         serviceEndDate: serviceEndDateStr,
         productAmount: product?.price || specificData?.price || 0,
-        ptTotalSessions: product?.totalSessions || specificData?.totalSessions || memberData.ptTotal || 0,
-        ptRemainingSessions: specificData?.remainingSessions || memberData.ptRemaining || 0,
+        lessonTotalSessions: product?.totalSessions || specificData?.totalSessions || memberData.lessonTotal || 0,
+        lessonRemainingSessions: specificData?.remainingSessions || memberData.lessonRemaining || 0,
         instructor: memberData.trainerAssigned || commonDetails.instructor,
         ...commonDetails,
         actualPaymentAmount: specificData?.price || 0,
@@ -231,6 +239,23 @@ export const MembershipTab = ({
         type: '락커',
         category: '기간제',
         subCategory: '락커',
+        serviceStartDate: serviceStartDateStr,
+        serviceEndDate: serviceEndDateStr,
+        productAmount: product?.price || specificData?.price || 0,
+        ...commonDetails,
+        actualPaymentAmount: specificData?.price || 0,
+        lockerNumber: specificData?.lockerNumber || memberData.lockerInfo?.lockerNumber,
+        lockerEndDate: specificData?.endDate ? formatDateForPass(specificData.endDate) : (memberData.lockerInfo?.endDate ? formatDateForPass(memberData.lockerInfo.endDate) : undefined),
+      };
+    } else if (type === 'other') {
+      serviceStartDateStr = formatDateForPass(specificData?.startDate);
+      serviceEndDateStr = formatDateForPass(specificData?.endDate);
+      return {
+        id: specificData?.id || 'other-pass',
+        name: product?.name || specificData?.name || '기타 이용권',
+        type: '기타',
+        category: specificData?.category || '기타',
+        subCategory: '기타',
         serviceStartDate: serviceStartDateStr,
         serviceEndDate: serviceEndDateStr,
         productAmount: product?.price || specificData?.price || 0,
@@ -385,12 +410,6 @@ export const MembershipTab = ({
                     </span>
                   </div>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">앱 이용 여부</span>
-                  <Badge className={member.appUsage ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-700"}>
-                    {member.appUsage ? "이용" : "미이용"}
-                  </Badge>
-                </div>
               </div>
             ) : (
               <div className="text-center py-6">
@@ -403,19 +422,19 @@ export const MembershipTab = ({
           </CardContent>
         </Card>
 
-        {/* PT 레슨권 정보 */}
+        {/* 개인레슨 레슨권 정보 */}
         <Card
-          className={getCardStyle(!!member.hasPT)}
+          className={getCardStyle(!!member.hasLesson)}
           onClick={() => {
-            if (member.hasPT) {
-              const passDetailsData = mapToPassDetails('pt', member, {
+            if (member.hasLesson) {
+              const passDetailsData = mapToPassDetails('lesson', member, {
                 id: member.id,
                 productId: member.ptId,
-                name: `PT ${member.ptTotal}회권`,
-                startDate: new Date(member.ptStartDate || ''),
-                endDate: new Date(member.ptExpiryDate || ''),
-                remainingSessions: member.ptRemaining,
-                totalSessions: member.ptTotal,
+                name: `개인레슨 ${member.lessonTotal}회권`,
+                startDate: new Date(member.lessonStartDate || ''),
+                endDate: new Date(member.lessonEndDate || ''),
+                remainingSessions: member.lessonRemaining,
+                totalSessions: member.lessonTotal,
                 notes: `담당 트레이너: ${member.trainerAssigned || '미지정'}`
               });
               openPassDetailModalHandler(passDetailsData);
@@ -426,21 +445,21 @@ export const MembershipTab = ({
             <div>
               <CardTitle className="text-lg flex items-center gap-2">
                 <User className="h-5 w-5 text-gym-primary" />
-                개인 레슨 이용권
+                개인레슨 이용권
               </CardTitle>
               <CardDescription>
-                개인 레슨 이용권 상태 및 정보
+                개인레슨 이용권 상태 및 정보
               </CardDescription>
             </div>
-            {/* PT 이용권이 없을 때만 신규 등록 버튼 표시 */}
-            {!member.hasPT && (
+            {/* 개인레슨 이용권이 없을 때만 신규 등록 버튼 표시 */}
+            {!member.hasLesson && (
               <Button 
                 variant="outline" 
                 size="sm" 
                 data-button="true"
                 onClick={(e) => {
                   e.stopPropagation();
-                  onPaymentRegister('pt');
+                  onPaymentRegister('lesson');
                 }}
               >
                 <Plus className="mr-2 h-4 w-4" />
@@ -449,18 +468,18 @@ export const MembershipTab = ({
             )}
           </CardHeader>
           <CardContent>
-            {member.hasPT ? (
+            {member.hasLesson ? (
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">상품명</span>
                   <span className="font-medium">
                     {(() => {
-                      // PT 상품 ID가 있으면 해당 상품 이름 찾기
+                      // 개인레슨 상품 ID가 있으면 해당 상품 이름 찾기
                       if (member.ptId) {
-                        const product = mockProducts.find(p => p.id === member.ptId && p.type === ProductType.PT);
+                        const product = mockProducts.find(p => p.id === member.ptId && p.type === ProductType.LESSON);
                         if (product) return product.name;
                       }
-                      return `PT ${member.ptTotal || 0}회권`;
+                      return `개인레슨 ${member.lessonTotal || 0}회권`;
                     })()}
                   </span>
                 </div>
@@ -472,10 +491,10 @@ export const MembershipTab = ({
                   <span className="text-sm text-muted-foreground">남은 횟수</span>
                   <div className="flex items-center gap-2">
                     <Badge className="bg-blue-100 text-blue-800">
-                      {member.ptRemaining}회
+                      {member.lessonRemaining}회
                     </Badge>
                     <span className="text-sm text-muted-foreground">
-                      ({formatDate(member.ptStartDate || '')} ~ {formatDate(member.ptExpiryDate || '')})
+                      ({formatDate(member.lessonStartDate || '')} ~ {formatDate(member.lessonEndDate || '')})
                     </span>
                   </div>
                 </div>
@@ -484,7 +503,7 @@ export const MembershipTab = ({
               <div className="text-center py-6">
                 <Badge variant="destructive">이용권 없음</Badge>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  현재 등록된 PT 이용권이 없습니다.
+                  현재 등록된 개인레슨 이용권이 없습니다.
                 </p>
               </div>
             )}
@@ -494,16 +513,20 @@ export const MembershipTab = ({
         {/* 락커 이용권 정보 */}
         <Card
           className={getCardStyle(!!member.lockerInfo)}
-          onClick={() => member.lockerInfo && handleMembershipCardClick('locker', {
-            id: member.id,
-            productId: lockerInfoWithId?.id,
-            name: member.lockerInfo?.name,
-            startDate: new Date(member.lockerInfo?.startDate || ''),
-            endDate: new Date(member.lockerInfo?.endDate || ''),
-            price: lockerInfoWithId?.price,
-            lockerNumber: member.lockerInfo?.lockerNumber,
-            notes: member.lockerInfo?.notes
-          })}
+          onClick={() => {
+            if (member.lockerInfo) {
+              const passDetailsData = mapToPassDetails('locker', member, {
+                id: member.id,
+                productId: member.lockerId,
+                name: member.lockerInfo?.name,
+                startDate: new Date(member.lockerInfo?.startDate || ''),
+                endDate: new Date(member.lockerInfo?.endDate || ''),
+                lockerNumber: member.lockerInfo?.lockerNumber,
+                notes: member.lockerInfo?.notes
+              });
+              openPassDetailModalHandler(passDetailsData);
+            }
+          }}
         >
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
@@ -516,7 +539,7 @@ export const MembershipTab = ({
               </CardDescription>
             </div>
             {/* 락커 이용권이 없을 때만 신규 등록 버튼 표시 */}
-            {!member.lockerId && (
+            {!member.lockerInfo && (
               <Button 
                 variant="outline" 
                 size="sm" 
@@ -585,25 +608,7 @@ export const MembershipTab = ({
         </Card>
 
         {/* 기타 결제 정보 */}
-        <Card
-          className={getCardStyle(!!member.otherProducts)}
-          onClick={(e) => {
-            // 버튼 클릭 이벤트가 발생한 경우 이벤트 처리하지 않음
-            const target = e.target as HTMLElement;
-            if (target.closest('button') || target.tagName === 'BUTTON' || 
-                target.closest('[data-button="true"]') || 
-                target.getAttribute('data-button') === 'true') {
-              return;
-            }
-            
-            // 기타 이용권 데이터가 있을 때만 상세 모달 열기
-            if (member.otherProducts) {
-              handleMembershipCardClick('other', {
-                // 기타 이용권 데이터가 있다면 여기에 추가
-              });
-            }
-          }}
-        >
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
               <CardTitle className="text-lg flex items-center gap-2">
@@ -615,7 +620,7 @@ export const MembershipTab = ({
               </CardDescription>
             </div>
             {/* 이용권이 등록되어 있지 않을 때만 신규 등록 버튼 표시 */}
-            {!member.otherProducts && (
+            {(!member.otherProducts || member.otherProducts.length === 0) && (
               <Button 
                 variant="outline" 
                 size="sm" 
@@ -638,14 +643,77 @@ export const MembershipTab = ({
                 신규 등록
               </Button>
             )}
+            {/* 이용권이 등록되어 있을 때 추가 등록 버튼 표시 */}
+            {member.otherProducts && member.otherProducts.length > 0 && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                data-button="true"
+                onClick={(e) => { 
+                  // 이벤트 전파 완전 차단
+                  e.stopPropagation();
+                  e.preventDefault(); 
+                  
+                  // 모든 모달 상태 초기화
+                  setIsPassDetailModalOpen(false);
+                  setSelectedPassDetails(null);
+                  setDialogOpen(false);
+                  
+                  // 상품등록 팝업만 열기
+                  onPaymentRegister('merchandise');
+                }}
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                추가 등록
+              </Button>
+            )}
           </CardHeader>
           <CardContent>
-            <div className="text-center py-6">
-              <Badge variant="destructive">이용권 없음</Badge>
-              <p className="mt-2 text-sm text-muted-foreground">
-                등록된 기타 이용권 결제 내역이 없습니다.
-              </p>
-            </div>
+            {(!member.otherProducts || member.otherProducts.length === 0) ? (
+              <div className="text-center py-6">
+                <Badge variant="destructive">이용권 없음</Badge>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  등록된 기타 이용권 결제 내역이 없습니다.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {member.otherProducts.map((product, index) => (
+                  <div 
+                    key={index}
+                    className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 cursor-pointer"
+                    onClick={() => {
+                      const passDetailsData = mapToPassDetails('other', member, {
+                        id: `other_${index}`,
+                        productId: `other_${index}`,
+                        name: product.name,
+                        startDate: new Date(product.startDate),
+                        endDate: new Date(product.endDate),
+                        category: product.type,
+                        price: 0 // 기타 상품은 가격이 없을 수 있음
+                      });
+                      openPassDetailModalHandler(passDetailsData);
+                    }}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <ShoppingBag className="h-4 w-4 text-muted-foreground" />
+                      <div>
+                        <div className="font-medium">{product.name}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {product.startDate} ~ {product.endDate}
+                        </div>
+                        {product.type && (
+                          <Badge variant="outline" className="text-xs mt-1">
+                            {product.type}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                    <Badge variant="secondary">이용 중</Badge>
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

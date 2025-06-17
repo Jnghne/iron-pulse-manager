@@ -5,7 +5,13 @@
       "mcp__ide__getDiagnostics",
       "Bash(grep:*)",
       "Bash(find:*)",
-      "Bash(sed:*)"
+      "Bash(sed:*)",
+      "Bash(git add:*)",
+      "Bash(npm run build:*)",
+      "Bash(rg:*)",
+      "Bash(npm run typecheck:*)",
+      "Bash(tsc --noEmit)",
+      "Bash(npm run lint:*)"
     ],
     "deny": []
   }

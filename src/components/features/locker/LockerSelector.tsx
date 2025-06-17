@@ -4,6 +4,8 @@ import { mockLockers } from "@/data/mockData";
 interface LockerSelectorProps {
   selectedLocker: number | null;
   onLockerSelect: (lockerNumber: number) => void;
+  currentMemberId?: string; // 현재 회원 ID - 해당 회원의 락커는 선택 가능하게 함
+  readOnly?: boolean; // 읽기 전용 모드
 }
 
 // 락커 상태 계산 함수 (LockerRoom.tsx와 동일)
@@ -49,23 +51,26 @@ const getLockerStyle = (status: string, isSelected: boolean) => {
   }
 };
 
-export const LockerSelector = ({ selectedLocker, onLockerSelect }: LockerSelectorProps) => {
-  // 비어있는 락커 개수 계산
+export const LockerSelector = ({ selectedLocker, onLockerSelect, currentMemberId, readOnly = false }: LockerSelectorProps) => {
+  // 비어있는 락커 개수 계산 (현재 회원의 락커 포함)
   const availableCount = mockLockers.filter(locker => {
     const status = getLockerStatus(locker);
-    return status === 'empty';
+    const isMemberLocker = currentMemberId && locker.memberId === currentMemberId;
+    return status === 'empty' || isMemberLocker;
   }).length;
   
   return (
     <div className="space-y-4">
       <div className="text-sm text-muted-foreground">
-        비어있는 락커를 선택하세요 ({availableCount}개 이용 가능)
+        {readOnly ? '락커 현황' : `비어있는 락커를 선택하세요 (${availableCount}개 이용 가능)`}
       </div>
       <div className="max-h-60 overflow-y-auto">
         <div className="grid grid-cols-8 sm:grid-cols-10 md:grid-cols-12 gap-2 p-3 bg-muted/10 rounded-lg border border-muted">
           {mockLockers.map(locker => {
             const status = getLockerStatus(locker);
             const isAvailable = status === 'empty';
+            const isMemberLocker = currentMemberId && locker.memberId === currentMemberId;
+            const isClickable = !readOnly && (isAvailable || isMemberLocker);
             const isSelected = selectedLocker === locker.number;
             
             return (
@@ -73,15 +78,20 @@ export const LockerSelector = ({ selectedLocker, onLockerSelect }: LockerSelecto
                 key={locker.id}
                 className={`
                   relative p-1.5 h-12 rounded-lg border-2 text-center transition-all duration-200 
-                  ${isAvailable ? 'hover:shadow-lg hover:scale-105' : ''}
+                  ${isClickable ? 'hover:shadow-lg hover:scale-105' : ''}
                   ${getLockerStyle(status, isSelected)}
+                  ${isMemberLocker && !isSelected ? 'ring-2 ring-blue-400 ring-opacity-50' : ''}
                 `}
-                onClick={() => isAvailable && onLockerSelect(locker.number)}
-                disabled={!isAvailable}
+                onClick={() => isClickable && onLockerSelect(locker.number)}
+                disabled={!isClickable}
                 title={
-                  !isAvailable 
-                    ? `${locker.number}번 락커: ${locker.memberName || '사용중'} (${status === 'expired' ? '만료됨' : status === 'expiring-soon' ? '만료 임박' : '사용중'})` 
-                    : `${locker.number}번 락커: 이용 가능`
+                  readOnly
+                    ? `${locker.number}번 락커: ${isSelected ? '현재 사용중' : locker.isOccupied ? `${locker.memberName || '사용중'}` : '이용 가능'}`
+                    : isMemberLocker
+                      ? `${locker.number}번 락커: 현재 사용중인 락커 (변경 가능)`
+                      : !isAvailable 
+                        ? `${locker.number}번 락커: ${locker.memberName || '사용중'} (${status === 'expired' ? '만료됨' : status === 'expiring-soon' ? '만료 임박' : '사용중'})` 
+                        : `${locker.number}번 락커: 이용 가능`
                 }
               >
                 <div className={`font-bold text-xs ${isSelected ? 'text-white' : ''}`}>

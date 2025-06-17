@@ -3,21 +3,21 @@ export interface MemberData {
   name: string;
   total: number;
   active: number;
-  pt: number;
+  lesson: number;
   inactive: number;
 }
 
 export interface RevenueData {
   month: string;
   membership: number;
-  pt: number;
+  lesson: number;
   daily: number;
   other: number;
 }
 
 export interface StaffData {
   name: string;
-  pt: number;
+  lesson: number;
   revenue: number;
   rating: number;
   newMembers: number;

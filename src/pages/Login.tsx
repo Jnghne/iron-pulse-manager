@@ -8,7 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "@/components/ui/use-toast";
 import { Eye, EyeOff, Building2 } from "lucide-react";
 import Logo from "@/components/ui/logo";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -148,14 +148,6 @@ const Login = () => {
             </div>
           </div>
 
-          <div className="text-center space-y-2">
-            <p className="text-sm text-muted-foreground">
-              계정이 없으신가요?{" "}
-              <Link to="/signup" className="text-gym-primary hover:underline">
-                회원가입
-              </Link>
-            </p>
-          </div>
         </CardContent>
       </Card>
     </div>

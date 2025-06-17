@@ -29,18 +29,18 @@ const getExpiringPTMembers = () => {
   const thirtyDaysFromNow = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
   
   return mockMembers.filter(member => {
-    if (!member.ptExpiryDate || !member.ptRemaining || member.ptRemaining === 0) return false;
-    const ptExpiryDate = new Date(member.ptExpiryDate);
+    if (!member.lessonEndDate || !member.lessonRemaining || member.lessonRemaining === 0) return false;
+    const ptExpiryDate = new Date(member.lessonEndDate);
     return ptExpiryDate >= today && ptExpiryDate <= thirtyDaysFromNow;
   }).length;
 };
 
 // Function to get change percentage (mock data for now)
-const getChangePercentage = (type: 'members' | 'membership' | 'pt') => {
+const getChangePercentage = (type: 'members' | 'membership' | 'lesson') => {
   // Mock percentage changes
   if (type === 'members') return 8.5;
   if (type === 'membership') return -12.3;
-  if (type === 'pt') return 15.7;
+  if (type === 'lesson') return 15.7;
   return 0;
 };
 
@@ -125,7 +125,7 @@ const TrainerDashboard = () => {
           </CardHeader>
         </Card>
 
-        {/* Expiring PT Members */}
+        {/* Expiring Lesson Members */}
         <Card className="border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 bg-white dark:bg-gray-800">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
@@ -138,15 +138,15 @@ const TrainerDashboard = () => {
               {getExpiringPTMembers()}명
             </div>
             <div className="flex items-center mt-1">
-              {getChangePercentage('pt') >= 0 ? (
+              {getChangePercentage('lesson') >= 0 ? (
                 <div className="flex items-center text-green-600 dark:text-green-400 gap-1">
                   <TrendingUp className="h-3 w-3" />
-                  <span className="text-xs font-medium">+{getChangePercentage('pt').toFixed(1)}%</span>
+                  <span className="text-xs font-medium">+{getChangePercentage('lesson').toFixed(1)}%</span>
                 </div>
               ) : (
                 <div className="flex items-center text-red-600 dark:text-red-400 gap-1">
                   <TrendingDown className="h-3 w-3" />
-                  <span className="text-xs font-medium">{getChangePercentage('pt').toFixed(1)}%</span>
+                  <span className="text-xs font-medium">{getChangePercentage('lesson').toFixed(1)}%</span>
                 </div>
               )}
               <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">지난달 대비</span>

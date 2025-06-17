@@ -11,8 +11,6 @@ import DashboardLayout from "./layouts/DashboardLayout";
 
 // Pages
 import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import SignupOwner from "./pages/SignupOwner";
 import Dashboard from "./pages/Dashboard";
 import MemberList from "./pages/members/MemberList";
 import MemberDetail from "./pages/members/MemberDetail";
@@ -48,8 +46,6 @@ const App = () => (
         <Routes>
           {/* Public Routes */}
           <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/signup/owner" element={<SignupOwner />} />
           
           {/* Protected Routes */}
           <Route path="/" element={<DashboardLayout />}>

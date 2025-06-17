@@ -61,7 +61,7 @@ const getVisitorChange = (period: 'daily' | 'weekly') => {
 // Prepare revenue breakdown data for pie chart
 const revenueBreakdownData = [
   { name: '회원권', value: mockMonthlyRevenueData[0].membership },
-  { name: '개인레슨 이용권', value: mockMonthlyRevenueData[0].pt },
+  { name: '개인레슨 이용권', value: mockMonthlyRevenueData[0].lesson },
   { name: '일일권', value: mockMonthlyRevenueData[0].dailyTicket },
   { name: '기타', value: mockMonthlyRevenueData[0].other },
 ];

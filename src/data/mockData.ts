@@ -32,18 +32,19 @@ export interface Member {
   memberType: string;
   registrationDate: string;
   expiryDate?: string;
-  ptRemaining?: number; // 개인레슨 잔여 횟수
-  ptExpiryDate?: string; // 개인레슨 만료일
-  ptStartDate?: string; // 개인레슨 시작일
-  ptTotal?: number; // 개인레슨 총 횟수
+  lessonRemaining?: number; // 개인레슨 잔여 횟수
+  lessonTotal?: number; // 개인레슨 총 횟수
+  lessonStartDate?: string; // 개인레슨 시작일
+  lessonEndDate?: string; // 개인레슨 만료일
   gymMembershipDaysLeft?: number;
   attendanceRate: number;
   trainerAssigned?: string;
   trainerNotes?: string;
   smsConsent: boolean;
+  appUsage?: boolean; // 앱 이용 여부
   photoUrl?: string;
   membershipActive?: boolean;
-  hasPT?: boolean; // 개인레슨 여부
+  hasLesson?: boolean; // 개인레슨 여부
   membershipId?: string;
   ptId?: string; // 개인레슨 상품 ID
   lockerId?: string;
@@ -52,7 +53,6 @@ export interface Member {
   phoneNumber?: string;
 
   // 회원 상세 페이지 리뉴얼에 필요한 추가 필드
-  appUsage?: boolean; // 앱 이용 여부
   unpaidAmount?: number; // 잔여 미수금
   registrationPath?: string; // 방문/가입 경로
   memberNotes?: string; // 특이사항 메모
@@ -99,21 +99,21 @@ export const mockMembers: Member[] = [
     memberType: '정회원',
     registrationDate: '2025-01-15',
     expiryDate: '2026-01-14',
-    ptRemaining: 15,
-    ptTotal: 30,
-    ptExpiryDate: '2025-06-30',
-    ptStartDate: '2024-01-15',
-    ptId: 'prod_002',
+    lessonRemaining: 15,
+    lessonTotal: 30,
+    lessonEndDate: '2025-06-30',
+    lessonStartDate: '2024-01-15',
+    ptId: 'prod_010',
     gymMembershipDaysLeft: 230,
     attendanceRate: 85,
     trainerAssigned: '박지훈',
     trainerNotes: '운동 성장이 빠르고 열정적임. 사이클링 선호.',
     smsConsent: true,
+    appUsage: true,
     membershipActive: true,
     membershipId: 'prod_001',
-    hasPT: true,
+    hasLesson: true,
     membershipStartDate: '2023-01-15',
-    appUsage: true,
   },
   {
     id: 'M00002',
@@ -127,22 +127,22 @@ export const mockMembers: Member[] = [
     memberType: '정회원',
     registrationDate: '2025-02-10',
     expiryDate: '2026-08-09',
-    ptRemaining: 8,
-    ptTotal: 10,
-    ptStartDate: '2025-01-10',
+    lessonRemaining: 8,
+    lessonTotal: 10,
+    lessonStartDate: '2025-01-10',
     ptId: 'prod_002',
-    ptExpiryDate: '2024-09-30',
+    lessonEndDate: '2024-09-30',
     gymMembershipDaysLeft: 75,
     attendanceRate: 92,
     trainerAssigned: '박지훈',
     trainerNotes: '근력 향상에 관심이 많음. 웨이트 트레이닝 위주로 진행.',
     smsConsent: true,
+    appUsage: true,
     membershipActive: true,
     membershipId: 'prod_001',
-    hasPT: true,
+    hasLesson: true,
     lockerId: 'prod_003',
     membershipStartDate: '2023-02-10',
-    appUsage: true,
   },
   {
     id: 'M00003',
@@ -155,15 +155,15 @@ export const mockMembers: Member[] = [
     memberType: '개인레슨 회원',
     registrationDate: '2024-03-20',
     expiryDate: '2024-08-09',
-    ptRemaining: 22,
-    ptExpiryDate: '2026-12-31',
+    lessonRemaining: 22,
+    lessonEndDate: '2026-12-31',
     attendanceRate: 78,
     trainerAssigned: '박지훈',
     smsConsent: false,
+    appUsage: false,
     membershipActive: false,
-    hasPT: true,
+    hasLesson: true,
     ptId: 'prod_002', // 개인레슨 상품 ID 추가
-    appUsage: true,
   },
   {
     id: 'M00004',
@@ -180,10 +180,10 @@ export const mockMembers: Member[] = [
     attendanceRate: 65,
     trainerAssigned: '김지원',
     smsConsent: true,
+    appUsage: true,
     membershipActive: false,
-    hasPT: false,
+    hasLesson: false,
     lockerId: 'prod_003', // 락커 상품 ID 추가
-    appUsage: false,
   },
   {
     id: 'M00005',
@@ -196,20 +196,20 @@ export const mockMembers: Member[] = [
     memberType: 'VIP 회원',
     registrationDate: '2025-01-02',
     expiryDate: '2026-01-01',
-    ptRemaining: 30,
-    ptExpiryDate: '2026-01-01',
+    lessonRemaining: 30,
+    lessonEndDate: '2026-01-01',
     gymMembershipDaysLeft: 220,
     attendanceRate: 95,
     trainerAssigned: '박지훈',
     trainerNotes: '체중 감량과 근육량 증가가 목표. 다이어트 시작.',
     smsConsent: true,
+    appUsage: true,
     membershipActive: true,
-    hasPT: true,
+    hasLesson: true,
     lockerId: undefined, // 김영희 회원은 락커 미사용 (명시적으로 undefined 설정)
     membershipId: 'prod_001', // 헬스 6개월 상품 ID
     ptId: 'prod_002', // 개인레슨 10회 상품 ID
     membershipStartDate: '2023-01-02',
-    appUsage: true,
   },
   {
     id: 'M00006',
@@ -222,16 +222,16 @@ export const mockMembers: Member[] = [
     memberType: '정회원',
     registrationDate: '2025-06-15',
     expiryDate: '2026-06-14',
-    ptRemaining: 0,
+    lessonRemaining: 0,
     gymMembershipDaysLeft: 20,
     attendanceRate: 70,
     trainerAssigned: '김지원',
     smsConsent: true,
+    appUsage: true,
     membershipActive: true,
-    hasPT: false,
+    hasLesson: false,
     membershipId: 'prod_001', // 헬스 6개월 상품 ID
     membershipStartDate: '2023-06-15',
-    appUsage: false,
   },
   {
     id: 'M00007',
@@ -247,10 +247,10 @@ export const mockMembers: Member[] = [
     gymMembershipDaysLeft: 45,
     attendanceRate: 60,
     smsConsent: true,
+    appUsage: true,
     membershipActive: true,
-    hasPT: false,
+    hasLesson: false,
     membershipStartDate: '2024-01-10',
-    appUsage: false,
   },
   {
     id: 'M00008',
@@ -262,15 +262,15 @@ export const mockMembers: Member[] = [
     email: 'jinsoo@example.com',
     memberType: '개인레슨 회원',
     registrationDate: '2024-09-01',
-    ptRemaining: 5,
-    ptExpiryDate: '2026-06-30',
+    lessonRemaining: 5,
+    lessonEndDate: '2026-06-30',
     expiryDate: '2025-04-30',
     attendanceRate: 88,
     trainerAssigned: '김지원',
     smsConsent: true,
+    appUsage: true,
     membershipActive: false,
-    hasPT: false,
-    appUsage: false,
+    hasLesson: false,
   },
   {
     id: 'M00009',
@@ -286,11 +286,11 @@ export const mockMembers: Member[] = [
     gymMembershipDaysLeft: 5,
     attendanceRate: 45,
     smsConsent: false,
+    appUsage: false,
     membershipActive: true,
-    hasPT: false,
+    hasLesson: false,
     membershipId: 'prod_001', // 헬스 6개월 상품 ID
     membershipStartDate: '2024-04-01',
-    appUsage: false,
   },
   {
     id: 'M00010',
@@ -303,20 +303,21 @@ export const mockMembers: Member[] = [
     memberType: 'VIP 회원',
     registrationDate: '2025-11-15',
     expiryDate: '2026-11-14',
-    ptRemaining: 25,
-    ptExpiryDate: '2026-12-31',
+    lessonRemaining: 25,
+    lessonTotal: 30,
+    lessonEndDate: '2026-12-31',
     gymMembershipDaysLeft: 170,
     attendanceRate: 90,
     trainerAssigned: '박지훈',
     trainerNotes: '개인 경기 준비 중. 근지구력 향상에 집중.',
     smsConsent: true,
+    appUsage: true,
     membershipActive: true,
-    hasPT: true,
+    hasLesson: true,
     lockerId: 'B05',
     membershipId: 'prod_001', // 헬스 6개월 상품 ID
-    ptId: 'prod_002', // 개인레슨 10회 상품 ID
+    ptId: 'prod_010', // 개인레슨 30회 상품 ID
     membershipStartDate: '2023-11-15',
-    appUsage: true,
   },
   {
     id: 'M00011',
@@ -329,18 +330,19 @@ export const mockMembers: Member[] = [
     memberType: '정회원',
     registrationDate: '2025-08-01',
     expiryDate: '2026-08-01',
-    ptRemaining: 12,
-    ptExpiryDate: '2026-10-31',
+    lessonRemaining: 12,
+    lessonTotal: 20,
+    lessonEndDate: '2026-10-31',
     gymMembershipDaysLeft: 65,
     attendanceRate: 75,
     trainerAssigned: '김지원',
     smsConsent: true,
-    membershipActive: true,
-    hasPT: true,
-    membershipId: 'prod_001', // 헬스 6개월 상품 ID
-    ptId: 'prod_002', // 개인레슨 10회 상품 ID
-    membershipStartDate: '2023-08-01',
     appUsage: true,
+    membershipActive: true,
+    hasLesson: true,
+    membershipId: 'prod_001', // 헬스 6개월 상품 ID
+    ptId: 'prod_009', // 개인레슨 20회 상품 ID
+    membershipStartDate: '2023-08-01',
   },
   {
     id: 'M00012',
@@ -356,9 +358,9 @@ export const mockMembers: Member[] = [
     gymMembershipDaysLeft: 0,
     attendanceRate: 50,
     smsConsent: false,
-    membershipActive: false,
-    hasPT: false,
     appUsage: false,
+    membershipActive: false,
+    hasLesson: false,
   }
 ];
 
@@ -368,7 +370,7 @@ export const mockRevenueData = [
     date: '2024-05-27', 
     total: 4200000,
     membership: 1800000,
-    pt: 1600000,
+    lesson: 1600000,
     dailyTicket: 600000,
     other: 200000
   },
@@ -376,7 +378,7 @@ export const mockRevenueData = [
     date: '2024-05-26', 
     total: 3800000,
     membership: 1600000,
-    pt: 1400000,
+    lesson: 1400000,
     dailyTicket: 550000,
     other: 250000
   },
@@ -384,7 +386,7 @@ export const mockRevenueData = [
     date: '2024-05-25', 
     total: 4000000,
     membership: 1700000,
-    pt: 1500000,
+    lesson: 1500000,
     dailyTicket: 550000,
     other: 250000
   },
@@ -392,7 +394,7 @@ export const mockRevenueData = [
     date: '2024-05-24', 
     total: 3900000,
     membership: 1650000,
-    pt: 1450000,
+    lesson: 1450000,
     dailyTicket: 500000,
     other: 300000
   },
@@ -400,7 +402,7 @@ export const mockRevenueData = [
     date: '2024-05-23', 
     total: 4100000,
     membership: 1750000,
-    pt: 1550000,
+    lesson: 1550000,
     dailyTicket: 600000,
     other: 200000
   },
@@ -408,7 +410,7 @@ export const mockRevenueData = [
     date: '2024-05-22', 
     total: 3700000,
     membership: 1550000,
-    pt: 1350000,
+    lesson: 1350000,
     dailyTicket: 500000,
     other: 300000
   },
@@ -416,7 +418,7 @@ export const mockRevenueData = [
     date: '2024-05-21', 
     total: 3500000,
     membership: 1500000,
-    pt: 1200000,
+    lesson: 1200000,
     dailyTicket: 500000,
     other: 300000
   }
@@ -430,9 +432,9 @@ const generateMonthlyRevenueData = () => {
   return months.map((name, index) => {
     const total = baseRevenues[index];
     const membership = Math.floor(total * 0.42);
-    const pt = Math.floor(total * 0.38);
+    const lesson = Math.floor(total * 0.38);
     const dailyTicket = Math.floor(total * 0.13);
-    const other = total - membership - pt - dailyTicket;
+    const other = total - membership - lesson - dailyTicket;
     
     return {
       name,
@@ -440,7 +442,7 @@ const generateMonthlyRevenueData = () => {
       total,
       revenue: total,
       membership,
-      pt,
+      lesson,
       dailyTicket,
       other
     };
@@ -549,7 +551,7 @@ const _mockEvents: Event[] = [
     date: new Date(),
     time: "09:00",
     duration: "1시간",
-    type: "pt",
+    type: "lesson",
     trainer: "이트레이너",
     assignedTo: "이트레이너",
     color: "bg-blue-500"

@@ -7,7 +7,7 @@ import { SlidersHorizontal, Check, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export type MemberStatus = 'all' | 'active' | 'expired' | 'pending';
-export type MemberType = 'all' | 'regular' | 'pt' | 'vip' | 'student';
+export type MemberType = 'all' | 'regular' | 'lesson' | 'vip' | 'student';
 export type SortOption = 'name' | 'registrationDate' | 'expiryDate' | 'attendanceRate' | 'membershipStatus';
 
 interface FilterPopoverProps {
@@ -89,7 +89,7 @@ export const FilterPopover = ({ onFilterChange, className }: FilterPopoverProps)
               <SelectContent>
                 <SelectItem value="all">모든 유형</SelectItem>
                 <SelectItem value="regular">정회원</SelectItem>
-                <SelectItem value="pt">PT 회원</SelectItem>
+                <SelectItem value="lesson">개인레슨 회원</SelectItem>
                 <SelectItem value="vip">VIP 회원</SelectItem>
                 <SelectItem value="student">학생 회원</SelectItem>
               </SelectContent>

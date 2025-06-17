@@ -19,9 +19,16 @@ export interface PassDetails {
   actualPaymentAmount: number; // 예: 0
   consultantSalesShare?: number; // 예: 0
   unpaidAmount?: number; // 미수금 (예: 0)
-  ptTotalSessions?: number; // PT 총 횟수 (PT 이용권인 경우)
-  ptRemainingSessions?: number; // PT 잔여 횟수 (PT 이용권인 경우)
+  lessonTotalSessions?: number; // 개인레슨 총 횟수 (개인레슨 이용권인 경우)
+  lessonRemainingSessions?: number; // 개인레슨 잔여 횟수 (개인레슨 이용권인 경우)
   revenueDistributionNotes?: string; // 실적 배분 관련 메모
+  
+  // Registration form fields
+  consultantSalesPerformance?: number; // 상담자 매출 실적
+  unpaidOrPerformanceShare?: number; // 미수금/실적배분
+  lockerNumber?: string; // 락커 번호 (락커 이용권인 경우)
+  lockerEndDate?: string; // 락커 종료일 (락커 이용권인 경우)
+  memo?: string; // 메모
   
   // 계약서 관련 필드
   contractImages?: string[]; // 계약서 이미지 URL 배열

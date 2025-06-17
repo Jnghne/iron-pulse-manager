@@ -337,7 +337,7 @@ const TrainerManagement = () => {
                     <div className="col-span-2 font-bold">{selectedTrainer.revenue.toLocaleString()}원</div>
                   </div>
                   <div className="grid grid-cols-3 gap-4">
-                    <div className="font-medium text-right">PT 회원 수</div>
+                    <div className="font-medium text-right">개인레슨 회원 수</div>
                     <div className="col-span-2">{selectedTrainer.ptMemberCount}명</div>
                   </div>
                   <div className="grid grid-cols-3 gap-4">

@@ -29,7 +29,7 @@ export const MemberSummary = ({ member }: MemberSummaryProps) => {
     if (member.membershipActive) {
       types.push("헬스권");
     }
-    if (member.hasPT) {
+    if (member.hasLesson) {
       types.push("PT");
     }
     return types.length > 0 ? types : ["일반 회원"];

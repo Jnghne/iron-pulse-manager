@@ -45,7 +45,7 @@ export const ScheduleAddDialog = ({ open, onOpenChange, onEventAdd }: ScheduleAd
 
   // Mock 데이터
   const scheduleTypes = [
-    { value: "pt", label: "개인레슨 세션" },
+    { value: "lesson", label: "개인레슨 세션" },
     { value: "group", label: "그룹 수업" },
     { value: "maintenance", label: "시설 점검" },
     { value: "event", label: "이벤트" },
@@ -56,7 +56,7 @@ export const ScheduleAddDialog = ({ open, onOpenChange, onEventAdd }: ScheduleAd
   // 일정 유형별 색상 반환 함수
   const getEventColor = (type: string) => {
     switch (type) {
-      case 'pt': return 'bg-blue-500';
+      case 'lesson': return 'bg-blue-500';
       case 'group': return 'bg-purple-500';
       case 'maintenance': return 'bg-orange-500';
       case 'event': return 'bg-green-500';
@@ -102,7 +102,7 @@ export const ScheduleAddDialog = ({ open, onOpenChange, onEventAdd }: ScheduleAd
       time: isAllDay ? "하루종일" : startTime,
       duration: isAllDay ? "하루종일" : `${startTime} - ${endTime}`,
       type: scheduleType,
-      trainer: scheduleType === 'pt' ? assignedTo : undefined,
+      trainer: scheduleType === 'lesson' ? assignedTo : undefined,
       assignedTo,
       color: getEventColor(scheduleType),
       notes

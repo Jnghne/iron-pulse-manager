@@ -10,7 +10,7 @@ const PaymentRegistration = () => {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">결제 등록</h1>
-        <p className="text-muted-foreground">회원권, PT 이용권, 일일권 결제를 등록합니다.</p>
+        <p className="text-muted-foreground">회원권, 개인레슨 이용권, 일일권 결제를 등록합니다.</p>
       </div>
       
       <Card>
@@ -21,7 +21,7 @@ const PaymentRegistration = () => {
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="membership">회원권 등록</TabsTrigger>
-              <TabsTrigger value="pt">PT 이용권 등록</TabsTrigger>
+              <TabsTrigger value="lesson">개인레슨 이용권 등록</TabsTrigger>
               <TabsTrigger value="daily">일일권 등록</TabsTrigger>
             </TabsList>
             
@@ -32,10 +32,10 @@ const PaymentRegistration = () => {
               </div>
             </TabsContent>
             
-            <TabsContent value="pt" className="mt-4">
+            <TabsContent value="lesson" className="mt-4">
               <div className="p-6 border rounded-lg text-center">
-                <h3 className="text-lg font-medium">PT 이용권 등록</h3>
-                <p className="text-muted-foreground mb-4">PT 이용권 등록 기능은 현재 개발 중입니다.</p>
+                <h3 className="text-lg font-medium">개인레슨 이용권 등록</h3>
+                <p className="text-muted-foreground mb-4">개인레슨 이용권 등록 기능은 현재 개발 중입니다.</p>
               </div>
             </TabsContent>
             

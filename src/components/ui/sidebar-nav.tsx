@@ -42,13 +42,18 @@ export function SidebarNav({ className, userPermission = 'general', ...props }: 
       icon: <Users className="h-5 w-5" />,
     },
     {
-      title: "일일권 이력",
+      title: "일일권 관리",
       href: "/daily-tickets",
       icon: <CreditCard className="h-5 w-5" />,
     },
   ]
 
   const masterOnlyItems = [
+    {
+      title: "문자 발송",
+      href: "/messages",
+      icon: <MessageSquare className="h-5 w-5" />,
+    },
     {
       title: "상품 관리",
       href: "/products",
@@ -77,11 +82,6 @@ export function SidebarNav({ className, userPermission = 'general', ...props }: 
   ]
 
   const generalItems = [
-    {
-      title: "문자 메시지",
-      href: "/messages",
-      icon: <MessageSquare className="h-5 w-5" />,
-    },
     {
       title: "락커룸 관리",
       href: "/locker-room",

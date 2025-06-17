@@ -13,7 +13,7 @@ interface RevenueStatsProps {
 
 export const RevenueStats = ({ revenueData, revenueChartConfig, businessName }: RevenueStatsProps) => {
   const currentRevenue = revenueData[revenueData.length - 1];
-  const totalCurrentRevenue = currentRevenue.membership + currentRevenue.pt + currentRevenue.daily + currentRevenue.other;
+  const totalCurrentRevenue = currentRevenue.membership + currentRevenue.lesson + currentRevenue.daily + currentRevenue.other;
 
   return (
     <div className="space-y-8">
@@ -36,7 +36,7 @@ export const RevenueStats = ({ revenueData, revenueChartConfig, businessName }: 
                     <stop offset="5%" stopColor="#8B5CF6" stopOpacity={0.8}/>
                     <stop offset="95%" stopColor="#8B5CF6" stopOpacity={0.1}/>
                   </linearGradient>
-                  <linearGradient id="pt" x1="0" y1="0" x2="0" y2="1">
+                  <linearGradient id="lesson" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#06B6D4" stopOpacity={0.8}/>
                     <stop offset="95%" stopColor="#06B6D4" stopOpacity={0.1}/>
                   </linearGradient>
@@ -78,10 +78,10 @@ export const RevenueStats = ({ revenueData, revenueChartConfig, businessName }: 
                 />
                 <Area 
                   type="monotone" 
-                  dataKey="pt" 
+                  dataKey="lesson" 
                   stackId="1" 
                   stroke="#06B6D4" 
-                  fill="url(#pt)" 
+                  fill="url(#lesson)" 
                   strokeWidth={2}
                 />
                 <Area 
@@ -125,8 +125,8 @@ export const RevenueStats = ({ revenueData, revenueChartConfig, businessName }: 
                 <div className="font-semibold">{currentRevenue.membership.toLocaleString()}원 ({Math.round((currentRevenue.membership / totalCurrentRevenue) * 100)}%)</div>
               </div>
               <div className="flex items-center justify-between p-4 rounded-xl bg-white/40 dark:bg-slate-800/40 backdrop-blur-sm">
-                <div className="text-sm font-medium">PT 이용권 매출</div>
-                <div className="font-semibold">{currentRevenue.pt.toLocaleString()}원 ({Math.round((currentRevenue.pt / totalCurrentRevenue) * 100)}%)</div>
+                <div className="text-sm font-medium">개인레슨 이용권 매출</div>
+                <div className="font-semibold">{currentRevenue.lesson.toLocaleString()}원 ({Math.round((currentRevenue.lesson / totalCurrentRevenue) * 100)}%)</div>
               </div>
               <div className="flex items-center justify-between p-4 rounded-xl bg-white/40 dark:bg-slate-800/40 backdrop-blur-sm">
                 <div className="text-sm font-medium">일일권 매출</div>

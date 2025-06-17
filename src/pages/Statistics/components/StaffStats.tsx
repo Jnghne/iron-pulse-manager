@@ -82,7 +82,7 @@ export const StaffStats = ({ staffData }: StaffStatsProps) => {
                 {currentItems.map((staff) => (
                   <TableRow key={staff.name} className="border-border/50 hover:bg-slate-50/80 dark:hover:bg-slate-800/30 transition-colors">
                     <TableCell className="font-semibold text-center">{staff.name}</TableCell>
-                    <TableCell className="text-center font-medium">{staff.pt}회</TableCell>
+                    <TableCell className="text-center font-medium">{staff.lesson}회</TableCell>
                     <TableCell className="text-center font-semibold text-green-600 dark:text-green-400">
                       {staff.revenue.toLocaleString()}원
                     </TableCell>

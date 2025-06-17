@@ -131,7 +131,7 @@ const MemberList = () => {
     if (membershipFilter !== "all") {
       filtered = filtered.filter(member => {
         if (membershipFilter === "regular" && member.memberType.includes("정회원")) return true;
-        if (membershipFilter === "pt" && member.hasPT) return true;
+        if (membershipFilter === "lesson" && member.hasLesson) return true;
         if (membershipFilter === "vip" && member.memberType.includes("VIP")) return true;
         if (membershipFilter === "student" && member.memberType.includes("학생")) return true;
         return false;
@@ -374,17 +374,17 @@ const MemberList = () => {
                           </div>
                         </TableCell>
                         
-                        {/* 회원 구분 (PT, 헬스장, PT&헬스장) */}
+                        {/* 회원 구분 (개인레슨, 헬스장, 개인레슨&헬스장) */}
                         <TableCell className="text-center pl-4">
                           <div className="flex flex-row flex-wrap gap-1 items-center justify-center">
                             {(() => {
                               const badges: JSX.Element[] = [];
 
-                              // PT 이용권 확인 (간단한 방식)
-                              if (member.hasPT) {
+                              // 개인레슨 이용권 확인 (간단한 방식)
+                              if (member.hasLesson) {
                                 badges.push(
-                                  <span key="pt" className={`px-2 py-1 text-xs bg-purple-50 text-purple-700 rounded-full font-medium`}>
-                                    PT
+                                  <span key="lesson" className={`px-2 py-1 text-xs bg-purple-50 text-purple-700 rounded-full font-medium`}>
+                                    개인레슨
                                   </span>
                                 );
                               }

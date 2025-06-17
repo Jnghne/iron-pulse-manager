@@ -30,13 +30,13 @@ const MessageSystem = () => {
   useEffect(() => {
     // 목업 데이터
     const mockMembers: Member[] = [
-      { id: "1", name: "김철수", phone: "010-1234-5678", status: "active", membershipType: "PT 회원권" },
+      { id: "1", name: "김철수", phone: "010-1234-5678", status: "active", membershipType: "개인레슨 12회" },
       { id: "2", name: "이영희", phone: "010-2345-6789", status: "active", membershipType: "일반 회원권" },
-      { id: "3", name: "박지성", phone: "010-3456-7890", status: "inactive", membershipType: "PT 회원권" },
+      { id: "3", name: "박지성", phone: "010-3456-7890", status: "inactive", membershipType: "개인레슨 회원권" },
       { id: "4", name: "최민수", phone: "010-4567-8901", status: "expired", membershipType: "일반 회원권" },
-      { id: "5", name: "정다영", phone: "010-5678-9012", status: "active", membershipType: "PT 회원권" },
+      { id: "5", name: "정다영", phone: "010-5678-9012", status: "active", membershipType: "개인레슨 회원권" },
       { id: "6", name: "강현우", phone: "010-6789-0123", status: "active", membershipType: "일반 회원권" },
-      { id: "7", name: "윤서연", phone: "010-7890-1234", status: "inactive", membershipType: "PT 회원권" },
+      { id: "7", name: "윤서연", phone: "010-7890-1234", status: "inactive", membershipType: "개인레슨 회원권" },
       { id: "8", name: "임재현", phone: "010-8901-2345", status: "active", membershipType: "일반 회원권" },
     ];
     
@@ -211,7 +211,7 @@ const MessageSystem = () => {
                   >
                     <option value="all">전체 회원</option>
                     <option value="active">활성 회원</option>
-                    <option value="pt">PT 회원</option>
+                    <option value="lesson">개인레슨 회원</option>
                     <option value="expired">만료 임박 회원</option>
                   </select>
                 </div>

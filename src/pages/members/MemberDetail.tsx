@@ -39,7 +39,7 @@ const MemberDetail = ({ id: propId }: MemberDetailProps) => {
   const [lockerDialogOpen, setLockerDialogOpen] = useState(false);
   const [suspensionDialogOpen, setSuspensionDialogOpen] = useState(false);
   const [paymentRegistrationOpen, setPaymentRegistrationOpen] = useState(false);
-  const [paymentRegistrationType, setPaymentRegistrationType] = useState<'gym' | 'pt' | 'locker' | 'other' | 'merchandise' | null>(null);
+  const [paymentRegistrationType, setPaymentRegistrationType] = useState<'gym' | 'lesson' | 'locker' | 'other' | 'merchandise' | null>(null);
   const [paymentDetailOpen, setPaymentDetailOpen] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState<any>(null);
 
@@ -69,7 +69,7 @@ const MemberDetail = ({ id: propId }: MemberDetailProps) => {
     }
   }, [id]);
 
-  const handlePaymentRegistration = (type: 'gym' | 'pt' | 'locker' | 'other' | 'merchandise') => {
+  const handlePaymentRegistration = (type: 'gym' | 'lesson' | 'locker' | 'other' | 'merchandise') => {
     // 타입을 그대로 사용 (PaymentRegistrationDialog에서 처리)
     setPaymentRegistrationType(type);
     setPaymentRegistrationOpen(true);
@@ -269,15 +269,15 @@ const MemberDetail = ({ id: propId }: MemberDetailProps) => {
                 updatedMember.gymMembershipDaysLeft = 365;
                 break;
               }
-              case 'pt': {
-                updatedMember.hasPT = true;
-                updatedMember.ptStartDate = paymentData.serviceStartDate;
-                updatedMember.ptTotal = 10; // 임의 설정 (실제로는 상품에 따라 다름)
-                updatedMember.ptRemaining = 10;
+              case 'lesson': {
+                updatedMember.hasLesson = true;
+                updatedMember.lessonStartDate = paymentData.serviceStartDate;
+                updatedMember.lessonTotal = 10; // 임의 설정 (실제로는 상품에 따라 다름)
+                updatedMember.lessonRemaining = 10;
                 // 임의로 6개월 후로 설정
-                const ptEndDate = new Date(paymentData.serviceStartDate || new Date());
-                ptEndDate.setMonth(ptEndDate.getMonth() + 6);
-                updatedMember.ptExpiryDate = ptEndDate.toISOString().split('T')[0];
+                const lessonEndDate = new Date(paymentData.serviceStartDate || new Date());
+                lessonEndDate.setMonth(lessonEndDate.getMonth() + 6);
+                updatedMember.lessonExpiryDate = lessonEndDate.toISOString().split('T')[0];
                 updatedMember.trainerAssigned = paymentData.instructor;
                 break;
               }
@@ -292,6 +292,7 @@ const MemberDetail = ({ id: propId }: MemberDetailProps) => {
                 };
                 break;
               case 'other':
+              case 'merchandise':
                 if (!updatedMember.otherProducts) {
                   updatedMember.otherProducts = [];
                 }

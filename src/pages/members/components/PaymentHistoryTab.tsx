@@ -13,7 +13,7 @@ interface PaymentRecord {
   id: string;
   date: string;
   paymentDate: string;
-  product: 'PT' | '헬스장 이용권' | '락커 이용권' | '기타 상품';
+  product: '개인레슨 이용권' | '헬스장 이용권' | '락커 이용권' | '기타 상품';
   type: '신규' | '연장';
   productName: string;
   startDate: string;
@@ -55,9 +55,9 @@ export const PaymentHistoryTab = ({ memberId, onViewDetail, isOwner }: PaymentHi
       id: "P001",
       date: "2024-03-15",
       paymentDate: "2024-03-15",
-      product: "PT",
+      product: "개인레슨 이용권",
       type: "신규",
-      productName: "PT 20회권",
+      productName: "개인레슨 20회권",
       startDate: "2024-03-15",
       endDate: "2024-09-15",
       amount: 1000000,
@@ -87,9 +87,9 @@ export const PaymentHistoryTab = ({ memberId, onViewDetail, isOwner }: PaymentHi
       id: "P003",
       date: "2024-01-15",
       paymentDate: "2024-01-15",
-      product: "PT",
+      product: "개인레슨 이용권",
       type: "연장",
-      productName: "PT 10회권",
+      productName: "개인레슨 10회권",
       startDate: "2024-01-15",
       endDate: "2024-07-15",
       amount: 500000,
@@ -197,8 +197,8 @@ export const PaymentHistoryTab = ({ memberId, onViewDetail, isOwner }: PaymentHi
 
   const getProductBadge = (product: string) => {
     switch (product) {
-      case 'PT':
-        return <Badge className="bg-blue-100 text-blue-800">PT</Badge>;
+      case '개인레슨 이용권':
+        return <Badge className="bg-blue-100 text-blue-800">개인레슨</Badge>;
       case '헬스장 이용권':
         return <Badge className="bg-purple-100 text-purple-800">헬스장</Badge>;
       case '락커 이용권':

@@ -29,7 +29,7 @@ import {
 const getProductTypeName = (type: ProductType): string => {
   switch (type) {
     case ProductType.MEMBERSHIP: return '헬스';
-    case ProductType.PT: return 'PT';
+    case ProductType.LESSON: return '개인레슨';
     case ProductType.LOCKER: return '락커';
     case ProductType.OTHER: return '기타';
     default: return '알 수 없음';
@@ -44,7 +44,7 @@ const getProductTypeBadgeStyle = (type: ProductType) => {
         className: "bg-blue-50 text-blue-700 border-blue-200",
         icon: <ShoppingBag className="w-3 h-3 mr-1" />
       };
-    case ProductType.PT:
+    case ProductType.LESSON:
       return {
         className: "bg-purple-50 text-purple-700 border-purple-200",
         icon: <Star className="w-3 h-3 mr-1" />
@@ -71,7 +71,7 @@ const getProductTypeBadgeStyle = (type: ProductType) => {
 const productTabs = [
   { value: 'all', label: '전체' },
   { value: ProductType.MEMBERSHIP, label: getProductTypeName(ProductType.MEMBERSHIP) },
-  { value: ProductType.PT, label: getProductTypeName(ProductType.PT) },
+  { value: ProductType.LESSON, label: getProductTypeName(ProductType.LESSON) },
   { value: ProductType.LOCKER, label: getProductTypeName(ProductType.LOCKER) },
   { value: ProductType.OTHER, label: getProductTypeName(ProductType.OTHER) },
 ];

@@ -19,7 +19,7 @@ import { LockerSelector } from '@/components/features/locker/LockerSelector';
 export interface PaymentData {
   memberId: string;
   memberName: string;
-  category: string; // 'gym', 'pt', 'locker', 'merchandise'
+  category: string; // 'gym', 'lesson', 'locker', 'merchandise'
   product: string;
   paymentDate: string; 
   paymentTime: string;
@@ -45,7 +45,7 @@ export interface PaymentData {
 
 interface PaymentRegistrationDialogProps {
   member: Member;
-  type: 'gym' | 'pt' | 'locker' | 'other' | 'merchandise' | null;
+  type: 'gym' | 'lesson' | 'locker' | 'other' | 'merchandise' | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSave: (paymentData: PaymentData) => void;
@@ -60,7 +60,7 @@ export const PaymentRegistrationDialog = ({
 }: PaymentRegistrationDialogProps) => {
   // 초기 탭 선택 설정 - type이 'merchandise' 또는 'other'인 경우 'merchandise' 탭으로 설정
   const initialCategory = (type === 'merchandise' || type === 'other') ? 'merchandise' : (type || 'gym');
-  const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory); // 'gym', 'pt', 'locker', 'merchandise'
+  const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory); // 'gym', 'lesson', 'locker', 'merchandise'
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [product, setProduct] = useState<string>("");
   const [price, setPrice] = useState<string>("");
@@ -100,7 +100,7 @@ export const PaymentRegistrationDialog = ({
   // 상품 목록 (실제로는 API에서 가져올 수 있음)
   const products = {
     gym: ["헬스 이용권 1개월", "헬스 이용권 3개월", "헬스 이용권 6개월", "헬스 이용권 12개월"],
-    pt: ["PT 10회권", "PT 20회권", "PT 30회권", "PT 50회권"],
+    lesson: ["개인레슨 10회권", "개인레슨 20회권", "개인레슨 30회권", "개인레슨 50회권"],
     locker: ["락커 1개월", "락커 3개월", "락커 6개월", "락커 12개월"],
     other: ["운동복", "식음료", "공간대여", "촬영협조", "기타"],
     merchandise: ["운동복 상의", "운동복 하의", "스포츠 양말", "물통", "쉐이커"]
@@ -137,12 +137,13 @@ export const PaymentRegistrationDialog = ({
       return;
     }
 
-    if (!selectedStaff) {
+    // Ensure staff/consultant is selected for all categories
+    if (!consultant && !selectedStaff) {
       alert("결제 직원을 선택해주세요.");
       return;
     }
 
-    if (selectedCategory === 'pt' && !instructor) {
+    if (selectedCategory === 'lesson' && !instructor) {
       alert("담당 트레이너를 선택해주세요.");
       return;
     }
@@ -172,7 +173,7 @@ export const PaymentRegistrationDialog = ({
       paymentMethod,
       purchasePurpose,
       consultant: consultant || selectedStaff,
-      instructor: selectedCategory === 'pt' ? (instructor || selectedTrainer) : undefined,
+      instructor: selectedCategory === 'lesson' ? (instructor || selectedTrainer) : undefined,
       lockerNumber: selectedCategory === 'locker' ? selectedLockerNumber?.toString() : undefined,
       lockerEndDate: selectedCategory === 'locker' && lockerEndDate ? format(lockerEndDate, 'yyyy-MM-dd') : undefined,
       // marketingSource, // PaymentData에 없으므로 제거 또는 인터페이스에 추가 필요
@@ -234,7 +235,7 @@ export const PaymentRegistrationDialog = ({
               {
                 [
                   { id: 'gym', label: '회원권', icon: Ticket },
-                  { id: 'pt', label: '개인 레슨', icon: Users },
+                  { id: 'lesson', label: '개인 레슨', icon: Users },
                   { id: 'locker', label: '락커', icon: Lock },
                   { id: 'merchandise', label: '기타 이용권', icon: Shirt },
                 ].map(item => (
@@ -256,7 +257,7 @@ export const PaymentRegistrationDialog = ({
               <DialogHeader className="p-6 border-b">
                 <DialogTitle className="text-xl font-semibold">
                   {selectedCategory === 'gym' && '회원권 추가'}
-                  {selectedCategory === 'pt' && '개인 레슨 추가'}
+                  {selectedCategory === 'lesson' && '개인레슨 추가'}
                   {selectedCategory === 'locker' && '락커 추가'}
                   {selectedCategory === 'merchandise' && '기타 이용권 추가'}
                 </DialogTitle>
@@ -264,7 +265,7 @@ export const PaymentRegistrationDialog = ({
               
               <div className="p-6 space-y-6 overflow-y-auto flex-grow">
                 {/* 회원권 폼 */}
-                {(selectedCategory === 'gym' || selectedCategory === 'pt') && (
+                {(selectedCategory === 'gym' || selectedCategory === 'lesson') && (
                   <>
                     {/* 상품 정보 */}
                     <div className="space-y-3">
@@ -328,7 +329,7 @@ export const PaymentRegistrationDialog = ({
                     {/* 상담 및 강사 정보 */}
                     <div className="space-y-3">
                       <div className="flex items-center">
-                        <h3 className="text-md font-medium">{selectedCategory === 'gym' ? '상품 상담자 및 담당 강사' : '상품 상담자 및 담당 강사 (PT)'}</h3>
+                        <h3 className="text-md font-medium">{selectedCategory === 'gym' ? '상품 상담자 및 담당 강사' : '상품 상담자 및 담당 강사 (개인레슨)'}</h3>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-1.5">
@@ -343,8 +344,8 @@ export const PaymentRegistrationDialog = ({
                           </Select>
                         </div>
                         <div className="space-y-1.5">
-                          <Label htmlFor="instructor">담당 강사 {selectedCategory === 'pt' ? '1' : ''}</Label>
-                          <Select value={instructor} onValueChange={setInstructor} disabled={selectedCategory === 'gym' && !product.toLowerCase().includes('pt')}>
+                          <Label htmlFor="instructor">담당 강사 {selectedCategory === 'lesson' ? '1' : ''}</Label>
+                          <Select value={instructor} onValueChange={setInstructor} disabled={selectedCategory === 'gym' && !product.toLowerCase().includes('lesson')}>
                             <SelectTrigger id="instructor">
                               <SelectValue placeholder="강사를 선택하세요" />
                             </SelectTrigger>
@@ -355,7 +356,7 @@ export const PaymentRegistrationDialog = ({
                           </Select>
                         </div>
                       </div>
-                      {selectedCategory === 'pt' && (
+                      {selectedCategory === 'lesson' && (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                            {/* 담당 강사 2, 3 - 추후 구현 */}
                           <div className="space-y-1.5">
@@ -458,88 +459,189 @@ export const PaymentRegistrationDialog = ({
 
                 {/* 락커 관련 필드 */}
                 {selectedCategory === 'locker' && (
-                  <div className="space-y-4">
-                    <div className="space-y-1.5">
-                      <Label htmlFor="product-locker">상품 선택</Label>
-                      <Select value={product} onValueChange={(value) => { setProduct(value); /* 상품 선택 시 가격 자동 설정 로직 추가 가능 */ }}>
-                        <SelectTrigger id="product-locker"><SelectValue placeholder="락커 종류를 선택하세요" /></SelectTrigger>
-                        <SelectContent>{products.locker.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}</SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label htmlFor="locker-serviceStartDate">시작일</Label>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant={"outline"}
-                            className={cn(
-                              "w-full justify-start text-left font-normal",
-                              !selectedDate && "text-muted-foreground"
-                            )}
-                          >
-                            <CalendarIcon className="mr-2 h-4 w-4" />
-                            {selectedDate ? format(selectedDate, "PPP", { locale: ko }) : <span>날짜 선택</span>}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0">
-                          <Calendar
-                            mode="single"
-                            selected={selectedDate}
-                            onSelect={(date) => setSelectedDate(date || new Date())}
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label htmlFor="locker-endDate">종료일</Label>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant={"outline"}
-                            className={cn(
-                              "w-full justify-start text-left font-normal",
-                              !lockerEndDate && "text-muted-foreground"
-                            )}
-                          >
-                            <CalendarIcon className="mr-2 h-4 w-4" />
-                            {lockerEndDate ? format(lockerEndDate, "PPP", { locale: ko }) : <span>날짜 선택</span>}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0">
-                          <Calendar
-                            mode="single"
-                            selected={lockerEndDate}
-                            onSelect={(date) => setLockerEndDate(date || undefined)}
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label htmlFor="price-locker">결제 금액</Label>
-                      <div className="relative">
-                        <Input 
-                          id="price-locker" 
-                          value={price} // 락커 선택 시 가격 자동 설정 또는 직접 입력
-                          onChange={(e) => setPrice(formatCurrency(e.target.value))} 
-                          placeholder="결제 금액 입력" 
-                        />
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">원</span>
+                  <>
+                    {/* 상품 정보 */}
+                    <div className="space-y-3">
+                      <div className="flex items-center">
+                        <h3 className="text-md font-medium">상품 정보</h3>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button variant="ghost" size="icon" className="ml-1 w-5 h-5">
+                              <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>락커 상품과 이용 기간을 선택합니다.</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
+                      <div className="grid grid-cols-1 gap-4">
+                        <div className="space-y-1.5">
+                          <Label htmlFor="product-locker">락커 상품</Label>
+                          <Select value={product} onValueChange={(value) => { setProduct(value); /* 상품 선택 시 가격 자동 설정 로직 추가 가능 */ }}>
+                            <SelectTrigger id="product-locker"><SelectValue placeholder="락커 종류를 선택하세요" /></SelectTrigger>
+                            <SelectContent>{products.locker.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}</SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                          <Label htmlFor="locker-serviceStartDate">서비스 시작일</Label>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button
+                                variant={"outline"}
+                                className={cn(
+                                  "w-full justify-start text-left font-normal",
+                                  !selectedDate && "text-muted-foreground"
+                                )}
+                              >
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {selectedDate ? format(selectedDate, "yyyy. MM. dd") : <span>날짜 선택</span>}
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0">
+                              <Calendar
+                                mode="single"
+                                selected={selectedDate}
+                                onSelect={(date) => setSelectedDate(date || new Date())}
+                                initialFocus
+                              />
+                            </PopoverContent>
+                          </Popover>
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label htmlFor="locker-endDate">락커 종료일</Label>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button
+                                variant={"outline"}
+                                className={cn(
+                                  "w-full justify-start text-left font-normal",
+                                  !lockerEndDate && "text-muted-foreground"
+                                )}
+                              >
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {lockerEndDate ? format(lockerEndDate, "yyyy. MM. dd") : <span>날짜 선택</span>}
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0">
+                              <Calendar
+                                mode="single"
+                                selected={lockerEndDate}
+                                onSelect={(date) => setLockerEndDate(date || undefined)}
+                                initialFocus
+                              />
+                            </PopoverContent>
+                          </Popover>
+                        </div>
                       </div>
                     </div>
-                    <div className="space-y-1.5">
-                      <Label>락커 선택</Label>
-                      <LockerSelector
-                        selectedLocker={selectedLockerNumber}
-                        onLockerSelect={setSelectedLockerNumber}
-                      />
+
+                    {/* 상품 담당자 */}
+                    <div className="space-y-3">
+                      <div className="flex items-center">
+                        <h3 className="text-md font-medium">상품 담당자</h3>
+                      </div>
+                      <div className="grid grid-cols-1 gap-4">
+                        <div className="space-y-1.5">
+                          <Label htmlFor="consultant-locker">결제 직원</Label>
+                          <Select value={consultant} onValueChange={setConsultant}>
+                            <SelectTrigger id="consultant-locker">
+                              <SelectValue placeholder="결제 직원을 선택하세요" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {staffs.map(staff => <SelectItem key={staff} value={staff}>{staff}</SelectItem>)}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
                     </div>
-                    <div className="space-y-1.5">
-                       <Label htmlFor="memo-locker">메모</Label>
-                       <Textarea id="memo-locker" value={memo} onChange={(e) => setMemo(e.target.value)} placeholder="특이사항을 입력하세요 (선택 사항)" />
-                     </div>
-                  </div>
+
+                    {/* 결제 정보 */}
+                    <div className="space-y-3">
+                      <div className="flex items-center">
+                        <h3 className="text-md font-medium">결제 정보</h3>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                          <Label htmlFor="price-locker">상품 금액</Label>
+                          <div className="relative">
+                            <Input 
+                              id="price-locker" 
+                              value={price} 
+                              onChange={(e) => setPrice(formatCurrency(e.target.value))} 
+                              placeholder="상품 금액 입력" 
+                            />
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">원</span>
+                          </div>
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label htmlFor="actualPrice-locker">실제 결제 금액</Label>
+                          <div className="relative">
+                            <Input 
+                              id="actualPrice-locker" 
+                              value={actualPrice} 
+                              onChange={(e) => setActualPrice(formatCurrency(e.target.value))} 
+                              placeholder="실제 결제 금액 입력" 
+                            />
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">원</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                          <Label htmlFor="consultantSalesPerformance-locker">상담자 매출 실적</Label>
+                          <div className="relative">
+                            <Input 
+                              id="consultantSalesPerformance-locker" 
+                              value={consultantSalesPerformance} 
+                              onChange={(e) => setConsultantSalesPerformance(formatCurrency(e.target.value))} 
+                              placeholder="상담자 매출 실적 입력" 
+                            />
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">원</span>
+                          </div>
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label htmlFor="unpaidOrPerformanceShare-locker">미수금/실적배분</Label>
+                          <div className="relative">
+                            <Input 
+                              id="unpaidOrPerformanceShare-locker" 
+                              value={unpaidOrPerformanceShare} 
+                              onChange={(e) => setUnpaidOrPerformanceShare(formatCurrency(e.target.value))} 
+                              placeholder="미수금/실적배분 입력" 
+                            />
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">원</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 락커 정보 */}
+                    <div className="space-y-3">
+                      <div className="flex items-center">
+                        <h3 className="text-md font-medium">락커 정보</h3>
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label>락커 선택</Label>
+                        <LockerSelector
+                          selectedLocker={selectedLockerNumber}
+                          onLockerSelect={setSelectedLockerNumber}
+                        />
+                      </div>
+                    </div>
+
+                    {/* 추가 정보 */}
+                    <div className="space-y-3">
+                      <div className="flex items-center">
+                        <h3 className="text-md font-medium">추가 정보</h3>
+                      </div>
+                      <div className="space-y-1.5">
+                         <Label htmlFor="memo-locker">메모</Label>
+                         <Textarea id="memo-locker" value={memo} onChange={(e) => setMemo(e.target.value)} placeholder="특이사항을 입력하세요 (선택 사항)" />
+                       </div>
+                    </div>
+                  </>
                 )}
 
                 {/* 기타 이용권 폼 */}

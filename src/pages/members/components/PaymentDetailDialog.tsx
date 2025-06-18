@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,7 +36,12 @@ export const PaymentDetailDialog = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   // 편집 가능한 필드 상태
-  const [editedPayment, setEditedPayment] = useState<any>(payment);
+  const [editedPayment, setEditedPayment] = useState<any>(payment || {});
+  
+  // payment prop이 변경될 때 editedPayment 업데이트
+  useEffect(() => {
+    setEditedPayment(payment || {});
+  }, [payment]);
   
   // 수정 모드 전환
   const handleEditMode = () => {
@@ -84,13 +89,18 @@ export const PaymentDetailDialog = ({
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'completed':
-        return <Badge className="bg-green-100 text-green-800">결제 완료</Badge>;
+      case '완료':
+        return <Badge className="bg-green-100 text-green-800">완료</Badge>;
       case 'pending':
+      case '대기':
         return <Badge className="bg-yellow-100 text-yellow-800">대기</Badge>;
       case 'cancelled':
+      case '취소':
         return <Badge className="bg-red-100 text-red-800">취소</Badge>;
+      case '실패':
+        return <Badge className="bg-red-100 text-red-800">실패</Badge>;
       default:
-        return <Badge variant="outline">알 수 없음</Badge>;
+        return <Badge variant="outline">{status || '알 수 없음'}</Badge>;
     }
   };
   
@@ -136,9 +146,7 @@ export const PaymentDetailDialog = ({
                     </Select>
                   ) : (
                     <p className="font-medium">
-                      {payment.type === 'gym' ? '헬스장 이용권' : 
-                       payment.type === 'lesson' ? '개인레슨 이용권' : 
-                       payment.type === 'locker' ? '락커 이용권' : '기타 상품'}
+                      {payment.product || payment.type || 'N/A'}
                     </p>
                   )}
                 </div>
@@ -147,12 +155,12 @@ export const PaymentDetailDialog = ({
                   <Label className="text-sm text-muted-foreground">상품명</Label>
                   {isEditing ? (
                     <Input 
-                      value={editedPayment.product} 
-                      onChange={(e) => setEditedPayment({...editedPayment, product: e.target.value})}
+                      value={editedPayment.productName || editedPayment.product} 
+                      onChange={(e) => setEditedPayment({...editedPayment, productName: e.target.value, product: e.target.value})}
                       disabled={isSubmitting}
                     />
                   ) : (
-                    <p className="font-medium">{payment.product}</p>
+                    <p className="font-medium">{payment.productName || payment.product || 'N/A'}</p>
                   )}
                 </div>
                 
@@ -170,20 +178,20 @@ export const PaymentDetailDialog = ({
                           disabled={isSubmitting}
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
-                          {editedPayment.startDate ? format(new Date(editedPayment.startDate), 'PPP', { locale: ko }) : "날짜 선택"}
+                          {(editedPayment.startDate || editedPayment.serviceStartDate) ? format(new Date(editedPayment.startDate || editedPayment.serviceStartDate), 'PPP', { locale: ko }) : "날짜 선택"}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0">
                         <Calendar
                           mode="single"
-                          selected={new Date(editedPayment.startDate)}
-                          onSelect={(date) => date && setEditedPayment({...editedPayment, startDate: format(date, 'yyyy-MM-dd')})}
+                          selected={new Date(editedPayment.startDate || editedPayment.serviceStartDate)}
+                          onSelect={(date) => date && setEditedPayment({...editedPayment, startDate: format(date, 'yyyy-MM-dd'), serviceStartDate: format(date, 'yyyy-MM-dd')})}
                           initialFocus
                         />
                       </PopoverContent>
                     </Popover>
                   ) : (
-                    <p className="font-medium">{formatDate(payment.startDate)}</p>
+                    <p className="font-medium">{formatDate(payment.startDate || payment.serviceStartDate)}</p>
                   )}
                 </div>
                 
@@ -201,24 +209,24 @@ export const PaymentDetailDialog = ({
                           disabled={isSubmitting}
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
-                          {editedPayment.endDate ? format(new Date(editedPayment.endDate), 'PPP', { locale: ko }) : "날짜 선택"}
+                          {(editedPayment.endDate || editedPayment.serviceEndDate) ? format(new Date(editedPayment.endDate || editedPayment.serviceEndDate), 'PPP', { locale: ko }) : "날짜 선택"}
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0">
                         <Calendar
                           mode="single"
-                          selected={new Date(editedPayment.endDate)}
-                          onSelect={(date) => date && setEditedPayment({...editedPayment, endDate: format(date, 'yyyy-MM-dd')})}
+                          selected={new Date(editedPayment.endDate || editedPayment.serviceEndDate)}
+                          onSelect={(date) => date && setEditedPayment({...editedPayment, endDate: format(date, 'yyyy-MM-dd'), serviceEndDate: format(date, 'yyyy-MM-dd')})}
                           initialFocus
                         />
                       </PopoverContent>
                     </Popover>
                   ) : (
-                    <p className="font-medium">{formatDate(payment.endDate)}</p>
+                    <p className="font-medium">{formatDate(payment.endDate || payment.serviceEndDate)}</p>
                   )}
                 </div>
                 
-                {payment.type === 'lesson' && (
+                {(payment.type === 'lesson' || payment.product === '개인레슨 이용권' || payment.trainer) && (
                   <div className="space-y-1">
                     <Label className="text-sm text-muted-foreground">담당 트레이너</Label>
                     {isEditing ? (
@@ -233,7 +241,7 @@ export const PaymentDetailDialog = ({
                   </div>
                 )}
                 
-                {payment.type === 'locker' && (
+                {(payment.type === 'locker' || payment.product === '락커 이용권' || payment.lockerNumber) && (
                   <div className="space-y-1">
                     <Label className="text-sm text-muted-foreground">락커 번호</Label>
                     {isEditing ? (
@@ -295,7 +303,7 @@ export const PaymentDetailDialog = ({
                       </PopoverContent>
                     </Popover>
                   ) : (
-                    <p className="font-medium">{formatDate(payment.paymentDate)}</p>
+                    <p className="font-medium">{formatDate(payment.paymentDate || payment.date)}</p>
                   )}
                 </div>
                 
@@ -319,9 +327,10 @@ export const PaymentDetailDialog = ({
                     </Select>
                   ) : (
                     <p className="font-medium">
-                      {payment.paymentMethod === 'card' ? '카드' : 
-                       payment.paymentMethod === 'cash' ? '현금' : 
-                       payment.paymentMethod === 'transfer' ? '계좌이체' : '기타'}
+                      {payment.paymentMethod === '카드' || payment.paymentMethod === 'card' ? '카드' : 
+                       payment.paymentMethod === '현금' || payment.paymentMethod === 'cash' ? '현금' : 
+                       payment.paymentMethod === '계좌이체' || payment.paymentMethod === 'transfer' ? '계좌이체' : 
+                       payment.paymentMethod || '기타'}
                     </p>
                   )}
                 </div>
@@ -331,15 +340,15 @@ export const PaymentDetailDialog = ({
                   {isEditing ? (
                     <div className="relative">
                       <Input
-                        value={typeof editedPayment.price === 'number' ? editedPayment.price.toLocaleString() : editedPayment.price}
-                        onChange={(e) => setEditedPayment({...editedPayment, price: parseInt(e.target.value.replace(/,/g, '')) || 0})}
+                        value={typeof (editedPayment.price || editedPayment.amount) === 'number' ? (editedPayment.price || editedPayment.amount).toLocaleString() : (editedPayment.price || editedPayment.amount)}
+                        onChange={(e) => setEditedPayment({...editedPayment, price: parseInt(e.target.value.replace(/,/g, '')) || 0, amount: parseInt(e.target.value.replace(/,/g, '')) || 0})}
                         className="pl-8"
                         disabled={isSubmitting}
                       />
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">₩</span>
                     </div>
                   ) : (
-                    <p className="font-medium">₩ {payment.price.toLocaleString()}</p>
+                    <p className="font-medium">₩ {(payment.price || payment.amount || 0).toLocaleString()}</p>
                   )}
                 </div>
                 
@@ -348,15 +357,15 @@ export const PaymentDetailDialog = ({
                   {isEditing ? (
                     <div className="relative">
                       <Input
-                        value={typeof editedPayment.actualPrice === 'number' ? editedPayment.actualPrice.toLocaleString() : editedPayment.actualPrice}
-                        onChange={(e) => setEditedPayment({...editedPayment, actualPrice: parseInt(e.target.value.replace(/,/g, '')) || 0})}
+                        value={typeof (editedPayment.actualPrice || editedPayment.actualAmount) === 'number' ? (editedPayment.actualPrice || editedPayment.actualAmount).toLocaleString() : (editedPayment.actualPrice || editedPayment.actualAmount)}
+                        onChange={(e) => setEditedPayment({...editedPayment, actualPrice: parseInt(e.target.value.replace(/,/g, '')) || 0, actualAmount: parseInt(e.target.value.replace(/,/g, '')) || 0})}
                         className="pl-8"
                         disabled={isSubmitting}
                       />
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">₩</span>
                     </div>
                   ) : (
-                    <p className="font-medium">₩ {payment.actualPrice.toLocaleString()}</p>
+                    <p className="font-medium">₩ {(payment.actualPrice || payment.actualAmount || 0).toLocaleString()}</p>
                   )}
                 </div>
                 

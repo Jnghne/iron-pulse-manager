@@ -60,7 +60,7 @@ export function SidebarNav({ className, userPermission = 'general', ...props }: 
       icon: <Package className="h-5 w-5" />,
     },
     {
-      title: "캘린더 관리",
+      title: "일정 관리",
       href: "/calendar",
       icon: <Calendar className="h-5 w-5" />,
     },

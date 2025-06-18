@@ -26,9 +26,11 @@ export interface StaffRegistration {
   email: string;
   status: 'pending' | 'rejected';
   approvalDate: string;
+  rejectedDate?: string; // 거절일자
   position?: string;
   address?: string;
   memo?: string;
+  account?: string; // 계좌정보 추가
 }
 
 // 직원이 담당하는 회원 타입 정의
@@ -191,6 +193,7 @@ export const registrationMockData: StaffRegistration[] = [
     approvalDate: "2025-06-07",
     position: "헬스 트레이너",
     address: "서울시 서초구",
+    account: "신한은행 987-654-32109",
     memo: ""
   },
   {
@@ -202,6 +205,7 @@ export const registrationMockData: StaffRegistration[] = [
     approvalDate: "2025-06-08",
     position: "스포츠 마사지사",
     address: "서울시 중구",
+    account: "우리은행 876-543-21098",
     memo: ""
   },
   {
@@ -211,8 +215,22 @@ export const registrationMockData: StaffRegistration[] = [
     email: "lim@example.com",
     status: "rejected",
     approvalDate: "2025-06-01",
+    rejectedDate: "2025-06-03",
     position: "에어로빅 강사",
     address: "서울시 양천구",
+    account: "국민은행 765-432-10987",
+    memo: ""
+  },
+  {
+    id: "REG006",
+    name: "최도영",
+    phone: "010-4321-0987",
+    email: "choi@example.com",
+    status: "pending",
+    approvalDate: "2025-06-09",
+    position: "필라테스 강사",
+    address: "서울시 강동구",
+    account: "하나은행 654-321-09876",
     memo: ""
   }
 ];

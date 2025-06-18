@@ -7,7 +7,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { CheckCircle, XCircle, Search, UserPlus, Phone, Calendar, ChevronRight, Clock } from "lucide-react";
+import { CheckCircle, XCircle, Search, UserPlus, Phone, Calendar, ChevronRight, Clock, Filter } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { registrationMockData, StaffRegistration } from "@/data/staff-mock-data";
 
 // Mock data for registration
@@ -38,7 +39,8 @@ export const RegistrationManagement = memo(() => {
   const navigate = useNavigate();
   const [registrations, setRegistrations] = useState<StaffRegistration[]>(registrationMockData);
   const [searchQuery, setSearchQuery] = useState("");
-  const [approvalDialogOpen, setApprovalDialogOpen] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'rejected'>('all');
+  const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [selectedRegistration, setSelectedRegistration] = useState<StaffRegistration | null>(null);
 
   // 상세 페이지로 이동
@@ -60,7 +62,8 @@ export const RegistrationManagement = memo(() => {
       prev.filter(reg => reg.id !== selectedRegistration.id)
     );
     
-    setApprovalDialogOpen(false);
+    setDetailDialogOpen(false);
+    setSelectedRegistration(null);
     
     // 성공 메시지를 표시할 수 있습니다.
     alert(`${selectedRegistration.name} 직원의 가입이 승인되었습니다.`);
@@ -70,42 +73,79 @@ export const RegistrationManagement = memo(() => {
   const handleReject = useCallback(() => {
     if (!selectedRegistration) return;
     
+    // 현재 날짜를 거절일자로 설정
+    const rejectedDate = new Date().toISOString().split('T')[0];
+    
     // 실제 구현에서는 API 호출이 필요합니다.
     setRegistrations(prev => 
       prev.map(reg => 
         reg.id === selectedRegistration.id 
-          ? { ...reg, status: 'rejected' as const } 
+          ? { ...reg, status: 'rejected' as const, rejectedDate } 
           : reg
       )
     );
     
-    setApprovalDialogOpen(false);
+    setDetailDialogOpen(false);
+    setSelectedRegistration(null);
     
     // 성공 메시지를 표시할 수 있습니다.
     alert(`${selectedRegistration.name} 직원의 가입이 거절되었습니다.`);
   }, [selectedRegistration]);
 
-  // 검색 결과 필터링
-  const filteredRegistrations = registrations.filter(reg => 
-    reg.name.includes(searchQuery) || 
-    reg.id.includes(searchQuery) ||
-    reg.phone.includes(searchQuery)
-  );
+  // 검색 및 상태 필터링
+  const filteredRegistrations = registrations.filter(reg => {
+    // 상태 필터링 먼저 적용
+    if (statusFilter !== 'all' && reg.status !== statusFilter) {
+      return false;
+    }
+    
+    // 검색어가 비어있으면 상태 필터링만 적용
+    if (!searchQuery || searchQuery.trim() === '') {
+      return true;
+    }
+    
+    // 검색어 필터링 (이름, 핸드폰번호)
+    const query = searchQuery.trim().toLowerCase();
+    const nameMatch = reg.name.toLowerCase().includes(query);
+    
+    // 핸드폰번호 검색 (숙자만 추출해서 비교)
+    const phoneDigits = reg.phone.replace(/[^0-9]/g, '');
+    const searchDigits = searchQuery.replace(/[^0-9]/g, '');
+    const phoneMatch = searchDigits.length > 0 && phoneDigits.includes(searchDigits);
+    
+    return nameMatch || phoneMatch;
+  });
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between sm:items-center space-y-2 sm:space-y-0 gap-4">
-        <div className="flex-1">
-          <div className="relative">
+        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center flex-1">
+          {/* 검색 입력 */}
+          <div className="relative max-w-sm flex-shrink-0">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
-              placeholder="검색..."
-              className="pl-8 w-full sm:w-[300px]"
+              placeholder="이름 또는 핸드폰번호로 검색..."
+              className="pl-8 w-full min-w-[280px]"
               value={searchQuery}
               onChange={handleSearchChange}
             />
           </div>
+        </div>
+        
+        {/* 상태 필터 - 오른쪽으로 이동 */}
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <Filter className="h-4 w-4 text-muted-foreground" />
+          <Select value={statusFilter} onValueChange={(value: 'all' | 'pending' | 'rejected') => setStatusFilter(value)}>
+            <SelectTrigger className="w-[140px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">전체</SelectItem>
+              <SelectItem value="pending">승인대기</SelectItem>
+              <SelectItem value="rejected">거절</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
@@ -128,10 +168,9 @@ export const RegistrationManagement = memo(() => {
                 <div 
                   key={registration.id} 
                   className="group cursor-pointer hover:bg-slate-50/80 dark:hover:bg-slate-800/30 transition-all duration-200 p-4"
-                  onClick={(e) => {
-                    e.stopPropagation();
+                  onClick={() => {
                     setSelectedRegistration(registration);
-                    setApprovalDialogOpen(true);
+                    setDetailDialogOpen(true);
                   }}
                 >
                   <div className="flex items-center justify-between">
@@ -166,37 +205,7 @@ export const RegistrationManagement = memo(() => {
                       </div>
                     </div>
                     
-                    <div className="flex items-center gap-2">
-                      {registration.status === 'pending' && (
-                        <>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedRegistration(registration);
-                              handleReject();
-                            }}
-                            className="hover:bg-red-50 hover:border-red-300 hover:text-red-600"
-                          >
-                            <XCircle className="h-4 w-4 mr-1" />
-                            거절
-                          </Button>
-                          <Button 
-                            variant="default" 
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedRegistration(registration);
-                              handleApprove();
-                            }}
-                            className="bg-blue-600 hover:bg-blue-700"
-                          >
-                            <CheckCircle className="h-4 w-4 mr-1" />
-                            승인
-                          </Button>
-                        </>
-                      )}
+                    <div className="flex items-center">
                       <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
                     </div>
                   </div>
@@ -217,26 +226,82 @@ export const RegistrationManagement = memo(() => {
         </CardContent>
       </Card>
 
-      {/* 승인/거절 확인 다이얼로그 */}
+      {/* 가입요청 상세 다이얼로그 */}
       {selectedRegistration && (
-        <Dialog open={approvalDialogOpen} onOpenChange={setApprovalDialogOpen}>
-          <DialogContent className="sm:max-w-[400px]">
+        <Dialog open={detailDialogOpen} onOpenChange={setDetailDialogOpen}>
+          <DialogContent className="sm:max-w-[500px] max-h-[80vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>직원 가입 승인 결정</DialogTitle>
-              <DialogDescription>
-                {selectedRegistration.name}님의 가입 신청을 승인하시겠습니까?
-              </DialogDescription>
+              <DialogTitle className="flex items-center gap-3">
+                <Avatar className="h-12 w-12">
+                  <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${selectedRegistration.name}`} />
+                  <AvatarFallback className="bg-blue-100 text-blue-600 font-medium text-lg">
+                    {selectedRegistration.name.slice(0, 2)}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <h3 className="text-lg font-semibold">{selectedRegistration.name}</h3>
+                  <RegistrationStatusBadge status={selectedRegistration.status} />
+                </div>
+              </DialogTitle>
             </DialogHeader>
             
-            <div className="flex justify-end space-x-2 pt-6">
-              <Button variant="destructive" onClick={handleReject}>
-                <XCircle className="mr-2 h-4 w-4" />
-                거절
-              </Button>
-              <Button variant="default" onClick={handleApprove}>
-                <CheckCircle className="mr-2 h-4 w-4" />
-                승인
-              </Button>
+            <div className="space-y-6">
+              {/* 기본 정보 */}
+              <div className="space-y-4">
+                <h4 className="font-medium text-gray-900 dark:text-white">기본 정보</h4>
+                <div className="grid grid-cols-1 gap-4 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">핸드폰 번호:</span>
+                    <span className="font-medium">{selectedRegistration.phone}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">이메일:</span>
+                    <span className="font-medium">{selectedRegistration.email}</span>
+                  </div>
+                  {selectedRegistration.position && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">직책:</span>
+                      <span className="font-medium">{selectedRegistration.position}</span>
+                    </div>
+                  )}
+                  {selectedRegistration.address && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">주소:</span>
+                      <span className="font-medium">{selectedRegistration.address}</span>
+                    </div>
+                  )}
+                  {selectedRegistration.account && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">계좌정보:</span>
+                      <span className="font-medium">{selectedRegistration.account}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">신청일자:</span>
+                    <span className="font-medium">{selectedRegistration.approvalDate}</span>
+                  </div>
+                  {selectedRegistration.status === 'rejected' && selectedRegistration.rejectedDate && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">거절일자:</span>
+                      <span className="font-medium text-red-600">{selectedRegistration.rejectedDate}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              {/* 승인/거절 버튼 - 승인대기 상태일 때만 표시 */}
+              {selectedRegistration.status === 'pending' && (
+                <div className="flex justify-end space-x-2 pt-4 border-t">
+                  <Button variant="outline" onClick={handleReject} className="hover:bg-red-50 hover:border-red-300 hover:text-red-600">
+                    <XCircle className="mr-2 h-4 w-4" />
+                    거절
+                  </Button>
+                  <Button onClick={handleApprove} className="bg-blue-600 hover:bg-blue-700">
+                    <CheckCircle className="mr-2 h-4 w-4" />
+                    승인
+                  </Button>
+                </div>
+              )}
             </div>
           </DialogContent>
         </Dialog>

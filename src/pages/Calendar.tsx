@@ -5,13 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
 import {
   Popover,
   PopoverContent,
@@ -24,7 +17,6 @@ import {
   Calendar as CalendarIcon,
   Clock,
   Users,
-  MapPin,
   Filter
 } from "lucide-react";
 import { ScheduleAddDialog } from "./Calendar/components/ScheduleAddDialog";
@@ -34,7 +26,6 @@ const Calendar = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [viewMode, setViewMode] = useState<"month" | "week" | "day">("month");
-  const [branch, setBranch] = useState("main");
   const [selectedStaff, setSelectedStaff] = useState<string[]>(mockStaff.map(s => s.id));
   const [isScheduleAddOpen, setIsScheduleAddOpen] = useState(false);
   const [events, setEvents] = useState(getMockEvents());
@@ -159,16 +150,6 @@ const Calendar = () => {
             </PopoverContent>
           </Popover>
 
-          <Select value={branch} onValueChange={setBranch}>
-            <SelectTrigger className="w-[140px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="main">본점</SelectItem>
-              <SelectItem value="gangnam">강남점</SelectItem>
-              <SelectItem value="hongdae">홍대점</SelectItem>
-            </SelectContent>
-          </Select>
           
           <Button 
             className="bg-gym-primary hover:bg-gym-primary/90"
@@ -286,7 +267,7 @@ const Calendar = () => {
                             {date.getDate()}
                           </span>
                           <div className="flex-1 w-full mt-1 space-y-0.5">
-                            {dayEvents.slice(0, 2).map((event, index) => (
+                            {dayEvents.slice(0, 2).map((event) => (
                               <div
                                 key={event.id}
                                 className={`text-xs px-1 py-0.5 rounded truncate ${event.color} text-white`}
@@ -347,10 +328,6 @@ const Calendar = () => {
                         </div>
                       )}
                       
-                      <div className="flex items-center gap-2">
-                        <MapPin className="h-3 w-3" />
-                        <span>본점</span>
-                      </div>
                       
                       {event.notes && (
                         <div className="mt-2 p-2 bg-gray-50 rounded text-xs">

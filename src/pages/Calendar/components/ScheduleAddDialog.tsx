@@ -19,11 +19,14 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { CalendarIcon, Clock, Users } from "lucide-react";
+import { CalendarIcon, Clock, Users, Search, User, Check, X } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 import { cn } from "@/lib/utils";
+import { useRef } from "react";
 import { toast } from "sonner";
 import { Event, mockStaff } from "@/data/mockData";
 
@@ -40,7 +43,10 @@ export const ScheduleAddDialog = ({ open, onOpenChange, onEventAdd }: ScheduleAd
   const [isAllDay, setIsAllDay] = useState(true);
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
-  const [assignedTo, setAssignedTo] = useState("");
+  const [selectedStaff, setSelectedStaff] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
+  const searchResultsRef = useRef<HTMLDivElement>(null);
   const [notes, setNotes] = useState("");
 
   // Mock 데이터
@@ -89,7 +95,7 @@ export const ScheduleAddDialog = ({ open, onOpenChange, onEventAdd }: ScheduleAd
       return;
     }
     
-    if (!assignedTo) {
+    if (selectedStaff.length === 0) {
       toast.error("담당자를 선택해주세요.");
       return;
     }
@@ -102,8 +108,8 @@ export const ScheduleAddDialog = ({ open, onOpenChange, onEventAdd }: ScheduleAd
       time: isAllDay ? "하루종일" : startTime,
       duration: isAllDay ? "하루종일" : `${startTime} - ${endTime}`,
       type: scheduleType,
-      trainer: scheduleType === 'lesson' ? assignedTo : undefined,
-      assignedTo,
+      trainer: scheduleType === 'lesson' ? selectedStaff.join(', ') : undefined,
+      assignedTo: selectedStaff.join(', '),
       color: getEventColor(scheduleType),
       notes
     };
@@ -123,7 +129,9 @@ export const ScheduleAddDialog = ({ open, onOpenChange, onEventAdd }: ScheduleAd
     setIsAllDay(true);
     setStartTime("");
     setEndTime("");
-    setAssignedTo("");
+    setSelectedStaff([]);
+    setSearchQuery("");
+    setIsSearching(false);
     setNotes("");
   };
 
@@ -249,29 +257,131 @@ export const ScheduleAddDialog = ({ open, onOpenChange, onEventAdd }: ScheduleAd
           </div>
 
           {/* 담당자 */}
-          <div className="space-y-2">
-            <Label htmlFor="assigned-to">담당자</Label>
-            <Select value={assignedTo} onValueChange={setAssignedTo}>
-              <SelectTrigger id="assigned-to">
-                <SelectValue placeholder="담당자를 선택하세요" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="전체">
-                  <div className="flex items-center space-x-2">
-                    <Users className="h-4 w-4" />
-                    <span>전체</span>
-                  </div>
-                </SelectItem>
-                {staff.map((person) => (
-                  <SelectItem key={person} value={person}>
-                    <div className="flex items-center space-x-2">
-                      <Users className="h-4 w-4" />
-                      <span>{person}</span>
+          <div className="space-y-4">
+            <Label>담당자 선택</Label>
+            
+            {/* 직원 검색 */}
+            <div className="space-y-2">
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <Search className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <input
+                  type="text"
+                  placeholder="직원을 검색하세요 (이름 입력)"
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setIsSearching(e.target.value.length > 0);
+                  }}
+                  onFocus={() => {
+                    if (searchQuery) setIsSearching(true);
+                  }}
+                  onBlur={() => {
+                    setTimeout(() => setIsSearching(false), 200);
+                  }}
+                  className="flex h-10 w-full rounded-md border border-input bg-transparent pl-10 pr-3 py-2 text-sm ring-offset-background"
+                />
+                {isSearching && (
+                  <div 
+                    ref={searchResultsRef}
+                    className="absolute z-50 w-full mt-1 bg-background border rounded-md shadow-lg overflow-hidden"
+                  >
+                    <div className="max-h-[200px] overflow-auto p-1">
+                      {/* 전체 선택 옵션 */}
+                      <div 
+                        className={cn(
+                          "flex items-center justify-between w-full p-2 text-sm rounded-md cursor-pointer",
+                          "hover:bg-accent hover:text-accent-foreground",
+                          "border-b"
+                        )}
+                        onClick={() => {
+                          if (selectedStaff.length === staff.length) {
+                            setSelectedStaff([]);
+                          } else {
+                            setSelectedStaff(staff);
+                          }
+                          setSearchQuery("");
+                          setIsSearching(false);
+                        }}
+                      >
+                        <div className="flex items-center gap-2">
+                          <Users className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium">전체 {selectedStaff.length === staff.length ? '해제' : '선택'}</span>
+                        </div>
+                        {selectedStaff.length === staff.length && (
+                          <Check className="h-4 w-4 text-primary" />
+                        )}
+                      </div>
+                      
+                      {/* 검색된 직원 목록 */}
+                      {searchQuery.length > 0 ? (
+                        staff
+                          .filter(person => 
+                            person.toLowerCase().includes(searchQuery.toLowerCase())
+                          )
+                          .map(person => {
+                            const isSelected = selectedStaff.includes(person);
+                            return (
+                              <div 
+                                key={person}
+                                className={cn(
+                                  "flex items-center justify-between w-full p-2 text-sm rounded-md cursor-pointer",
+                                  "hover:bg-accent hover:text-accent-foreground",
+                                  isSelected && "bg-accent/50"
+                                )}
+                                onClick={() => {
+                                  if (isSelected) {
+                                    setSelectedStaff(selectedStaff.filter(s => s !== person));
+                                  } else {
+                                    setSelectedStaff([...selectedStaff, person]);
+                                  }
+                                  setSearchQuery("");
+                                  setIsSearching(false);
+                                }}
+                              >
+                                <div className="flex items-center gap-2">
+                                  <User className="h-4 w-4 text-muted-foreground" />
+                                  <span>{person}</span>
+                                </div>
+                                {isSelected && (
+                                  <Check className="h-4 w-4 text-primary" />
+                                )}
+                              </div>
+                            );
+                          })
+                      ) : (
+                        <div className="p-2 text-sm text-muted-foreground text-center">
+                          직원 이름을 입력하세요
+                        </div>
+                      )}
                     </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            {/* 선택된 담당자 목록 */}
+            {selectedStaff.length > 0 && (
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-gray-700">선택된 담당자 ({selectedStaff.length}명)</Label>
+                <div className="flex flex-wrap gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg max-h-32 overflow-y-auto">
+                  {selectedStaff.map((person) => (
+                    <Badge key={person} variant="secondary" className="bg-blue-100 text-blue-800 hover:bg-blue-200">
+                      <User className="h-3 w-3 mr-1" />
+                      {person}
+                      <button
+                        type="button"
+                        onClick={() => setSelectedStaff(selectedStaff.filter(s => s !== person))}
+                        className="ml-2 hover:text-red-600"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* 메모 */}

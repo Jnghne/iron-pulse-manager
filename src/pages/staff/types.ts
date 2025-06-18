@@ -14,6 +14,7 @@ export interface Staff {
   account?: string;
   workHours?: string;
   revenue?: number;
+  reRegistrationCount?: number; // 이번달 재등록 회원 수
   isRegistration?: boolean;
   note?: string;
 }

@@ -217,7 +217,7 @@ const StaffDetail = () => {
                 disabled={isRegistration}
               >
                 <BarChart3 className="h-4 w-4" />
-                <span>실적 분석</span>
+                <span>직원 실적</span>
               </TabsTrigger>
             </TabsList>
 
@@ -228,11 +228,6 @@ const StaffDetail = () => {
 
             <TabsContent value="performance" className="mt-6">
               <div className="space-y-6">
-                <div>
-                  <h3 className="text-xl font-semibold mb-2">실적 분석</h3>
-                  <p className="text-sm text-muted-foreground">월별 실적 및 회원 관리 현황을 확인할 수 있습니다.</p>
-                </div>
-
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <Card className="overflow-hidden">
                     <CardContent className="p-6">
@@ -275,15 +270,13 @@ const StaffDetail = () => {
                           <BarChart3 className="h-5 w-5 text-purple-600" />
                         </div>
                         <span className="text-xs font-medium text-purple-600 bg-purple-50 px-2 py-1 rounded-full">
-                          평균
+                          재등록
                         </span>
                       </div>
                       <div className="text-2xl font-bold mb-1">
-                        {(staff as Staff).memberCount
-                          ? Math.round(((staff as Staff).revenue || 0) / (staff as Staff).memberCount).toLocaleString()
-                          : 0}원
+                        {(staff as Staff).reRegistrationCount || 0}명
                       </div>
-                      <div className="text-sm text-muted-foreground">회원당 평균 매출</div>
+                      <div className="text-sm text-muted-foreground">이번달 재등록 회원 수</div>
                     </CardContent>
                   </Card>
                 </div>

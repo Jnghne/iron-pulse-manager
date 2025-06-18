@@ -13,6 +13,7 @@ export interface Staff {
   workHours?: string;
   memo?: string;
   revenue?: number;
+  reRegistrationCount?: number; // 이번달 재등록 회원 수
   gender?: string;
   note?: string;
 }
@@ -56,6 +57,7 @@ export const staffMockData: Staff[] = [
     workHours: "09:00-18:00",
     memo: "",
     revenue: 2400000,
+    reRegistrationCount: 3,
     gender: "male",
     note: "",
   },
@@ -67,12 +69,13 @@ export const staffMockData: Staff[] = [
     position: "개인레슨 트레이너",
     memberCount: 8,
     status: "leave",
-    approvalDate: "2024-05-10",
+    approvalDate: "2024-02-20",
     address: "서울시 서초구",
-    account: "신한은행 123-456-78910",
-    workHours: "13:00-22:00",
+    account: "우리은행 234-567-89012",
+    workHours: "08:00-17:00",
     memo: "",
-    revenue: 1600000,
+    revenue: 1800000,
+    reRegistrationCount: 2,
     gender: "female",
     note: "",
   },
@@ -90,6 +93,7 @@ export const staffMockData: Staff[] = [
     workHours: "10:00-19:00",
     memo: "",
     revenue: 1800000,
+    reRegistrationCount: 5,
     gender: "female",
     note: "",
     },
@@ -106,6 +110,8 @@ export const staffMockData: Staff[] = [
     account: "하나은행 123-456-78910",
     workHours: "06:00-15:00",
     memo: "",
+    revenue: 500000,
+    reRegistrationCount: 0,
     revenue: 0,
     gender: "male",
     note: "",

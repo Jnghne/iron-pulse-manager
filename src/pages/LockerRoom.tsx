@@ -41,32 +41,97 @@ const LockerDetails = ({ locker, onClose }: LockerDetailsProps) => {
       </div>
       
       {locker.isOccupied ? (
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 gap-4">
-            <div className="flex items-center space-x-3 p-3 bg-muted/50 rounded-lg">
-              <User className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <div className="text-sm font-medium">회원 정보</div>
-                <div className="text-sm text-muted-foreground">{locker.memberName} ({locker.memberId})</div>
+        <div className="space-y-6">
+          {/* 기본 정보 섹션 */}
+          <div className="space-y-3">
+            <h4 className="text-sm font-medium text-muted-foreground">기본 정보</h4>
+            <div className="grid grid-cols-1 gap-3">
+              <div className="flex items-center space-x-3 p-3 bg-muted/50 rounded-lg">
+                <User className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <div className="text-sm font-medium">회원 정보</div>
+                  <div className="text-sm text-muted-foreground">{locker.memberName} ({locker.memberId})</div>
+                </div>
               </div>
+              
+              <div className="flex items-center space-x-3 p-3 bg-muted/50 rounded-lg">
+                <Calendar className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <div className="text-sm font-medium">사용 기간</div>
+                  <div className="text-sm text-muted-foreground">
+                    {formatDate(locker.startDate || "")} ~ {formatDate(locker.endDate || "")}
+                  </div>
+                </div>
+              </div>
+
+              {locker.product && (
+                <div className="flex items-center space-x-3 p-3 bg-muted/50 rounded-lg">
+                  <Lock className="h-5 w-5 text-muted-foreground" />
+                  <div>
+                    <div className="text-sm font-medium">락커 상품</div>
+                    <div className="text-sm text-muted-foreground">{locker.product}</div>
+                  </div>
+                </div>
+              )}
             </div>
-            
-            <div className="flex items-center space-x-3 p-3 bg-muted/50 rounded-lg">
-              <Calendar className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <div className="text-sm font-medium">사용 기간</div>
-                <div className="text-sm text-muted-foreground">
-                  {formatDate(locker.startDate || "")} ~ {formatDate(locker.endDate || "")}
+          </div>
+
+          {/* 결제 정보 섹션 */}
+          <div className="space-y-3 border-t pt-4">
+            <h4 className="text-sm font-medium text-muted-foreground">결제 정보</h4>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="p-3 bg-muted/50 rounded-lg">
+                <div className="text-sm font-medium">상품 금액</div>
+                <div className="text-sm text-muted-foreground mt-1">
+                  {locker.productPrice ? `${locker.productPrice.toLocaleString()}원` : '-'}
+                </div>
+              </div>
+              
+              <div className="p-3 bg-muted/50 rounded-lg">
+                <div className="text-sm font-medium">실제 결제 금액</div>
+                <div className="text-sm text-muted-foreground mt-1">
+                  {locker.actualPrice ? `${locker.actualPrice.toLocaleString()}원` : '-'}
+                </div>
+              </div>
+              
+              <div className="p-3 bg-muted/50 rounded-lg">
+                <div className="text-sm font-medium">직원 매출 실적</div>
+                <div className="text-sm text-muted-foreground mt-1">
+                  {locker.staffCommission ? `${locker.staffCommission.toLocaleString()}원` : '-'}
+                </div>
+              </div>
+              
+              <div className="p-3 bg-muted/50 rounded-lg">
+                <div className="text-sm font-medium">미수금</div>
+                <div className={`text-sm mt-1 ${(locker.unpaidAmount || 0) > 0 ? 'text-red-600 font-medium' : 'text-muted-foreground'}`}>
+                  {locker.unpaidAmount ? `${locker.unpaidAmount.toLocaleString()}원` : '0원'}
+                </div>
+              </div>
+              
+              <div className="p-3 bg-muted/50 rounded-lg">
+                <div className="text-sm font-medium">결제일시</div>
+                <div className="text-sm text-muted-foreground mt-1">
+                  {locker.paymentDate && locker.paymentTime ? `${locker.paymentDate} ${locker.paymentTime}` : '-'}
+                </div>
+              </div>
+              
+              <div className="p-3 bg-muted/50 rounded-lg">
+                <div className="text-sm font-medium">결제 수단</div>
+                <div className="text-sm text-muted-foreground mt-1">
+                  {locker.paymentMethod || '-'}
                 </div>
               </div>
             </div>
-            
-            {locker.notes && (
-              <div className="p-3 bg-muted/50 rounded-lg">
-                <div className="text-sm font-medium">메모</div>
-                <div className="text-sm text-muted-foreground mt-1">{locker.notes}</div>
+          </div>
+          
+          {/* 특이사항 메모 섹션 */}
+          <div className="space-y-3 border-t pt-4">
+            <h4 className="text-sm font-medium text-muted-foreground">특이사항 메모</h4>
+            <div className="p-3 bg-muted/50 rounded-lg">
+              <div className="text-sm text-muted-foreground">
+                {locker.notes || "등록된 메모가 없습니다."}
               </div>
-            )}
+            </div>
           </div>
           
           <div className="flex space-x-2 justify-end mt-4">
@@ -98,12 +163,44 @@ interface LockerAssignProps {
 
 const LockerAssign = ({ locker, onClose }: LockerAssignProps) => {
   const [selectedMember, setSelectedMember] = useState("");
+  const [lockerProduct, setLockerProduct] = useState("");
   const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
   const [endDate, setEndDate] = useState(
     new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString().split('T')[0]
   );
-  const [fee, setFee] = useState("");
+  const [productPrice, setProductPrice] = useState("");
+  const [actualPrice, setActualPrice] = useState("");
+  const [staffCommission, setStaffCommission] = useState("");
+  const [unpaidAmount, setUnpaidAmount] = useState("");
+  const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split('T')[0]);
+  const [paymentTime, setPaymentTime] = useState(new Date().toTimeString().slice(0,5));
+  const [paymentMethod, setPaymentMethod] = useState<'카드' | '현금' | '계좌이체'>('카드');
   const [notes, setNotes] = useState("");
+
+  // 락커 상품 목록
+  const lockerProducts = [
+    { id: "locker_1m", name: "락커 1개월", price: 30000 },
+    { id: "locker_3m", name: "락커 3개월", price: 80000 },
+    { id: "locker_6m", name: "락커 6개월", price: 150000 },
+    { id: "locker_12m", name: "락커 12개월", price: 280000 }
+  ];
+
+  // 락커 상품 선택 시 상품 금액 자동 설정
+  const handleProductSelect = (productId: string) => {
+    setLockerProduct(productId);
+    const selectedProduct = lockerProducts.find(p => p.id === productId);
+    if (selectedProduct) {
+      setProductPrice(selectedProduct.price.toLocaleString());
+      setActualPrice(selectedProduct.price.toLocaleString());
+      setStaffCommission(selectedProduct.price.toLocaleString());
+    }
+  };
+
+  // 금액 포맷팅 함수
+  const formatAmount = (value: string) => {
+    const numValue = value.replace(/[^\d]/g, '');
+    return numValue ? parseInt(numValue).toLocaleString() : '';
+  };
   
   const handleAssign = () => {
     if (!selectedMember) {
@@ -111,30 +208,51 @@ const LockerAssign = ({ locker, onClose }: LockerAssignProps) => {
       return;
     }
     
-    if (!fee || parseInt(fee.replace(/,/g, '')) <= 0) {
-      toast.error("결제 금액을 입력해주세요.");
+    if (!lockerProduct) {
+      toast.error("락커 상품을 선택해주세요.");
+      return;
+    }
+
+    if (!productPrice || parseInt(productPrice.replace(/,/g, '')) <= 0) {
+      toast.error("상품 금액을 입력해주세요.");
+      return;
+    }
+
+    if (!actualPrice || parseInt(actualPrice.replace(/,/g, '')) <= 0) {
+      toast.error("실제 결제 금액을 입력해주세요.");
+      return;
+    }
+    
+    if (!paymentDate) {
+      toast.error("결제일자를 선택해주세요.");
+      return;
+    }
+    
+    if (!paymentTime) {
+      toast.error("결제시간을 입력해주세요.");
       return;
     }
     
     const member = mockMembers.find(m => m.id === selectedMember);
+    const selectedProductInfo = lockerProducts.find(p => p.id === lockerProduct);
     
-    if (member) {
-      toast.success(`${locker.number}번 락커가 ${member.name} 회원에게 배정되었습니다. (결제 금액: ${fee}원)`);
+    if (member && selectedProductInfo) {
+      toast.success(`${locker.number}번 락커가 ${member.name} 회원에게 배정되었습니다. (상품: ${selectedProductInfo.name}, 결제 금액: ${actualPrice}원, 결제 방법: ${paymentMethod})`);
       onClose();
     }
   };
   
   return (
-    <div className="space-y-6">
-      <div className="grid gap-6">
+    <div className="space-y-4">
+      <div className="grid gap-4">
         {/* 선택된 락커 번호 표시 */}
-        <div className="space-y-3">
+        <div className="space-y-2">
           <Label>선택된 락커</Label>
-          <div className="p-3 bg-muted/20 rounded-lg border">
+          <div className="p-2 bg-muted/20 rounded-lg border">
             <div className="flex items-center justify-center">
               <div className="flex items-center space-x-2">
-                <Lock className="h-5 w-5 text-primary" />
-                <span className="text-lg font-semibold">{locker.number}번 락커</span>
+                <Lock className="h-4 w-4 text-primary" />
+                <span className="text-base font-semibold">{locker.number}번 락커</span>
               </div>
             </div>
           </div>
@@ -155,6 +273,23 @@ const LockerAssign = ({ locker, onClose }: LockerAssignProps) => {
                     {member.name} ({member.id})
                   </SelectItem>
                 ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* 락커 상품 선택 */}
+        <div className="space-y-2">
+          <Label htmlFor="locker-product">락커 상품</Label>
+          <Select value={lockerProduct} onValueChange={handleProductSelect}>
+            <SelectTrigger>
+              <SelectValue placeholder="락커 상품 선택" />
+            </SelectTrigger>
+            <SelectContent>
+              {lockerProducts.map(product => (
+                <SelectItem key={product.id} value={product.id}>
+                  {product.name} ({product.price.toLocaleString()}원)
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -180,37 +315,153 @@ const LockerAssign = ({ locker, onClose }: LockerAssignProps) => {
           </div>
         </div>
         
-        <div className="space-y-2">
-          <Label htmlFor="fee">결제 금액</Label>
-          <div className="relative">
-            <Input
-              id="fee"
-              placeholder="결제 금액을 입력하세요"
-              value={fee}
-              onChange={(e) => {
-                const value = e.target.value.replace(/[^\d]/g, '');
-                const formattedValue = value ? parseInt(value).toLocaleString() : '';
-                setFee(formattedValue);
-              }}
-            />
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-              원
-            </span>
+        {/* 결제 정보 섹션 */}
+        <div className="space-y-3 border-t pt-3">
+          <h3 className="text-sm font-medium text-muted-foreground">결제 정보</h3>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="product-price">상품 금액</Label>
+              <div className="relative">
+                <Input
+                  id="product-price"
+                  placeholder="상품 금액"
+                  value={productPrice}
+                  onChange={(e) => setProductPrice(formatAmount(e.target.value))}
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                  원
+                </span>
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="actual-price">실제 결제 금액</Label>
+              <div className="relative">
+                <Input
+                  id="actual-price"
+                  placeholder="실제 결제 금액"
+                  value={actualPrice}
+                  onChange={(e) => setActualPrice(formatAmount(e.target.value))}
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                  원
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="staff-commission">직원 매출 실적</Label>
+              <div className="relative">
+                <Input
+                  id="staff-commission"
+                  placeholder="직원 매출 실적"
+                  value={staffCommission}
+                  onChange={(e) => setStaffCommission(formatAmount(e.target.value))}
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                  원
+                </span>
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="unpaid-amount">미수금</Label>
+              <div className="relative">
+                <Input
+                  id="unpaid-amount"
+                  placeholder="미수금 (없으면 0)"
+                  value={unpaidAmount}
+                  onChange={(e) => setUnpaidAmount(formatAmount(e.target.value))}
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                  원
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* 결제 일시 및 방법 섹션 */}
+        <div className="space-y-3 border-t pt-3">
+          <h3 className="text-sm font-medium text-muted-foreground">결제 일시 및 방법</h3>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="payment-date">결제일자</Label>
+              <Input
+                id="payment-date"
+                type="date"
+                value={paymentDate}
+                onChange={(e) => setPaymentDate(e.target.value)}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="payment-time">결제시간</Label>
+              <Input
+                id="payment-time"
+                type="time"
+                value={paymentTime}
+                onChange={(e) => setPaymentTime(e.target.value)}
+              />
+            </div>
+          </div>
+          
+          <div className="space-y-2">
+            <Label>결제 수단</Label>
+            <div className="flex gap-4 flex-wrap">
+              <div className="flex items-center">
+                <input
+                  type="radio"
+                  id="payment-card"
+                  name="payment-method"
+                  checked={paymentMethod === "카드"}
+                  onChange={() => setPaymentMethod("카드")}
+                  className="mr-2"
+                />
+                <label htmlFor="payment-card" className="text-sm">카드</label>
+              </div>
+              <div className="flex items-center">
+                <input
+                  type="radio"
+                  id="payment-cash"
+                  name="payment-method"
+                  checked={paymentMethod === "현금"}
+                  onChange={() => setPaymentMethod("현금")}
+                  className="mr-2"
+                />
+                <label htmlFor="payment-cash" className="text-sm">현금</label>
+              </div>
+              <div className="flex items-center">
+                <input
+                  type="radio"
+                  id="payment-transfer"
+                  name="payment-method"
+                  checked={paymentMethod === "계좌이체"}
+                  onChange={() => setPaymentMethod("계좌이체")}
+                  className="mr-2"
+                />
+                <label htmlFor="payment-transfer" className="text-sm">계좌이체</label>
+              </div>
+            </div>
           </div>
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="notes">메모</Label>
+          <Label htmlFor="notes">특이사항 메모</Label>
           <Input
             id="notes"
-            placeholder="메모 내용 입력"
+            placeholder="특이사항 메모를 입력하세요"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
           />
         </div>
       </div>
       
-      <div className="flex space-x-2 justify-end mt-6">
+      <div className="flex space-x-2 justify-end mt-4 pt-4 border-t">
         <Button variant="outline" onClick={onClose}>
           취소
         </Button>
@@ -476,7 +727,7 @@ const LockerRoom = () => {
       
       {/* Locker Details Dialog */}
       <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>락커 상세 정보</DialogTitle>
             <DialogDescription>
@@ -494,7 +745,7 @@ const LockerRoom = () => {
       
       {/* Locker Assign Dialog */}
       <Dialog open={isAssignOpen} onOpenChange={setIsAssignOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>락커 배정</DialogTitle>
             <DialogDescription>

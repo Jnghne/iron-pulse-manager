@@ -47,7 +47,7 @@ function SidebarProvider({ defaultCollapsed = false, children, className, onColl
     <SidebarContext.Provider value={{ collapsed, setCollapsed }}>
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-30 flex flex-col border-r bg-background transition-all",
+          "flex flex-col border-r bg-background transition-all h-full",
           collapsed ? "w-[70px]" : "w-[240px]",
           className
         )}

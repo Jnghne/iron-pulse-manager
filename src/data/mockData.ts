@@ -8,9 +8,18 @@ export interface Locker {
   memberName?: string;
   startDate?: string;
   endDate?: string;
-  fee?: number;
+  // 결제 정보 추가
+  product?: string; // 락커 상품명 (ex: 락커 3개월)
+  productPrice?: number; // 상품 금액
+  actualPrice?: number; // 실제 결제 금액
+  staffCommission?: number; // 직원 매출 실적
+  unpaidAmount?: number; // 미수금
+  paymentDate?: string; // 결제일시
+  paymentTime?: string; // 결제 시간
+  paymentMethod?: '카드' | '현금' | '계좌이체'; // 결제 수단
+  fee?: number; // 기존 결제 금액 (actualPrice와 동일)
   isPaid?: boolean;
-  notes?: string;
+  notes?: string; // 특이사항 메모
 }
 
 // 출석 기록 타입 정의
@@ -462,16 +471,80 @@ export const mockVisitorsData = [
 // 락커 데이터 생성 함수
 const generateMockLockers = (totalLockers: number = 200): Locker[] => {
   const occupiedLockers = [
-    { number: 1, memberId: 'M00001', memberName: '김지원', startDate: '2024-01-15', endDate: '2025-01-14', fee: 80000, isPaid: true },
-    { number: 3, memberId: 'M00002', memberName: '이지훈', startDate: '2024-02-10', endDate: '2024-08-09', fee: 70000, isPaid: true },
-    { number: 5, memberId: 'M00003', memberName: '박수진', startDate: '2024-11-01', endDate: '2025-01-30', fee: 90000, isPaid: true },
-    { number: 7, memberId: 'M00004', memberName: '정동현', startDate: '2024-06-15', endDate: '2025-06-14', fee: 85000, isPaid: true },
-    { number: 9, memberId: 'M00005', memberName: '김영희', startDate: '2024-03-20', endDate: '2024-09-19', fee: 75000, isPaid: false },
-    { number: 11, memberId: 'M00006', memberName: '최지원', startDate: '2024-12-01', endDate: '2025-01-15', fee: 95000, isPaid: true },
-    { number: 13, memberId: 'M00007', memberName: '이지영', startDate: '2024-08-10', endDate: '2025-08-09', fee: 88000, isPaid: true },
-    { number: 15, memberId: 'M00008', memberName: '박진수', startDate: '2024-01-05', endDate: '2024-07-04', fee: 65000, isPaid: true },
-    { number: 17, memberId: 'M00009', memberName: '이서연', startDate: '2024-11-15', endDate: '2025-02-14', fee: 82000, isPaid: true },
-    { number: 19, memberId: 'M00010', memberName: '김태호', startDate: '2024-12-10', endDate: '2025-01-20', fee: 92000, isPaid: true },
+    { 
+      number: 1, memberId: 'M00001', memberName: '김지원', 
+      startDate: '2024-01-15', endDate: '2025-01-14', 
+      product: '락커 12개월', productPrice: 300000, actualPrice: 280000, 
+      staffCommission: 280000, unpaidAmount: 0, fee: 280000, isPaid: true,
+      paymentDate: '2024-01-15', paymentTime: '14:30', paymentMethod: '카드' as const,
+      notes: '12개월 할인 적용'
+    },
+    { 
+      number: 3, memberId: 'M00002', memberName: '이지훈', 
+      startDate: '2024-02-10', endDate: '2024-08-09', 
+      product: '락커 6개월', productPrice: 150000, actualPrice: 150000, 
+      staffCommission: 150000, unpaidAmount: 0, fee: 150000, isPaid: true,
+      paymentDate: '2024-02-10', paymentTime: '16:20', paymentMethod: '현금' as const
+    },
+    { 
+      number: 5, memberId: 'M00003', memberName: '박수진', 
+      startDate: '2024-11-01', endDate: '2025-01-30', 
+      product: '락커 3개월', productPrice: 80000, actualPrice: 90000, 
+      staffCommission: 90000, unpaidAmount: 0, fee: 90000, isPaid: true,
+      paymentDate: '2024-11-01', paymentTime: '10:45', paymentMethod: '카드' as const,
+      notes: '청소용품 추가 요청'
+    },
+    { 
+      number: 7, memberId: 'M00004', memberName: '정동현', 
+      startDate: '2024-06-15', endDate: '2025-06-14', 
+      product: '락커 12개월', productPrice: 300000, actualPrice: 285000, 
+      staffCommission: 285000, unpaidAmount: 0, fee: 285000, isPaid: true,
+      paymentDate: '2024-06-15', paymentTime: '13:15', paymentMethod: '계좌이체' as const
+    },
+    { 
+      number: 9, memberId: 'M00005', memberName: '김영희', 
+      startDate: '2024-03-20', endDate: '2024-09-19', 
+      product: '락커 6개월', productPrice: 150000, actualPrice: 125000, 
+      staffCommission: 125000, unpaidAmount: 50000, fee: 125000, isPaid: false,
+      paymentDate: '2024-03-20', paymentTime: '11:30', paymentMethod: '카드' as const,
+      notes: '미수금 50,000원 발생'
+    },
+    { 
+      number: 11, memberId: 'M00006', memberName: '최지원', 
+      startDate: '2024-12-01', endDate: '2025-01-15', 
+      product: '락커 1개월', productPrice: 30000, actualPrice: 30000, 
+      staffCommission: 30000, unpaidAmount: 0, fee: 30000, isPaid: true,
+      paymentDate: '2024-12-01', paymentTime: '09:00', paymentMethod: '현금' as const
+    },
+    { 
+      number: 13, memberId: 'M00007', memberName: '이지영', 
+      startDate: '2024-08-10', endDate: '2025-08-09', 
+      product: '락커 12개월', productPrice: 300000, actualPrice: 288000, 
+      staffCommission: 288000, unpaidAmount: 0, fee: 288000, isPaid: true,
+      paymentDate: '2024-08-10', paymentTime: '15:45', paymentMethod: '카드' as const
+    },
+    { 
+      number: 15, memberId: 'M00008', memberName: '박진수', 
+      startDate: '2024-01-05', endDate: '2024-07-04', 
+      product: '락커 6개월', productPrice: 150000, actualPrice: 135000, 
+      staffCommission: 135000, unpaidAmount: 0, fee: 135000, isPaid: true,
+      paymentDate: '2024-01-05', paymentTime: '17:20', paymentMethod: '계좌이체' as const,
+      notes: '학생 할인 적용'
+    },
+    { 
+      number: 17, memberId: 'M00009', memberName: '이서연', 
+      startDate: '2024-11-15', endDate: '2025-02-14', 
+      product: '락커 3개월', productPrice: 80000, actualPrice: 82000, 
+      staffCommission: 82000, unpaidAmount: 0, fee: 82000, isPaid: true,
+      paymentDate: '2024-11-15', paymentTime: '12:10', paymentMethod: '현금' as const
+    },
+    { 
+      number: 19, memberId: 'M00010', memberName: '김태호', 
+      startDate: '2024-12-10', endDate: '2025-01-20', 
+      product: '락커 1개월', productPrice: 30000, actualPrice: 30000, 
+      staffCommission: 30000, unpaidAmount: 0, fee: 30000, isPaid: true,
+      paymentDate: '2024-12-10', paymentTime: '18:00', paymentMethod: '카드' as const
+    },
   ];
 
   return Array.from({ length: totalLockers }, (_, i) => {

@@ -296,15 +296,15 @@ export const PaymentHistoryTab = ({ memberId, onViewDetail, isOwner }: PaymentHi
                 </TableHeader>
                 <TableBody>
                   {currentPayments.map((payment) => (
-                    <TableRow key={payment.id} className="cursor-pointer hover:bg-muted/50" onClick={() => onViewDetail(payment)}>
-                      <TableCell>{formatDate(payment.paymentDate)}</TableCell>
-                      <TableCell>{formatDate(payment.startDate)}</TableCell>
-                      <TableCell>{getProductBadge(payment.product)}</TableCell>
-                      <TableCell className="font-medium">{payment.productName}</TableCell>
-                      <TableCell className="font-semibold">{formatCurrency(payment.actualAmount)}</TableCell>
-                      <TableCell>{getStatusBadge(payment.status)}</TableCell>
+                    <TableRow key={payment.id} className="cursor-pointer hover:bg-muted/50">
+                      <TableCell onClick={() => onViewDetail(payment)}>{formatDate(payment.paymentDate)}</TableCell>
+                      <TableCell onClick={() => onViewDetail(payment)}>{formatDate(payment.startDate)}</TableCell>
+                      <TableCell onClick={() => onViewDetail(payment)}>{getProductBadge(payment.product)}</TableCell>
+                      <TableCell className="font-medium" onClick={() => onViewDetail(payment)}>{payment.productName}</TableCell>
+                      <TableCell className="font-semibold" onClick={() => onViewDetail(payment)}>{formatCurrency(payment.actualAmount)}</TableCell>
+                      <TableCell onClick={() => onViewDetail(payment)}>{getStatusBadge(payment.status)}</TableCell>
                       <TableCell className="text-right">
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={(e) => { e.stopPropagation(); onViewDetail(payment); }}>
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => onViewDetail(payment)}>
                           <Eye className="h-4 w-4" />
                           <span className="sr-only">상세 보기</span>
                         </Button>

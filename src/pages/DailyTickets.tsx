@@ -18,8 +18,9 @@ interface DailyTicket {
   name: string;
   phoneNumber: string;
   date: string;
+  visitTime?: string; // 방문 시간 추가
   paymentAmount: number;
-  paymentMethod: "카드" | "현금";
+  paymentMethod: "카드" | "현금" | "계좌이체";
 }
 
 const mockDailyTickets: DailyTicket[] = [
@@ -28,6 +29,7 @@ const mockDailyTickets: DailyTicket[] = [
     name: "김방문",
     phoneNumber: "010-1234-5678",
     date: new Date().toISOString().split("T")[0],
+    visitTime: "09:30",
     paymentAmount: 10000,
     paymentMethod: "카드"
   },
@@ -36,6 +38,7 @@ const mockDailyTickets: DailyTicket[] = [
     name: "박일일",
     phoneNumber: "010-2345-6789",
     date: new Date().toISOString().split("T")[0],
+    visitTime: "14:15",
     paymentAmount: 10000,
     paymentMethod: "현금"
   },
@@ -44,6 +47,7 @@ const mockDailyTickets: DailyTicket[] = [
     name: "이헬스",
     phoneNumber: "010-3456-7890",
     date: new Date(Date.now() - 86400000).toISOString().split("T")[0],
+    visitTime: "18:45",
     paymentAmount: 10000,
     paymentMethod: "카드"
   },
@@ -52,8 +56,9 @@ const mockDailyTickets: DailyTicket[] = [
     name: "최운동",
     phoneNumber: "010-4567-8901",
     date: new Date(Date.now() - 86400000).toISOString().split("T")[0],
+    visitTime: "11:20",
     paymentAmount: 10000,
-    paymentMethod: "카드"
+    paymentMethod: "계좌이체"
   }
 ];
 
@@ -61,6 +66,11 @@ const mockDailyTickets: DailyTicket[] = [
 const formatDate = (dateStr: string): string => {
   const date = new Date(dateStr);
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+};
+
+const formatDateTime = (dateStr: string, timeStr?: string): string => {
+  const formattedDate = formatDate(dateStr);
+  return timeStr ? `${formattedDate} ${timeStr}` : formattedDate;
 };
 
 const formatCurrency = (amount: number): string => {
@@ -82,6 +92,8 @@ const DailyTickets = () => {
   const [newTicket, setNewTicket] = useState({
     name: "",
     phoneNumber: "",
+    visitDate: new Date().toISOString().split("T")[0], // 오늘 날짜로 기본 설정
+    visitTime: new Date().toTimeString().slice(0,5), // 현재 시간으로 기본 설정
     paymentAmount: 10000,
     paymentMethod: "카드"
   });
@@ -114,13 +126,12 @@ const DailyTickets = () => {
   
   const handleCreateTicket = () => {
     // Basic validation
-    if (!newTicket.name || !newTicket.phoneNumber) {
-      toast.error("이름과 연락처를 모두 입력해주세요.");
+    if (!newTicket.name || !newTicket.phoneNumber || !newTicket.visitDate || !newTicket.visitTime) {
+      toast.error("모든 필드를 입력해주세요.");
       return;
     }
     
     // In a real app, this would be an API call
-    const today = new Date().toISOString().split("T")[0];
     const ticketId = `D${Date.now().toString().slice(-6)}`;
     
     // Add new ticket
@@ -128,9 +139,10 @@ const DailyTickets = () => {
       id: ticketId,
       name: newTicket.name,
       phoneNumber: newTicket.phoneNumber,
-      date: today,
+      date: newTicket.visitDate,
+      visitTime: newTicket.visitTime,
       paymentAmount: newTicket.paymentAmount,
-      paymentMethod: newTicket.paymentMethod as "카드" | "현금"
+      paymentMethod: newTicket.paymentMethod as "카드" | "현금" | "계좌이체"
     };
     
     // In a real app, this would update the server
@@ -141,6 +153,8 @@ const DailyTickets = () => {
     setNewTicket({
       name: "",
       phoneNumber: "",
+      visitDate: new Date().toISOString().split("T")[0],
+      visitTime: new Date().toTimeString().slice(0,5),
       paymentAmount: 10000,
       paymentMethod: "카드"
     });
@@ -190,6 +204,30 @@ const DailyTickets = () => {
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="visit-date" className="text-right">
+                  방문일자
+                </Label>
+                <Input
+                  id="visit-date"
+                  type="date"
+                  value={newTicket.visitDate}
+                  onChange={(e) => setNewTicket({ ...newTicket, visitDate: e.target.value })}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="visit-time" className="text-right">
+                  방문시간
+                </Label>
+                <Input
+                  id="visit-time"
+                  type="time"
+                  value={newTicket.visitTime}
+                  onChange={(e) => setNewTicket({ ...newTicket, visitTime: e.target.value })}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="payment-amount" className="text-right">
                   결제 금액
                 </Label>
@@ -203,7 +241,7 @@ const DailyTickets = () => {
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label className="text-right">결제 수단</Label>
-                <div className="col-span-3 flex gap-4">
+                <div className="col-span-3 flex gap-4 flex-wrap">
                   <div className="flex items-center">
                     <input
                       type="radio"
@@ -225,6 +263,17 @@ const DailyTickets = () => {
                       className="mr-2"
                     />
                     <label htmlFor="payment-cash">현금</label>
+                  </div>
+                  <div className="flex items-center">
+                    <input
+                      type="radio"
+                      id="payment-transfer"
+                      name="payment-method"
+                      checked={newTicket.paymentMethod === "계좌이체"}
+                      onChange={() => setNewTicket({ ...newTicket, paymentMethod: "계좌이체" })}
+                      className="mr-2"
+                    />
+                    <label htmlFor="payment-transfer">계좌이체</label>
                   </div>
                 </div>
               </div>
@@ -283,9 +332,9 @@ const DailyTickets = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead>No.</TableHead>
+                    <TableHead>방문일시</TableHead>
                     <TableHead>이름</TableHead>
                     <TableHead>연락처</TableHead>
-                    <TableHead>방문일자</TableHead>
                     <TableHead>결제금액</TableHead>
                     <TableHead>결제방식</TableHead>
                   </TableRow>
@@ -295,14 +344,20 @@ const DailyTickets = () => {
                     filteredTickets.map((ticket, index) => (
                       <TableRow key={ticket.id}>
                         <TableCell className="font-medium">{index + 1}</TableCell>
+                        <TableCell>{formatDateTime(ticket.date, ticket.visitTime)}</TableCell>
                         <TableCell>{ticket.name}</TableCell>
                         <TableCell>{formatPhoneNumber(ticket.phoneNumber)}</TableCell>
-                        <TableCell>{formatDate(ticket.date)}</TableCell>
                         <TableCell>{formatCurrency(ticket.paymentAmount)}</TableCell>
                         <TableCell>
                           <Badge 
                             variant={ticket.paymentMethod === "카드" ? "default" : "outline"}
-                            className={ticket.paymentMethod === "카드" ? "bg-gym-primary hover:bg-gym-primary/90" : "border-gym-primary text-gym-primary hover:bg-gym-primary/10"}
+                            className={
+                              ticket.paymentMethod === "카드" 
+                                ? "bg-gym-primary hover:bg-gym-primary/90" 
+                                : ticket.paymentMethod === "현금"
+                                ? "border-orange-500 text-orange-700 hover:bg-orange-50"
+                                : "border-blue-500 text-blue-700 hover:bg-blue-50"
+                            }
                           >
                             {ticket.paymentMethod}
                           </Badge>

@@ -3,8 +3,10 @@ import { Outlet, useLocation, Navigate, useNavigate } from "react-router-dom";
 import { SidebarProvider, SidebarHeader, SidebarMain, SidebarFooter, useSidebar } from "@/components/ui/sidebar";
 import { SidebarNav } from "@/components/ui/sidebar-nav";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
 import Logo from "@/components/ui/logo";
-import { User, Settings, LogOut, RefreshCw, Shield } from "lucide-react";
+import { User, Settings, LogOut, RefreshCw, Shield, Menu } from "lucide-react";
 import GymSwitchDialog from "@/components/GymSwitchDialog";
 import { PasswordConfirmDialog } from "@/components/PasswordConfirmDialog";
 import { PermissionSelectDialog } from "@/components/PermissionSelectDialog";
@@ -175,6 +177,7 @@ const DashboardLayout = () => {
   const { isAuthenticated, userRole, userPermission } = useAuth();
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   // If not authenticated, redirect to login
   if (!isAuthenticated) {
@@ -187,8 +190,8 @@ const DashboardLayout = () => {
   if (isGeneralPermissionDashboard) {
     return (
       <div className="flex h-screen overflow-hidden bg-background">
-        {/* 사이드바 */}
-        <div className="fixed inset-y-0 left-0 z-50">
+        {/* 데스크톱 사이드바 */}
+        <div className="hidden lg:block">
           <SidebarProvider 
             defaultCollapsed={false} 
             onCollapsedChange={(isCollapsed: boolean) => setCollapsed(isCollapsed)}
@@ -198,8 +201,26 @@ const DashboardLayout = () => {
         </div>
         
         {/* 메인 콘텐츠 - 트레이너 대시보드 */}
-        <div className={`flex-1 transition-all duration-300 ${collapsed ? 'ml-[70px]' : 'ml-[240px]'}`}>
-          <main className="h-screen overflow-y-auto p-8">
+        <div className="flex-1 lg:ml-0">
+          {/* 모바일 헤더 */}
+          <div className="lg:hidden flex items-center justify-between p-4 border-b bg-background">
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Menu className="h-6 w-6" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="p-0 w-[240px]">
+                <SidebarProvider defaultCollapsed={false}>
+                  <SidebarContent />
+                </SidebarProvider>
+              </SheetContent>
+            </Sheet>
+            <Logo />
+            <div className="w-10" /> {/* 균형을 위한 빈 공간 */}
+          </div>
+          
+          <main className="h-full overflow-y-auto p-4 lg:p-8 lg:h-screen">
             <TrainerDashboard />
           </main>
         </div>
@@ -214,8 +235,8 @@ const DashboardLayout = () => {
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
-      {/* 사이드바 */}
-      <div className="fixed inset-y-0 left-0 z-50">
+      {/* 데스크톱 사이드바 */}
+      <div className="hidden lg:block">
         <SidebarProvider 
           defaultCollapsed={false} 
           onCollapsedChange={handleSidebarStateChange}
@@ -224,9 +245,27 @@ const DashboardLayout = () => {
         </SidebarProvider>
       </div>
       
-      {/* 메인 콘텐츠 - 사이드바 상태에 따라 마진 동적 조정 */}
-      <div className={`flex-1 transition-all duration-300 ${collapsed ? 'ml-[70px]' : 'ml-[240px]'}`}>
-        <main className="h-screen overflow-y-auto p-8">
+      {/* 메인 콘텐츠 */}
+      <div className="flex-1 lg:ml-0">
+        {/* 모바일 헤더 */}
+        <div className="lg:hidden flex items-center justify-between p-4 border-b bg-background">
+          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <Menu className="h-6 w-6" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="p-0 w-[240px]">
+              <SidebarProvider defaultCollapsed={false}>
+                <SidebarContent />
+              </SidebarProvider>
+            </SheetContent>
+          </Sheet>
+          <Logo />
+          <div className="w-10" /> {/* 균형을 위한 빈 공간 */}
+        </div>
+        
+        <main className="h-full overflow-y-auto p-4 lg:p-8 lg:h-screen">
           <Outlet />
         </main>
       </div>

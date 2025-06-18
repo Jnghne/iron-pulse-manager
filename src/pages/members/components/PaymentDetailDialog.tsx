@@ -340,7 +340,7 @@ export const PaymentDetailDialog = ({
                   {isEditing ? (
                     <div className="relative">
                       <Input
-                        value={typeof (editedPayment.price || editedPayment.amount) === 'number' ? (editedPayment.price || editedPayment.amount).toLocaleString() : (editedPayment.price || editedPayment.amount)}
+                        value={typeof (editedPayment.price || editedPayment.amount) === 'number' ? (editedPayment.price || editedPayment.amount).toLocaleString() : (editedPayment.price || editedPayment.amount || '')}
                         onChange={(e) => setEditedPayment({...editedPayment, price: parseInt(e.target.value.replace(/,/g, '')) || 0, amount: parseInt(e.target.value.replace(/,/g, '')) || 0})}
                         className="pl-8"
                         disabled={isSubmitting}
@@ -357,7 +357,7 @@ export const PaymentDetailDialog = ({
                   {isEditing ? (
                     <div className="relative">
                       <Input
-                        value={typeof (editedPayment.actualPrice || editedPayment.actualAmount) === 'number' ? (editedPayment.actualPrice || editedPayment.actualAmount).toLocaleString() : (editedPayment.actualPrice || editedPayment.actualAmount)}
+                        value={typeof (editedPayment.actualPrice || editedPayment.actualAmount) === 'number' ? (editedPayment.actualPrice || editedPayment.actualAmount).toLocaleString() : (editedPayment.actualPrice || editedPayment.actualAmount || '')}
                         onChange={(e) => setEditedPayment({...editedPayment, actualPrice: parseInt(e.target.value.replace(/,/g, '')) || 0, actualAmount: parseInt(e.target.value.replace(/,/g, '')) || 0})}
                         className="pl-8"
                         disabled={isSubmitting}
@@ -374,7 +374,7 @@ export const PaymentDetailDialog = ({
                   {isEditing ? (
                     <div className="relative">
                       <Input
-                        value={typeof editedPayment.staffCommission === 'number' ? editedPayment.staffCommission.toLocaleString() : editedPayment.staffCommission}
+                        value={typeof editedPayment.staffCommission === 'number' ? editedPayment.staffCommission.toLocaleString() : editedPayment.staffCommission || ''}
                         onChange={(e) => setEditedPayment({...editedPayment, staffCommission: parseInt(e.target.value.replace(/,/g, '')) || 0})}
                         className="pl-8"
                         disabled={isSubmitting}
@@ -382,7 +382,7 @@ export const PaymentDetailDialog = ({
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">₩</span>
                     </div>
                   ) : (
-                    <p className="font-medium">₩ {payment.staffCommission?.toLocaleString() || payment.actualPrice.toLocaleString()}</p>
+                    <p className="font-medium">₩ {(payment.staffCommission || payment.actualPrice || payment.actualAmount || 0).toLocaleString()}</p>
                   )}
                 </div>
                 
@@ -391,7 +391,7 @@ export const PaymentDetailDialog = ({
                   {isEditing ? (
                     <div className="relative">
                       <Input
-                        value={typeof editedPayment.unpaidAmount === 'number' ? editedPayment.unpaidAmount.toLocaleString() : editedPayment.unpaidAmount}
+                        value={typeof editedPayment.unpaidAmount === 'number' ? editedPayment.unpaidAmount.toLocaleString() : editedPayment.unpaidAmount || ''}
                         onChange={(e) => setEditedPayment({...editedPayment, unpaidAmount: parseInt(e.target.value.replace(/,/g, '')) || 0})}
                         className="pl-8"
                         disabled={isSubmitting}

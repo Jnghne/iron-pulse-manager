@@ -142,7 +142,7 @@ const ProductFormPage: React.FC = () => {
   return (
     <div className="container mx-auto py-8">
       <h1 className="text-3xl font-bold mb-6">
-        {isEditMode ? '상품 수정' : '새 상품 추가'}
+        {isEditMode ? '상품 수정' : '새 상품 등록'}
       </h1>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 max-w-2xl">
         <div>
@@ -223,7 +223,7 @@ const ProductFormPage: React.FC = () => {
         
         <div className="flex space-x-2">
           <Button type="submit" className="bg-gym-primary hover:bg-gym-primary/90">
-            {isEditMode ? '상품 저장' : '상품 추가'}
+            {isEditMode ? '상품 저장' : '상품 등록'}
           </Button>
           <Button type="button" variant="outline" onClick={() => navigate('/products')}>
             취소

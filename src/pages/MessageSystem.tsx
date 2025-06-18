@@ -129,7 +129,7 @@ const MessageSystem = () => {
             <TabsList className="grid w-full grid-cols-2 mb-6">
               <TabsTrigger value="single">
                 <MessageSquare className="mr-2 h-4 w-4" />
-                단일 문자 발송
+                단건 문자 발송
               </TabsTrigger>
               <TabsTrigger value="bulk">
                 <Users className="mr-2 h-4 w-4" />

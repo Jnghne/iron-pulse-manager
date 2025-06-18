@@ -129,7 +129,7 @@ const ProductListPage: React.FC = () => {
     <div className="container mx-auto py-8">
       <div className="flex justify-end items-center mb-6">
         <Button onClick={handleOpenAddModal} className="bg-blue-600 hover:bg-blue-700 text-white">
-          <PlusCircle className="mr-2 h-5 w-5" /> 상품 추가
+          <PlusCircle className="mr-2 h-5 w-5" /> 상품 등록
         </Button>
       </div>
       
@@ -246,7 +246,7 @@ const ProductListPage: React.FC = () => {
                       : '다른 유형을 선택하거나 새 상품을 추가해보세요'}
                   </p>
                   <Button onClick={handleOpenAddModal} variant="outline">
-                    <PlusCircle className="mr-2 h-4 w-4" /> 상품 추가
+                    <PlusCircle className="mr-2 h-4 w-4" /> 상품 등록
                   </Button>
                 </div>
               </div>

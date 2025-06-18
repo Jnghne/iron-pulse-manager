@@ -139,7 +139,7 @@ export const ProductAddModal: React.FC<ProductAddModalProps> = ({ isOpen, onClos
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold flex items-center gap-2">
             <Package className="h-5 w-5" />
-            새 상품 추가
+            새 상품 등록
           </DialogTitle>
           <DialogDescription>
             새로운 상품의 정보를 입력하여 등록하세요.

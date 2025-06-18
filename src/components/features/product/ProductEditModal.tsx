@@ -169,15 +169,6 @@ export const ProductEditModal: React.FC<ProductEditModalProps> = ({ isOpen, onCl
             )}
           </div>
           
-          {selectedProductType === ProductType.MEMBERSHIP && (
-            <div>
-              <Label htmlFor="durationDays">기간 (일)</Label>
-              <Input id="durationDays" type="number" {...form.register('durationDays')} placeholder="예: 30 (30일)" />
-              {form.formState.errors.durationDays && (
-                <p className="text-sm text-red-500 mt-1">{form.formState.errors.durationDays.message}</p>
-              )}
-            </div>
-          )}
 
           {selectedProductType === ProductType.LESSON && (
             <div>

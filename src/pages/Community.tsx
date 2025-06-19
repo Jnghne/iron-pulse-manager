@@ -65,8 +65,8 @@ const Community = () => {
                     <ShoppingCart className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">중고거래 장터</h3>
-                    <p className="text-sm text-muted-foreground">헬스 장비 거래</p>
+                    <h3 className="text-lg font-semibold group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">중고거래 게시판</h3>
+                    <p className="text-sm text-muted-foreground">기구/장비 중고 거래</p>
                   </div>
                 </div>
                 <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
@@ -98,7 +98,7 @@ const Community = () => {
                 </TabsTrigger>
                 <TabsTrigger value="market" className="flex items-center gap-2">
                   <ShoppingCart className="h-4 w-4" />
-                  중고장터
+                  중고거래
                   <Badge variant="secondary" className="ml-2 text-xs">{myPosts.market.length}</Badge>
                 </TabsTrigger>
               </TabsList>
@@ -194,7 +194,7 @@ const Community = () => {
               <div className="p-1.5 rounded-md bg-blue-50 dark:bg-blue-900/20">
                 <MessageSquare className="h-4 w-4 text-blue-600 dark:text-blue-400" />
               </div>
-              내가 댓글 작성한 게시글
+              내가 작성한 댓글
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
@@ -207,7 +207,7 @@ const Community = () => {
                 </TabsTrigger>
                 <TabsTrigger value="market" className="flex items-center gap-2">
                   <ShoppingCart className="h-4 w-4" />
-                  중고장터
+                  중고거래
                   <Badge variant="secondary" className="ml-2 text-xs">{myCommentedPosts.market.length}</Badge>
                 </TabsTrigger>
               </TabsList>

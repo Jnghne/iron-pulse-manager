@@ -8,24 +8,17 @@ import {
   Plus, 
   MapPin, 
   Eye, 
-  Heart, 
-  Filter,
+  Heart,
   ArrowLeft,
   DollarSign
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { CommunityFilterPopover, type MarketPostType, type MarketSortOption } from "@/components/features/filter/CommunityFilterPopover";
 
 const CommunityMarket = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [priceRange, setPriceRange] = useState("all");
+  const [postType, setPostType] = useState<MarketPostType>("all");
+  const [sortOption, setSortOption] = useState<MarketSortOption>("latest");
 
   const marketItems = [
     {
@@ -165,12 +158,35 @@ const CommunityMarket = () => {
     return colors[status] || "bg-gray-100 text-gray-800";
   };
 
-  const filteredItems = marketItems.filter(item => {
-    const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         item.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === "all" || item.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+  const filteredAndSortedItems = (() => {
+    // 1. 필터링 적용
+    let filtered = marketItems.filter(item => {
+      const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           item.description.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesCategory = postType === "all" || item.category === postType;
+      return matchesSearch && matchesCategory;
+    });
+
+    // 2. 정렬 적용
+    filtered.sort((a, b) => {
+      switch (sortOption) {
+        case "latest":
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        case "likes":
+          return b.likes - a.likes;
+        case "views":
+          return b.views - a.views;
+        case "price_low":
+          return a.price - b.price;
+        case "price_high":
+          return b.price - a.price;
+        default:
+          return 0;
+      }
+    });
+
+    return filtered;
+  })();
 
   return (
     <div className="space-y-6">
@@ -195,38 +211,34 @@ const CommunityMarket = () => {
       {/* 검색 및 필터 */}
       <Card>
         <CardContent className="pt-6">
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input
-                  placeholder="상품명, 설명으로 검색..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="상품명, 설명으로 검색..."
+                className="pl-8"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
             </div>
-            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger className="w-40">
-                <Filter className="h-4 w-4 mr-2" />
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.entries(categories).map(([key, value]) => (
-                  <SelectItem key={key} value={key}>
-                    {value}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            
+            <div className="flex flex-row gap-2 flex-wrap">
+              <CommunityFilterPopover 
+                mode="market"
+                onFilterChange={(filters) => {
+                  setPostType(filters.postType as MarketPostType);
+                  setSortOption(filters.sort as MarketSortOption);
+                }}
+              />
+            </div>
           </div>
         </CardContent>
       </Card>
 
       {/* 상품 목록 */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredItems.map((item) => (
+        {filteredAndSortedItems.map((item) => (
           <Link key={item.id} to={`/community/market/${item.id}`}>
             <Card className="hover:shadow-lg transition-shadow cursor-pointer">
               <div className="aspect-video bg-gray-100 rounded-t-lg relative overflow-hidden">
@@ -295,7 +307,7 @@ const CommunityMarket = () => {
       {/* 페이지네이션 (추후 구현) */}
       <div className="flex justify-center">
         <div className="text-sm text-muted-foreground">
-          총 {filteredItems.length}개의 상품
+          총 {filteredAndSortedItems.length}개의 상품
         </div>
       </div>
     </div>

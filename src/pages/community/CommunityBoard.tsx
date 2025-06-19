@@ -8,23 +8,17 @@ import {
   Plus, 
   MessageSquare, 
   Eye, 
-  ThumbsUp, 
-  Filter,
+  ThumbsUp,
   ArrowLeft 
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { CommunityFilterPopover, type BoardPostType, type BoardSortOption } from "@/components/features/filter/CommunityFilterPopover";
 
 const CommunityBoard = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [postType, setPostType] = useState<BoardPostType>("all");
+  const [sortOption, setSortOption] = useState<BoardSortOption>("latest");
 
   const [posts] = useState([
     {
@@ -114,12 +108,33 @@ const CommunityBoard = () => {
     return colors[category] || "bg-gray-100 text-gray-800";
   };
 
-  const filteredPosts = posts.filter(post => {
-    const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         post.content.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === "all" || post.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+  const filteredAndSortedPosts = (() => {
+    // 1. 필터링 적용
+    let filtered = posts.filter(post => {
+      const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           post.content.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesCategory = postType === "all" || post.category === postType;
+      return matchesSearch && matchesCategory;
+    });
+
+    // 2. 정렬 적용
+    filtered.sort((a, b) => {
+      switch (sortOption) {
+        case "latest":
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        case "likes":
+          return b.likes - a.likes;
+        case "comments":
+          return b.comments - a.comments;
+        case "views":
+          return b.views - a.views;
+        default:
+          return 0;
+      }
+    });
+
+    return filtered;
+  })();
 
   const handlePostClick = (postId: number) => {
     navigate(`/community/board/${postId}`);
@@ -148,38 +163,34 @@ const CommunityBoard = () => {
       {/* 검색 및 필터 */}
       <Card>
         <CardContent className="pt-6">
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input
-                  placeholder="제목, 내용으로 검색..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="제목, 내용으로 검색..."
+                className="pl-8"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
             </div>
-            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger className="w-40">
-                <Filter className="h-4 w-4 mr-2" />
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.entries(categories).map(([key, value]) => (
-                  <SelectItem key={key} value={key}>
-                    {value}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            
+            <div className="flex flex-row gap-2 flex-wrap">
+              <CommunityFilterPopover 
+                mode="board"
+                onFilterChange={(filters) => {
+                  setPostType(filters.postType as BoardPostType);
+                  setSortOption(filters.sort as BoardSortOption);
+                }}
+              />
+            </div>
           </div>
         </CardContent>
       </Card>
 
       {/* 게시글 목록 */}
       <div className="space-y-4">
-        {filteredPosts.map((post) => (
+        {filteredAndSortedPosts.map((post) => (
           <Card 
             key={post.id} 
             className="hover:shadow-md transition-shadow cursor-pointer"
@@ -232,7 +243,7 @@ const CommunityBoard = () => {
       {/* 페이지네이션 */}
       <div className="flex justify-center">
         <div className="text-sm text-muted-foreground">
-          총 {filteredPosts.length}개의 게시글
+          총 {filteredAndSortedPosts.length}개의 게시글
         </div>
       </div>
     </div>

@@ -75,6 +75,11 @@ export function SidebarNav({ className, userPermission = 'general', ...props }: 
       icon: <Users2 className="h-5 w-5" />,
     },
     {
+      title: "지출 관리",
+      href: "/expenses",
+      icon: <CreditCard className="h-5 w-5" />,
+    },
+    {
       title: "통계",
       href: "/statistics",
       icon: <BarChart3 className="h-5 w-5" />,

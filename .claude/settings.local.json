@@ -11,7 +11,9 @@
       "Bash(rg:*)",
       "Bash(npm run typecheck:*)",
       "Bash(tsc --noEmit)",
-      "Bash(npm run lint:*)"
+      "Bash(npm run lint:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run dev:*)"
     ],
     "deny": []
   }

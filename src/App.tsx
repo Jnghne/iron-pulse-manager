@@ -22,6 +22,7 @@ import LockerRoom from "./pages/LockerRoom";
 import Attendance from "./pages/Attendance";
 import MessageSystem from "./pages/MessageSystem";
 import Calendar from "./pages/Calendar";
+import ExpenseManagement from "./pages/ExpenseManagement";
 import Statistics from "./pages/Statistics";
 import StaffManagement from "./pages/staff/Staff";
 import StaffDetail from "./pages/staff/StaffDetail";
@@ -60,6 +61,7 @@ const App = () => (
             <Route path="attendance" element={<Attendance />} />
             <Route path="messages" element={<MessageSystem />} />
             <Route path="calendar" element={<Calendar />} />
+            <Route path="expenses" element={<ExpenseManagement />} />
             <Route path="statistics" element={<Statistics />} />
             <Route path="staff" element={<StaffManagement />} />
             <Route path="staff/:id" element={<StaffDetail />} />

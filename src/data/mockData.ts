@@ -616,39 +616,50 @@ export const mockStaff = [
   { id: "trainer3", name: "김트레이너", role: "trainer" }
 ];
 
-// 이벤트 데이터 (내부 변수)
+// 이벤트 데이터 (내부 변수) - 사업장 전용 일정만 포함
 const _mockEvents: Event[] = [
   {
     id: "1",
-    title: "김영희 개인레슨 세션",
-    date: new Date(),
-    time: "09:00",
-    duration: "1시간",
-    type: "lesson",
-    trainer: "이트레이너",
-    assignedTo: "이트레이너",
-    color: "bg-blue-500"
-  },
-  {
-    id: "2", 
-    title: "그룹 필라테스",
-    date: new Date(),
-    time: "19:00",
-    duration: "1시간",
-    type: "group",
-    trainer: "박트레이너",
-    assignedTo: "박트레이너",
-    color: "bg-purple-500"
-  },
-  {
-    id: "3",
     title: "헬스장 정기 점검",
-    date: new Date(Date.now() + 86400000), // tomorrow
+    date: new Date(),
     time: "14:00", 
     duration: "2시간",
     type: "maintenance",
     assignedTo: "사장님",
-    color: "bg-orange-500"
+    color: "bg-orange-500",
+    notes: "운동기구 안전점검 및 청소"
+  },
+  {
+    id: "2",
+    title: "휴무일 - 추석연휴",
+    date: new Date(Date.now() + 86400000), // tomorrow
+    time: "하루종일",
+    type: "holiday",
+    assignedTo: "전체",
+    color: "bg-red-500",
+    notes: "추석 연휴로 인한 휴무"
+  },
+  {
+    id: "3",
+    title: "직원 회의",
+    date: new Date(Date.now() + 172800000), // day after tomorrow
+    time: "18:00",
+    duration: "1시간",
+    type: "meeting",
+    assignedTo: "전체",
+    color: "bg-gray-500",
+    notes: "월간 운영 회의"
+  },
+  {
+    id: "4",
+    title: "고객 이벤트 - 체성분 측정",
+    date: new Date(Date.now() + 259200000), // 3 days later
+    time: "10:00",
+    duration: "4시간",
+    type: "event",
+    assignedTo: "전체",
+    color: "bg-green-500",
+    notes: "무료 체성분 측정 이벤트"
   }
 ];
 

@@ -70,12 +70,11 @@ const Calendar = () => {
     setEvents(getMockEvents());
   };
 
-  // 이벤트 타입별 라벨
+  // 사업장 전용 이벤트 타입별 라벨
   const getEventTypeLabel = (type: string) => {
     switch (type) {
-      case 'lesson': return '개인레슨';
-      case 'group': return '그룹수업';
-      case 'maintenance': return '시설관리';
+      case 'holiday': return '휴무일';
+      case 'maintenance': return '시설점검';
       case 'event': return '이벤트';
       case 'meeting': return '회의';
       case 'other': return '기타';
@@ -321,12 +320,10 @@ const Calendar = () => {
                         <span>{event.time} {event.duration && `(${event.duration})`}</span>
                       </div>
                       
-                      {event.trainer && (
-                        <div className="flex items-center gap-2">
-                          <Users className="h-3 w-3" />
-                          <span>{event.trainer}</span>
-                        </div>
-                      )}
+                      <div className="flex items-center gap-2">
+                        <Users className="h-3 w-3" />
+                        <span>담당자: {event.assignedTo}</span>
+                      </div>
                       
                       
                       {event.notes && (

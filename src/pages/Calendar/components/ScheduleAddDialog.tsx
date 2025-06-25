@@ -49,24 +49,23 @@ export const ScheduleAddDialog = ({ open, onOpenChange, onEventAdd }: ScheduleAd
   const searchResultsRef = useRef<HTMLDivElement>(null);
   const [notes, setNotes] = useState("");
 
-  // Mock 데이터
+  // 사업장 전용 일정 타입 - 개인레슨, 그룹레슨 제외
   const scheduleTypes = [
-    { value: "lesson", label: "개인레슨 세션" },
-    { value: "group", label: "그룹 수업" },
+    { value: "holiday", label: "휴무일" },
     { value: "maintenance", label: "시설 점검" },
     { value: "event", label: "이벤트" },
     { value: "meeting", label: "회의" },
     { value: "other", label: "기타" }
   ];
 
-  // 일정 유형별 색상 반환 함수
+  // 일정 유형별 색상 반환 함수 - 사업장 전용
   const getEventColor = (type: string) => {
     switch (type) {
-      case 'lesson': return 'bg-blue-500';
-      case 'group': return 'bg-purple-500';
+      case 'holiday': return 'bg-red-500';
       case 'maintenance': return 'bg-orange-500';
       case 'event': return 'bg-green-500';
       case 'meeting': return 'bg-gray-500';
+      case 'other': return 'bg-slate-500';
       default: return 'bg-slate-500';
     }
   };
@@ -108,7 +107,7 @@ export const ScheduleAddDialog = ({ open, onOpenChange, onEventAdd }: ScheduleAd
       time: isAllDay ? "하루종일" : startTime,
       duration: isAllDay ? "하루종일" : `${startTime} - ${endTime}`,
       type: scheduleType,
-      trainer: scheduleType === 'lesson' ? selectedStaff.join(', ') : undefined,
+      trainer: undefined, // 사업장 일정에는 trainer 필드 사용 안함
       assignedTo: selectedStaff.join(', '),
       color: getEventColor(scheduleType),
       notes
